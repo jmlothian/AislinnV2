@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Core.Models;
 
 namespace Aislinn.Storage.AssociationStore

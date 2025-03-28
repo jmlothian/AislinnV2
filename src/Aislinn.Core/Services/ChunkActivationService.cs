@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.ChunkStorage.Storage;
 using Aislinn.Core.Models;
+using Aislinn.Core.Activation;
 
 namespace Aislinn.Core.Services
 {
@@ -13,10 +14,9 @@ namespace Aislinn.Core.Services
         private readonly IAssociationStore _associationStore;
         private readonly string _chunkCollectionId;
         private readonly string _associationCollectionId;
+        private readonly IActivationModel _activationModel;
 
-        // Configuration parameters
-        private readonly double _baseActivation = 1.0;
-        private readonly double _decayRate = 0.5;
+        // Default spreading configuration 
         private readonly double _spreadingFactor = 0.5;
         private readonly int _maxSpreadingDepth = 2;
         private readonly double _associationStrengthIncrement = 0.1;
@@ -24,11 +24,13 @@ namespace Aislinn.Core.Services
         public ChunkActivationService(
             IChunkStore chunkStore,
             IAssociationStore associationStore,
+            IActivationModel activationModel,
             string chunkCollectionId = "default",
             string associationCollectionId = "default")
         {
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
+            _activationModel = activationModel ?? throw new ArgumentNullException(nameof(activationModel));
             _chunkCollectionId = chunkCollectionId ?? throw new ArgumentNullException(nameof(chunkCollectionId));
             _associationCollectionId = associationCollectionId ?? throw new ArgumentNullException(nameof(associationCollectionId));
         }
@@ -54,8 +56,8 @@ namespace Aislinn.Core.Services
             // Record the previous activation level for history
             double previousActivation = chunk.ActivationLevel;
 
-            // Boost the activation level
-            chunk.ActivationLevel += _baseActivation * activationBoost;
+            // Calculate new activation using the activation model
+            chunk.ActivationLevel = _activationModel.CalculateActivation(chunk);
 
             // Create activation history item
             var activationItem = new ActivationHistoryItem
@@ -81,7 +83,7 @@ namespace Aislinn.Core.Services
                 chunk,
                 null,
                 _maxSpreadingDepth,
-                1.0,
+                activationBoost,
                 new HashSet<Guid> { chunkId },  // Mark the source as already visited
                 activationItem);
 
@@ -103,10 +105,14 @@ namespace Aislinn.Core.Services
                 if (chunk.ActivationLevel > 0)
                 {
                     double previousActivation = chunk.ActivationLevel;
-                    chunk.ActivationLevel *= (1 - _decayRate);
 
+                    // Apply decay using the activation model
+                    // Using 1.0 as default time since last update (in seconds)
+                    chunk.ActivationLevel = _activationModel.ApplyDecay(chunk, 1.0);
+
+                    // We could optionally add a decay history item here
+                    // Not sure how this might affect activation frequency though
                     /*
-                    // Create decay history item
                     var decayItem = new ActivationHistoryItem
                     {
                         PreviousValue = previousActivation,
@@ -121,6 +127,7 @@ namespace Aislinn.Core.Services
                     
                     chunk.ActivationHistory.Insert(0, decayItem);
                     */
+
                     await chunkCollection.UpdateChunkAsync(chunk);
                 }
             }
@@ -231,9 +238,15 @@ namespace Aislinn.Core.Services
                 var targetChunk = await chunkCollection.GetChunkAsync(targetChunkId);
                 if (targetChunk == null) continue;
 
-                // Calculate spread amount based on weight, current factor, and source activation
+                // Calculate spread amount using the activation model
                 double previousActivation = targetChunk.ActivationLevel;
-                double spreadAmount = weight * currentSpreadingFactor * _spreadingFactor * sourceChunk.ActivationLevel;
+                double spreadAmount = _activationModel.CalculateSpreadingActivation(
+                    sourceChunk,
+                    targetChunk,
+                    weight,
+                    currentSpreadingFactor
+                );
+
                 targetChunk.ActivationLevel += spreadAmount;
 
                 // Create activation history item for target chunk

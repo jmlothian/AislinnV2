@@ -3,10 +3,16 @@ using System.Collections.Generic;
 
 namespace Aislinn.Core.Models
 {
+
     public class Chunk
     {
         public Guid ID { get; set; } = Guid.NewGuid();
+        //Implementation type of the chunk, e.g. "Memory", "Procedure", "Goal", etc.
         public string ChunkType { get; set; }
+        //A more specific implementation subtype, used as needed
+        public string CognitiveCategory { get; set; }
+        //user-defined semantic type that might be used in certain algoritms for heuristics
+        public string SemanticType { get; set; }
         public string Name { get; set; }
         public double[] Vector { get; set; }
         public double ActivationLevel { get; set; }

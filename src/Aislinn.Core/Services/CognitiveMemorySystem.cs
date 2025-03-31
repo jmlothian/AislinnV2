@@ -28,6 +28,8 @@ namespace Aislinn.Core.Cognitive
         private readonly string _chunkCollectionId;
         private readonly string _associationCollectionId;
 
+        private readonly ActivationParametersRegistry _parametersRegistry;
+
         // System state
         private bool _isDisposed = false;
 
@@ -39,6 +41,7 @@ namespace Aislinn.Core.Cognitive
             IAssociationStore associationStore,
             IActivationModel activationModel,
             CognitiveTimeManager timeManager,
+            ActivationParametersRegistry parametersRegistry,
             string chunkCollectionId = "default",
             string associationCollectionId = "default")
         {
@@ -46,6 +49,7 @@ namespace Aislinn.Core.Cognitive
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
             _timeManager = timeManager ?? throw new ArgumentNullException(nameof(timeManager));
+            _parametersRegistry = parametersRegistry ?? throw new ArgumentNullException(nameof(parametersRegistry));
             _chunkCollectionId = chunkCollectionId;
             _associationCollectionId = associationCollectionId;
 
@@ -54,6 +58,7 @@ namespace Aislinn.Core.Cognitive
                 _chunkStore,
                 _associationStore,
                 activationModel,
+                _parametersRegistry,
                 _chunkCollectionId,
                 _associationCollectionId);
 

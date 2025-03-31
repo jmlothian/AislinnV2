@@ -5,6 +5,7 @@ using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.ChunkStorage.Storage;
 using Aislinn.Core.Models;
 using Aislinn.Core.Activation;
+using Aislinn.Models.Activation;
 
 namespace Aislinn.Core.Services
 {
@@ -17,20 +18,21 @@ namespace Aislinn.Core.Services
         private readonly IActivationModel _activationModel;
 
         // Default spreading configuration 
-        private readonly double _spreadingFactor = 0.5;
-        private readonly int _maxSpreadingDepth = 2;
-        private readonly double _associationStrengthIncrement = 0.1;
+        private readonly ActivationParametersRegistry _parametersRegistry;
+
 
         public ChunkActivationService(
             IChunkStore chunkStore,
             IAssociationStore associationStore,
             IActivationModel activationModel,
+            ActivationParametersRegistry parametersRegistry = null,
             string chunkCollectionId = "default",
             string associationCollectionId = "default")
         {
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
             _activationModel = activationModel ?? throw new ArgumentNullException(nameof(activationModel));
+            _parametersRegistry = parametersRegistry ?? new ActivationParametersRegistry();
             _chunkCollectionId = chunkCollectionId ?? throw new ArgumentNullException(nameof(chunkCollectionId));
             _associationCollectionId = associationCollectionId ?? throw new ArgumentNullException(nameof(associationCollectionId));
         }
@@ -53,11 +55,17 @@ namespace Aislinn.Core.Services
             var chunk = await chunkCollection.GetChunkAsync(chunkId);
             if (chunk == null) return null;
 
+            var parameters = _parametersRegistry.GetParameters(chunk);
+
             // Record the previous activation level for history
             double previousActivation = chunk.ActivationLevel;
 
             // Calculate new activation using the activation model
             chunk.ActivationLevel = _activationModel.CalculateActivation(chunk);
+
+            // Apply activation boost adjusted by type-specific factor
+            double adjustedBoost = activationBoost * parameters.BaseActivationBoost;
+            chunk.ActivationLevel += adjustedBoost;
 
             // Create activation history item
             var activationItem = new ActivationHistoryItem
@@ -78,14 +86,18 @@ namespace Aislinn.Core.Services
             // Update the chunk
             await chunkCollection.UpdateChunkAsync(chunk);
 
+            // Use type-specific parameters for max spreading depth
+            int maxSpreadingDepth = Convert.ToInt32(parameters.SpreadingFactor * 3); // Scale depth by spreading factor
+            maxSpreadingDepth = Math.Max(1, Math.Min(4, maxSpreadingDepth)); // Between 1-4
+
             // Start spreading activation
             await SpreadActivationAsync(
                 chunk,
                 null,
-                _maxSpreadingDepth,
+                maxSpreadingDepth,
                 activationBoost,
                 new HashSet<Guid> { chunkId },  // Mark the source as already visited
-                activationItem);
+                activationItem, parameters);
 
             return chunk;
         }
@@ -208,7 +220,7 @@ namespace Aislinn.Core.Services
             int remainingDepth,
             double currentSpreadingFactor,
             HashSet<Guid> visitedChunks,
-            ActivationHistoryItem originalActivation)
+            ActivationHistoryItem originalActivation, TypeActivationParameters parameters)
         {
             if (remainingDepth <= 0) return;
 
@@ -280,9 +292,9 @@ namespace Aislinn.Core.Services
                 // Strengthen the association
                 double previousWeight = isSourceA ? association.WeightAtoB : association.WeightBtoA;
                 if (isSourceA)
-                    association.WeightAtoB = Math.Min(1.0, association.WeightAtoB + _associationStrengthIncrement);
+                    association.WeightAtoB = Math.Min(1.0, association.WeightAtoB + parameters.AssociationStrengthIncrement);
                 else
-                    association.WeightBtoA = Math.Min(1.0, association.WeightBtoA + _associationStrengthIncrement);
+                    association.WeightBtoA = Math.Min(1.0, association.WeightBtoA + parameters.AssociationStrengthIncrement);
 
                 // Update association timestamp
                 association.LastActivated = DateTime.Now;
@@ -292,7 +304,7 @@ namespace Aislinn.Core.Services
                 {
                     PreviousValue = previousWeight,
                     NewValue = isSourceA ? association.WeightAtoB : association.WeightBtoA,
-                    Change = _associationStrengthIncrement,
+                    Change = parameters.AssociationStrengthIncrement,
                     ActivationDate = DateTime.Now,
                     ActivatedByChunk = sourceChunk.ID
                 };
@@ -306,9 +318,9 @@ namespace Aislinn.Core.Services
                     targetChunk,
                     association,
                     remainingDepth - 1,
-                    currentSpreadingFactor * _spreadingFactor,
+                    currentSpreadingFactor * parameters.SpreadingFactor,
                     visitedChunks,
-                    originalActivation);
+                    originalActivation, parameters);
             }
         }
 

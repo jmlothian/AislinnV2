@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/Aislinn.Agent/bin/Debug/net7.0/Aislinn.Agent.dll",
+      "program": "${workspaceFolder}/src/Aislinn.Agent/bin/Debug/net9.0/Aislinn.Agent.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/Aislinn.Agent",
       "console": "internalConsole",

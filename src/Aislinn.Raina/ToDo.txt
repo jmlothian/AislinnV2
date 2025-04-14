@@ -1,0 +1,14 @@
+
+
+
+
+Allow building of tasks with subtasks
+Allow building of "preflight" reminders
+
+Other Intent Types
+    Reminder
+    Appointment (create, reschedule, [query])
+    Informational entry, "remember?"  "store"?
+    recurring tasks
+    --move tasks around by due date
+

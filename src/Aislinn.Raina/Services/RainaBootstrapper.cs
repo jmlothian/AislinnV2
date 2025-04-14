@@ -4,6 +4,18 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using RAINA.Modules;
 using RAINA.Modules.Implementations;
+using Aislinn.ChunkStorage;
+using Aislinn.ChunkStorage.Interfaces;
+using Aislinn.ChunkStorage.Storage;
+using Aislinn.Core.Activation;
+using Aislinn.Core.Services;
+using Aislinn.Core.Memory;
+using Aislinn.Models.Activation;
+using Aislinn.VectorStorage.Storage;
+using Aislinn.Storage.AssociationStore;
+using Aislinn.Core.Cognitive;
+using Microsoft.Extensions.Logging;
+using RAINA.Services;
 
 namespace RAINA
 {
@@ -14,6 +26,8 @@ namespace RAINA
     {
         private readonly IServiceCollection _services;
         private readonly List<Type> _moduleTypes = new List<Type>();
+        private string _defaultChunkCollectionId = "default";
+        private string _defaultAssociationCollectionId = "default";
 
         public RainaBootstrapper(IServiceCollection services)
         {
@@ -21,11 +35,88 @@ namespace RAINA
         }
 
         /// <summary>
+        /// Configure the Aislinn chunk-based memory system
+        /// </summary>
+        public RainaBootstrapper ConfigureChunkMemorySystem()
+        {
+            // Register Aislinn storage providers
+            _services.AddSingleton<IChunkStore>(sp =>
+                new ChunkStore());
+
+            _services.AddSingleton<IAssociationStore>(sp =>
+                new AssociationStore());
+
+            // Register activation model components
+            _services.AddSingleton<ActivationParametersRegistry>();
+
+            _services.AddSingleton<IActivationModel>(sp =>
+            {
+                var timeManager = sp.GetRequiredService<CognitiveTimeManager>();
+                var parametersRegistry = sp.GetRequiredService<ActivationParametersRegistry>();
+                return new ActRActivationModel(timeManager, parametersRegistry);
+            });
+
+            // Register cognitive time manager
+            _services.AddSingleton<CognitiveTimeManager>();
+
+            // Register chunk activation service
+            _services.AddSingleton<ChunkActivationService>(sp =>
+            {
+                var chunkStore = sp.GetRequiredService<IChunkStore>();
+                var associationStore = sp.GetRequiredService<IAssociationStore>();
+                var activationModel = sp.GetRequiredService<IActivationModel>();
+                var parametersRegistry = sp.GetRequiredService<ActivationParametersRegistry>();
+
+                return new ChunkActivationService(
+                    chunkStore,
+                    associationStore,
+                    activationModel,
+                    parametersRegistry,
+                    _defaultChunkCollectionId,
+                    _defaultAssociationCollectionId);
+            });
+
+            // Register working memory manager
+            _services.AddSingleton<WorkingMemoryManager>(sp =>
+            {
+                var chunkStore = sp.GetRequiredService<IChunkStore>();
+                var associationStore = sp.GetRequiredService<IAssociationStore>();
+
+                return new WorkingMemoryManager(
+                    chunkStore,
+                    associationStore,
+                    totalCapacity: 7, // Miller's Law - 7±2 items
+                    chunkCollectionId: _defaultChunkCollectionId,
+                    associationCollectionId: _defaultAssociationCollectionId);
+            });
+
+            // Register cognitive memory system
+            _services.AddSingleton<CognitiveMemorySystem>(sp =>
+            {
+                var chunkStore = sp.GetRequiredService<IChunkStore>();
+                var associationStore = sp.GetRequiredService<IAssociationStore>();
+                var activationModel = sp.GetRequiredService<IActivationModel>();
+                var timeManager = sp.GetRequiredService<CognitiveTimeManager>();
+                var parametersRegistry = sp.GetRequiredService<ActivationParametersRegistry>();
+
+                return new CognitiveMemorySystem(
+                    chunkStore,
+                    associationStore,
+                    activationModel,
+                    timeManager, parametersRegistry,
+                    _defaultChunkCollectionId,
+                    _defaultAssociationCollectionId);
+            });
+
+            return this;
+        }
+
+        /// <summary>
         /// Configure the core services for RAINA
         /// </summary>
         public RainaBootstrapper ConfigureCore(string openAIApiKey)
         {
-            // Register core services
+            // Register intent processor
             _services.AddSingleton<IntentProcessor>(sp =>
             {
                 var conversationManager = sp.GetRequiredService<ConversationManager>();
@@ -37,12 +128,43 @@ namespace RAINA
                     contextDetector);
             });
 
-            _services.AddSingleton<ConversationManager>();
-            _services.AddSingleton<ContextDetector>();
-            _services.AddSingleton<ChunkManager>();
-            _services.AddSingleton<WorkingMemoryController>();
-            _services.AddSingleton<QueryEngine>();
-            _services.AddSingleton<TaskManager>();
+            // Register core services that interface with memory system
+            _services.AddSingleton<ConversationManager>(sp =>
+            {
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new ConversationManager(memorySystem, openAIApiKey);
+            });
+
+            _services.AddSingleton<ContextDetector>(sp =>
+            {
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new ContextDetector(memorySystem);
+            });
+
+            _services.AddSingleton<ChunkManager>(sp =>
+            {
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new ChunkManager(memorySystem);
+            });
+
+            _services.AddSingleton<WorkingMemoryController>(sp =>
+            {
+                var workingMemory = sp.GetRequiredService<WorkingMemoryManager>();
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new WorkingMemoryController(workingMemory, memorySystem);
+            });
+
+            _services.AddSingleton<QueryEngine>(sp =>
+            {
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new QueryEngine(memorySystem);
+            });
+
+            _services.AddSingleton<TaskManager>(sp =>
+            {
+                var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
+                return new TaskManager(memorySystem);
+            });
 
             return this;
         }
@@ -63,7 +185,7 @@ namespace RAINA
         public RainaBootstrapper RegisterStandardModules()
         {
             return RegisterIntentModule<QueryIntentModule>()
-                   .RegisterIntentModule<TaskCreationIntentModule>();
+                   .RegisterIntentModule<TaskManagementIntentModule>();
             // Add more standard modules as they're implemented
         }
 
@@ -80,6 +202,16 @@ namespace RAINA
         }
 
         /// <summary>
+        /// Set collection IDs for chunk storage
+        /// </summary>
+        public RainaBootstrapper SetCollectionIds(string chunkCollectionId, string associationCollectionId)
+        {
+            _defaultChunkCollectionId = chunkCollectionId;
+            _defaultAssociationCollectionId = associationCollectionId;
+            return this;
+        }
+
+        /// <summary>
         /// Build the RAINA system
         /// </summary>
         public ServiceProvider Build()
@@ -88,6 +220,14 @@ namespace RAINA
             _services.AddSingleton<IStartupTask>(sp => new ModuleRegistrationTask(
                 sp.GetRequiredService<IntentProcessor>(),
                 _moduleTypes
+            ));
+
+            // Register chunk database initialization task
+            _services.AddSingleton<IStartupTask>(sp => new ChunkDatabaseInitializationTask(
+                sp.GetRequiredService<IChunkStore>(),
+                sp.GetRequiredService<IAssociationStore>(),
+                _defaultChunkCollectionId,
+                _defaultAssociationCollectionId
             ));
 
             var provider = _services.BuildServiceProvider();
@@ -132,7 +272,7 @@ namespace RAINA
                 var module = serviceProvider.GetService(moduleType) as IIntentModule;
                 if (module != null)
                 {
-                    _intentProcessor.Registermodule(module);
+                    _intentProcessor.RegisterModule(module);
                     Console.WriteLine($"Registered intent module: {moduleType.Name} for intent type: {module.GetIntentType()}");
                 }
             }
@@ -145,6 +285,43 @@ namespace RAINA
             {
                 Console.WriteLine($"- {module.GetIntentType()}: {module.GetPromptDescription()}");
             }
+        }
+    }
+
+    /// <summary>
+    /// Task to initialize the chunk database with required collections
+    /// </summary>
+    public class ChunkDatabaseInitializationTask : IStartupTask
+    {
+        private readonly IChunkStore _chunkStore;
+        private readonly IAssociationStore _associationStore;
+        private readonly string _chunkCollectionId;
+        private readonly string _associationCollectionId;
+
+        public ChunkDatabaseInitializationTask(
+            IChunkStore chunkStore,
+            IAssociationStore associationStore,
+            string chunkCollectionId,
+            string associationCollectionId)
+        {
+            _chunkStore = chunkStore;
+            _associationStore = associationStore;
+            _chunkCollectionId = chunkCollectionId;
+            _associationCollectionId = associationCollectionId;
+        }
+
+        public void Execute(IServiceProvider serviceProvider)
+        {
+            //initialize the chunk context
+            ChunkContext.Initialize(_chunkStore, _chunkCollectionId);
+
+            // Initialize chunk collection
+            var chunkCollection = _chunkStore.GetOrCreateCollectionAsync(_chunkCollectionId).GetAwaiter().GetResult();
+            Console.WriteLine($"Initialized chunk collection: {_chunkCollectionId}");
+
+            // Initialize association collection
+            var associationCollection = _associationStore.GetOrCreateCollectionAsync(_associationCollectionId).GetAwaiter().GetResult();
+            Console.WriteLine($"Initialized association collection: {_associationCollectionId}");
         }
     }
 }

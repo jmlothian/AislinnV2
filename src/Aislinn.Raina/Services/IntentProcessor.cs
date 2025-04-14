@@ -4,9 +4,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Aislinn.Core.Models;
 using RAINA.Modules;
+using RAINA.Services;
 
 namespace RAINA
 {
@@ -35,7 +37,7 @@ namespace RAINA
         /// <summary>
         /// Register an intent module
         /// </summary>
-        public void Registermodule(IIntentModule module)
+        public void RegisterModule(IIntentModule module)
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
 
@@ -63,7 +65,8 @@ namespace RAINA
             await _contextDetector.UpdateContextAsync(userInput, intent);
 
             // Route to appropriate module
-            if (_modules.TryGetValue(intent.Type, out var module))
+            Console.WriteLine("Intent: " + intent.IntentType);
+            if (_modules.TryGetValue(intent.IntentType, out var module))
             {
                 return await module.HandleAsync(userInput, intent, context);
             }
@@ -107,17 +110,20 @@ Provide your response in JSON format:
   }}
 }}
 ";
-
+            Console.WriteLine(prompt);
             var response = await CallOpenAIAsync(prompt, 0.1);
-
+            Console.WriteLine(response.Choices[0].Message.Content);
             try
             {
                 return JsonSerializer.Deserialize<Intent>(response.Choices[0].Message.Content);
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
                 // Fallback if JSON parsing fails
-                return new Intent { Type = "Conversation", Confidence = 0.5 };
+                Console.WriteLine($"JSON parsing error: {ex.Message}. Fallback to default intent classification.");
+                Console.WriteLine(response.Choices[0].Message.Content);
+
+                return new Intent { IntentType = "Conversation", Confidence = 0.5 };
             }
         }
 
@@ -171,14 +177,18 @@ Provide your response in JSON format:
         {
             var requestBody = new
             {
-                model = "gpt-4-0125-preview",
+                model = "gpt-4o",
                 messages = new[]
                 {
-                    new { role = "system", content = "You are a helpful assistant specialized in intent classification." },
+                    new { role = "system", content = "You are a helpful assistant specialized in intent classification. Your name is Raina. Your pronouns are she/her." },
                     new { role = "user", content = prompt }
                 },
                 temperature = temperature,
-                max_tokens = 500
+                max_tokens = 500,
+                response_format = new
+                {
+                    type = "json_object"
+                }
             };
 
             var content = new StringContent(
@@ -197,15 +207,21 @@ Provide your response in JSON format:
     // Helper classes
     public class Intent
     {
-        public string Type { get; set; }
+        [JsonPropertyName("intentType")]
+        public string IntentType { get; set; }
+        [JsonPropertyName("confidence")]
         public double Confidence { get; set; }
+        [JsonPropertyName("entities")]
         public List<Entity> Entities { get; set; } = new List<Entity>();
+        [JsonPropertyName("parameters")]
         public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
     }
 
     public class Entity
     {
-        public string Type { get; set; }
+        [JsonPropertyName("type")]
+        public string EntityType { get; set; }
+        [JsonPropertyName("value")]
         public string Value { get; set; }
     }
 
@@ -243,16 +259,19 @@ Provide your response in JSON format:
 
     public class OpenAIResponse
     {
+        [JsonPropertyName("choices")]
         public List<Choice> Choices { get; set; } = new List<Choice>();
     }
 
     public class Choice
     {
+        [JsonPropertyName("message")]
         public Message Message { get; set; }
     }
 
     public class Message
     {
+        [JsonPropertyName("content")]
         public string Content { get; set; }
     }
 }

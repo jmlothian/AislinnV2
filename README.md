@@ -6,6 +6,8 @@
 
 Aislinn is a modular, extensible cognitive architecture designed for creating intelligent agents with human-like cognitive capabilities. Unlike many academic cognitive architectures focused on modeling specific aspects of cognition for research, Aislinn is built for practical applications, providing a comprehensive framework for general-purpose AI agents that can reason, learn, plan, and interact naturally with humans and environments.
 
+Explore the [API Documentation](/api/index.md)
+
 ## Key Features
 
 - **Chunk-Based Memory System**: Inspired by cognitive science but engineered for practical applications

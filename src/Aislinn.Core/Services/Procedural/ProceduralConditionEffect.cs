@@ -37,7 +37,7 @@ namespace Aislinn.Core.Procedural
         public string LeftOperand { get; set; }
 
         /// <summary>
-        /// For Comparison: comparison operator (==, !=, >, <, etc.)
+        /// For Comparison: comparison operator (==, !=, &gt;, &lt;, etc.)
         /// For TypeCheck: expected type name
         /// </summary>
         public string Operator { get; set; }

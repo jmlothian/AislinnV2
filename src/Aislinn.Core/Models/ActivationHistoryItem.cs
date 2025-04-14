@@ -3,6 +3,7 @@
 using System.Dynamic;
 using Aislinn.Core.Interfaces;
 
+namespace Aislinn.Core.Models;
 public class ActivationHistoryItem : IEmotion
 {
     public double PreviousValue { get; set; } = 0.0;

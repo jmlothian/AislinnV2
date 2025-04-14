@@ -10,6 +10,7 @@ using Aislinn.Core.Cognitive;
 using Aislinn.Core.Memory;
 using RAINA.Services;
 
+namespace RAINA;
 class Program
 {
     static async Task Main(string[] args)

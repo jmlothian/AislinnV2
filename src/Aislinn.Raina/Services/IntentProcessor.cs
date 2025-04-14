@@ -225,21 +225,15 @@ Provide your response in JSON format:
         public string Value { get; set; }
     }
 
-    public class UserContext
-    {
-        public string UserId { get; set; }
-        public string CurrentTopic { get; set; }
-        public List<Chunk> ActiveMemoryChunks { get; set; } = new List<Chunk>();
-        public Dictionary<string, object> ContextVariables { get; set; } = new Dictionary<string, object>();
-    }
 
-    public class Response
-    {
-        public string Message { get; set; }
-        public List<Chunk> RelevantChunks { get; set; } = new List<Chunk>();
-        public bool Success { get; set; } = true;
-        public string Error { get; set; }
-    }
+
+    // public class Response
+    // {
+    //     public string Message { get; set; }
+    //     public List<Chunk> RelevantChunks { get; set; } = new List<Chunk>();
+    //     public bool Success { get; set; } = true;
+    //     public string Error { get; set; }
+    // }
 
     public class QueryParameters
     {

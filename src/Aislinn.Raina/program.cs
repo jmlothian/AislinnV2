@@ -8,6 +8,7 @@ using RAINA.Modules.Implementations;
 using Aislinn.Core.Models;
 using Aislinn.Core.Cognitive;
 using Aislinn.Core.Memory;
+using RAINA.Services;
 
 class Program
 {

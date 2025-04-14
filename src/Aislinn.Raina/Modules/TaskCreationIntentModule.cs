@@ -70,7 +70,8 @@ namespace RAINA.Modules.Implementations
             var result = await _taskManager.CreateTaskAsync(task, context);
 
             // Generate confirmation response
-            return await _conversationManager.GenerateTaskConfirmationAsync(result, context);
+            // should also include info about the result...
+            return await _conversationManager.GenerateResponseAsync(userInput, intent, context);
         }
 
         private RainaTask ExtractTaskFromIntent(Intent intent)

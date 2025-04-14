@@ -71,6 +71,10 @@ namespace Aislinn.Core.Cognitive
                 associationCollectionId: _associationCollectionId);
         }
 
+        public double GetCurrentCognitiveTime()
+        {
+            return _timeManager.GetCurrentTime();
+        }
         #region Working Memory Management
 
         /// <summary>
@@ -198,6 +202,10 @@ namespace Aislinn.Core.Cognitive
                 relationBtoA,
                 initialWeightAtoB,
                 initialWeightBtoA);
+        }
+        public async Task<IChunkAssociationCollection> GetAssociationCollectionAsync()
+        {
+            return await _associationStore.GetOrCreateCollectionAsync(_associationCollectionId);
         }
 
         #endregion

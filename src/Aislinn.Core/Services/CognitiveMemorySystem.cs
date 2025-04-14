@@ -225,7 +225,9 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Add a new chunk to memory
         /// </summary>
-        public async Task<Chunk> AddChunkAsync(Chunk chunk)
+        /// <param name="chunk">The chunk to add</param>
+        /// <param name="includeTimestamp">Whether to include default timestamp values</param>
+        public async Task<Chunk> AddChunkAsync(Chunk chunk, bool includeTimestamp = true)
         {
             if (chunk == null)
                 throw new ArgumentNullException(nameof(chunk));
@@ -233,6 +235,13 @@ namespace Aislinn.Core.Cognitive
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
             if (chunkCollection == null)
                 throw new InvalidOperationException($"Chunk collection '{_chunkCollectionId}' not found");
+
+            //including default timestamp values
+            if (includeTimestamp)
+            {
+                chunk.Slots["$CreatedOn"] = new ModelSlot { Name = "$CreatedOn", Value = DateTime.Now };
+                chunk.Slots["$CreatedOnCognitiveTime"] = new ModelSlot { Name = "$CreatedOn", Value = _timeManager.GetCurrentTime() };
+            }
 
             return await chunkCollection.AddChunkAsync(chunk);
         }

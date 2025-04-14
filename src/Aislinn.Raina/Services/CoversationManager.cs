@@ -75,8 +75,6 @@ public class ConversationManager
                 { "Speaker", new ModelSlot { Name = "Speaker", Value = "User" } },
                 { "Text", new ModelSlot { Name = "Text", Value = userInput } },
                 { "Intent", new ModelSlot { Name = "Intent", Value = intent?.IntentType } },
-                { "Timestamp", new ModelSlot { Name = "Timestamp", Value = DateTime.Now } },
-                { "CognitiveTimestamp", new ModelSlot { Name = "CognitiveTimestamp", Value = _memorySystem.GetCurrentCognitiveTime() } },
                 { "ConversationId", new ModelSlot { Name = "ConversationId", Value = _currentConversationChunk.ID } }
             }
         };

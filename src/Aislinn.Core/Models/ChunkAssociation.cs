@@ -6,6 +6,8 @@ namespace Aislinn.Core.Models
         public Guid ChunkBId { get; set; }
         public string RelationAtoB { get; set; } // "IsA", "CreatedBy", etc.
         public string RelationBtoA { get; set; } // "HasInstance", "Created", etc.
+        public string SubTypeRelationshipAtoB { get; set; } //"IsAFriendOf", "IsAParentOf", etc. - user and context specific ontology data
+        public string SubTypeRelationshipBtoA { get; set; }
         public double WeightAtoB { get; set; } = 0.0;
         public double WeightBtoA { get; set; } = 0.0;
         public DateTime LastActivated { get; set; } = DateTime.Now;

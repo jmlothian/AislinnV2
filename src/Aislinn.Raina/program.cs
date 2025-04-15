@@ -179,6 +179,23 @@ class Program
             Console.WriteLine($"Loaded existing user chunk for {userContext.UserName}");
         }
 
+        //add Raina
+        query.Name = "Raina";
+        query.SemanticType = "entity.person.instance"; //we should set this to something like entity.ai.cognitive.instance, but this makes the queries easier for now, we'll add a role for further filtering
+        results = await queryService.ExecuteQueryAsync(query);
+        if (results.Count == 0)
+        {
+            var personChunk = await chunkManager.CreateChunkAsync("Declaritive", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName }, { "Role", "AI Assistant" } });
+            userContext.RainaChunk = personChunk;
+            Console.WriteLine($"Created new user chunk for {userContext.UserName}");
+        }
+        else
+        {
+            userContext.RainaChunk = results.FirstOrDefault().Chunk;
+            Console.WriteLine($"Loaded existing user chunk for {userContext.UserName}");
+        }
+
+
         // Load active chunks into user context
         var activeChunks = await workingMemoryController.GetActiveChunksAsync();
         userContext.ActiveMemoryChunks = activeChunks;

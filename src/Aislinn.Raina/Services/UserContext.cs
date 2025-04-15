@@ -4,6 +4,7 @@ namespace RAINA.Services;
 public class UserContext
 {
     public string UserId { get; set; }
+    public string UserName { get; set; }
     public string CurrentTopic { get; set; }
     public Chunk CurrentUtterance { get; set; }
     public Chunk LastSystemUtterance { get; set; }

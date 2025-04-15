@@ -64,6 +64,7 @@ class Program
             var userContext = new UserContext
             {
                 UserId = "user1",
+                UserName = "User",
                 CurrentTopic = "general"
             };
 

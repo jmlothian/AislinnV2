@@ -18,14 +18,20 @@ public class ConversationManager
     // Maximum number of recent utterances to keep in memory
     private const int MaxRecentUtterances = 10;
 
-    public ConversationManager(CognitiveMemorySystem memorySystem, string openAIApiKey)
+    /// <summary>
+    /// Default agent name for the system
+    /// </summary>
+    private string _agentName = "Raina";
+
+    public ConversationManager(CognitiveMemorySystem memorySystem, string openAIApiKey, string agentName = null)
     {
         _memorySystem = memorySystem;
         _openAIApiKey = openAIApiKey;
+        _agentName = agentName ?? _agentName;
     }
 
     // Method to initialize or retrieve an existing conversation
-    public async Task<Chunk> InitializeConversationAsync(string conversationId = null)
+    public async Task<Chunk> InitializeConversationAsync(UserContext context, string conversationId = null)
     {
         if (string.IsNullOrEmpty(conversationId))
         {
@@ -36,13 +42,16 @@ public class ConversationManager
                 Name = $"Conversation_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
                 Slots = new Dictionary<string, ModelSlot>
                 {
-                    { "StartTime", new ModelSlot { Name = "StartTime", Value = DateTime.Now } },
-                    { "UtteranceCount", new ModelSlot { Name = "UtteranceCount", Value = 0 } }
+                    { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserName } },
+                    { "Entities", new ModelSlot { Name = "Entities", Value = new List<Entity>() { new Entity {EntityType = "person", Value=context.UserName } } } }
                 }
             };
 
             // Add to memory system
             _currentConversationChunk = await _memorySystem.AddChunkAsync(conversationChunk);
+
+            //for any entity, we need to add an assocation to the conversation chunk, same with utterances (also, activate)
+            //_memorySystem.FindSimilarChunksAsync("chunktype == cognitive && SemanticType=='entity.person' && slot['name'] == username");
         }
         else
         {
@@ -62,7 +71,7 @@ public class ConversationManager
         // Ensure we have an active conversation
         if (_currentConversationChunk == null)
         {
-            await InitializeConversationAsync();
+            await InitializeConversationAsync(context);
         }
 
         // Create utterance chunk for user input
@@ -72,7 +81,7 @@ public class ConversationManager
             Name = $"UserUtterance_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
             Slots = new Dictionary<string, ModelSlot>
             {
-                { "Speaker", new ModelSlot { Name = "Speaker", Value = "User" } },
+                { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserName } },
                 { "Text", new ModelSlot { Name = "Text", Value = userInput } },
                 { "Intent", new ModelSlot { Name = "Intent", Value = intent?.IntentType } },
                 { "ConversationId", new ModelSlot { Name = "ConversationId", Value = _currentConversationChunk.ID } }
@@ -86,6 +95,7 @@ public class ConversationManager
 
             if (intent.Entities != null && intent.Entities.Any())
             {
+                //consider adding the speaker by default as well, we have this on the conversation chunk
                 utteranceChunk.Slots["Entities"] = new ModelSlot { Name = "Entities", Value = intent.Entities };
             }
         }
@@ -143,7 +153,7 @@ public class ConversationManager
             Name = $"SystemUtterance_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
             Slots = new Dictionary<string, ModelSlot>
             {
-                { "Speaker", new ModelSlot { Name = "Speaker", Value = "System" } },
+                { "Speaker", new ModelSlot { Name = "Speaker", Value = "Raina" } },
                 { "Text", new ModelSlot { Name = "Text", Value = responseText } },
                 { "ResponseToUtterance", new ModelSlot { Name = "ResponseToUtterance", Value = userUtterance.ID } },
                 { "Intent", new ModelSlot { Name = "Intent", Value = intent?.IntentType } },

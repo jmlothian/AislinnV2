@@ -46,7 +46,10 @@ public class ConversationManager
                 Name = $"Conversation_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
                 Slots = new Dictionary<string, ModelSlot>
                 {
-                    { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserName } },
+                    { "SpeakerName", new ModelSlot { Name = "Speaker", Value = context.UserName } },
+                    { "ListenerName", new ModelSlot { Name = "Listener", Value = _agentName } },
+                    { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserChunk } },
+                    { "Listener", new ModelSlot { Name = "Listener", Value = context.RainaChunk } },
                     { "Entities", new ModelSlot { Name = "Entities", Value = new List<Entity>() { new Entity {EntityType = "person", Value=context.UserName } } } }
                 }
             };
@@ -87,7 +90,10 @@ public class ConversationManager
             Name = $"UserUtterance_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
             Slots = new Dictionary<string, ModelSlot>
             {
-                { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserName } },
+                { "SpeakerName", new ModelSlot { Name = "Speaker", Value = context.UserName } },
+                { "ListenerName", new ModelSlot { Name = "Listener", Value = _agentName } },
+                { "Speaker", new ModelSlot { Name = "Speaker", Value = context.UserChunk } },
+                { "Listener", new ModelSlot { Name = "Listener", Value = context.RainaChunk } },
                 { "Text", new ModelSlot { Name = "Text", Value = userInput } },
                 { "Intent", new ModelSlot { Name = "Intent", Value = intent?.IntentType } },
                 { "ConversationId", new ModelSlot { Name = "ConversationId", Value = _currentConversationChunk.ID } }

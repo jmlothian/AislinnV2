@@ -16,6 +16,7 @@ using Aislinn.Storage.AssociationStore;
 using Aislinn.Core.Cognitive;
 using Microsoft.Extensions.Logging;
 using RAINA.Services;
+using Aislinn.Core.Query;
 
 namespace RAINA
 {
@@ -129,10 +130,16 @@ namespace RAINA
             });
 
             // Register core services that interface with memory system
+            _services.AddSingleton<ChunkQueryService>(sp =>
+            {
+                var chunkStore = sp.GetRequiredService<IChunkStore>();
+                return new ChunkQueryService(chunkStore, _defaultChunkCollectionId);
+            });
             _services.AddSingleton<ConversationManager>(sp =>
             {
                 var memorySystem = sp.GetRequiredService<CognitiveMemorySystem>();
-                return new ConversationManager(memorySystem, openAIApiKey);
+                var chunkQueryService = sp.GetRequiredService<ChunkQueryService>();
+                return new ConversationManager(memorySystem, chunkQueryService, openAIApiKey);
             });
 
             _services.AddSingleton<ContextDetector>(sp =>

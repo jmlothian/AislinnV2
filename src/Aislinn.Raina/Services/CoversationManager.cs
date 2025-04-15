@@ -1,12 +1,14 @@
 using System.Text;
 using Aislinn.Core.Cognitive;
 using Aislinn.Core.Models;
+using Aislinn.Core.Query;
 using RAINA;
 
 namespace RAINA.Services;
 public class ConversationManager
 {
     private readonly CognitiveMemorySystem _memorySystem;
+    private readonly ChunkQueryService _chunkQueryService;
     private readonly string _openAIApiKey;
 
     // Track the current conversation as a Chunk
@@ -23,9 +25,10 @@ public class ConversationManager
     /// </summary>
     private string _agentName = "Raina";
 
-    public ConversationManager(CognitiveMemorySystem memorySystem, string openAIApiKey, string agentName = null)
+    public ConversationManager(CognitiveMemorySystem memorySystem, ChunkQueryService chunkQueryService, string openAIApiKey, string agentName = null)
     {
         _memorySystem = memorySystem;
+        _chunkQueryService = chunkQueryService;
         _openAIApiKey = openAIApiKey;
         _agentName = agentName ?? _agentName;
     }

@@ -203,9 +203,6 @@ namespace Aislinn.Core.Query
                 var querySlotNames = query.SlotQueries.Select(q => q.SlotName).ToHashSet();
                 var extraSlots = chunk.Slots.Keys.Where(k => !querySlotNames.Contains(k)).ToList();
 
-                // Exclude standard properties that aren't considered slots
-                extraSlots.RemoveAll(s => s == "ID" || s == "ChunkType" || s == "Name" || s == "Vector" || s == "ActivationLevel");
-
                 if (extraSlots.Any())
                 {
                     result.ExactMatch = false;
@@ -252,10 +249,7 @@ namespace Aislinn.Core.Query
             if (extraSlotsHandling == ExtraSlotsHandling.Penalty)
             {
                 var querySlotNames = query.SlotQueries.Select(q => q.SlotName).ToHashSet();
-                var extraSlots = chunk.Slots.Keys.Where(k => !querySlotNames.Contains(k) &&
-                                                            k != "ID" && k != "ChunkType" &&
-                                                            k != "Name" && k != "Vector" &&
-                                                            k != "ActivationLevel").ToList();
+                var extraSlots = chunk.Slots.Keys.Where(k => !querySlotNames.Contains(k)).ToList();
 
                 if (extraSlots.Any())
                 {

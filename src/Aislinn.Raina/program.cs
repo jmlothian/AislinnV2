@@ -9,6 +9,7 @@ using Aislinn.Core.Models;
 using Aislinn.Core.Cognitive;
 using Aislinn.Core.Memory;
 using RAINA.Services;
+using Aislinn.Core.Query;
 
 namespace RAINA;
 class Program
@@ -60,6 +61,8 @@ class Program
             // Get the working memory controller
             var workingMemoryController = serviceProvider.GetRequiredService<WorkingMemoryController>();
 
+            var chunkQueryService = serviceProvider.GetRequiredService<ChunkQueryService>();
+
             // Create a simple user context
             var userContext = new UserContext
             {
@@ -69,7 +72,7 @@ class Program
             };
 
             // Load any active context from memory
-            await LoadUserContextAsync(userContext, workingMemoryController);
+            await LoadUserContextAsync(userContext, workingMemoryController, chunkManager, chunkQueryService);
 
             Console.WriteLine("RAINA is ready! Type 'exit' to quit, 'help' for commands.");
             Console.WriteLine();
@@ -150,8 +153,32 @@ class Program
         Console.WriteLine("  - When is John's birthday?");
     }
 
-    static async Task LoadUserContextAsync(UserContext userContext, WorkingMemoryController workingMemoryController)
+    static async Task LoadUserContextAsync(UserContext userContext, WorkingMemoryController workingMemoryController, ChunkManager chunkManager, ChunkQueryService queryService)
     {
+        // lookup the speaker
+        var query = new ChunkQuery
+        {
+            ChunkType = "Declaritive",
+            SemanticType = "entity.person.instance",
+            Name = userContext.UserName,  // Variable containing the username
+            NameHandling = NameMatchType.ExactMatch,  // Require exact name match
+            ExtraSlotsHandling = ExtraSlotsHandling.Ignore,  // Ignore additional slots
+            MinimumThreshold = 0.9  // Set high threshold since we're doing exact matching
+        };
+
+        var results = await queryService.ExecuteQueryAsync(query);
+        if (results.Count == 0)
+        {
+            var personChunk = await chunkManager.CreateChunkAsync("Declaritive", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName } });
+            userContext.UserChunk = personChunk;
+            Console.WriteLine($"Created new user chunk for {userContext.UserName}");
+        }
+        else
+        {
+            userContext.UserChunk = results.FirstOrDefault().Chunk;
+            Console.WriteLine($"Loaded existing user chunk for {userContext.UserName}");
+        }
+
         // Load active chunks into user context
         var activeChunks = await workingMemoryController.GetActiveChunksAsync();
         userContext.ActiveMemoryChunks = activeChunks;
@@ -223,11 +250,12 @@ public class ChunkManager
         _memorySystem = memorySystem;
     }
 
-    public async Task<Chunk> CreateChunkAsync(string chunkType, string name, Dictionary<string, object> slots = null)
+    public async Task<Chunk> CreateChunkAsync(string chunkType, string semanticType, string name, Dictionary<string, object> slots = null)
     {
         var chunk = new Chunk
         {
             ChunkType = chunkType,
+            SemanticType = semanticType,
             Name = name,
             Slots = new Dictionary<string, ModelSlot>()
         };

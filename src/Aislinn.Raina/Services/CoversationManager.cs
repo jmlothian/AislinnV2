@@ -41,7 +41,8 @@ public class ConversationManager
             // Create a new conversation chunk
             var conversationChunk = new Chunk
             {
-                ChunkType = "Conversation",
+                ChunkType = "Declaritive",
+                SemanticType = "Conversation",
                 Name = $"Conversation_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
                 Slots = new Dictionary<string, ModelSlot>
                 {
@@ -49,6 +50,7 @@ public class ConversationManager
                     { "Entities", new ModelSlot { Name = "Entities", Value = new List<Entity>() { new Entity {EntityType = "person", Value=context.UserName } } } }
                 }
             };
+
 
             // Add to memory system
             _currentConversationChunk = await _memorySystem.AddChunkAsync(conversationChunk);
@@ -80,7 +82,8 @@ public class ConversationManager
         // Create utterance chunk for user input
         var utteranceChunk = new Chunk
         {
-            ChunkType = "Utterance",
+            ChunkType = "Declaritive",
+            SemanticType = "Utterance",
             Name = $"UserUtterance_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}",
             Slots = new Dictionary<string, ModelSlot>
             {

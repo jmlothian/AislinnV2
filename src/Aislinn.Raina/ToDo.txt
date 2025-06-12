@@ -12,3 +12,42 @@ Other Intent Types
     recurring tasks
     --move tasks around by due date
 
+
+Store summaries to vector store _periodically_ - we dont want to update that all the time.  It will use summary_conversationid as the ID, so it will at least replace the existing one
+    --we ALSO should be inserting chunks from the top down _periodically_
+    --we ALSO need to be detecting old vs new conversations and getting a new ID
+        -- which ALSO means detecting old conversations even if there's a break to do something like ask a question on a different topic, so that we can resume...
+
+
+Use vector store to match against new Entity ontology types, determine if one exists thats suitable, and if not, generate a new one
+    -same thing for relationship types.
+
+
+Vector store ontology and relationships (ontology loader)
+
+--add "formal" to entity vector text and entity response object
+
+--do vector lookups on entities (populate a short list of other concepts to include in prompt)
+
+--do vector lookups on past conversations
+    --individual lines of text
+    --conversation "chunks"
+        --we should be saving Depth0 as a vector, before we remove part of it
+    --summaries
+
+    --insert line history into prompt
+    --insert summaries into prompt (or summarize them and THEN insert them...)
+
+    --activate any relevant chunks returne
+
+    --this should probably happen early or parallel with other processes
+
+    --we really need thread-safe chunk storage... but high performance multi-read/multiwrite
+
+--we need a way to "rebuild" a conversation from memory, line by line
+
+Raina - developer advocate bot
+    --scan and store API docs, user projects, useful sites
+    --allow folks to submit things, but block them if they abuse it
+
+Create API and web interface (bluesky login?  Some kind of auth)

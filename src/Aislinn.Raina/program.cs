@@ -10,12 +10,15 @@ using Aislinn.Core.Cognitive;
 using Aislinn.Core.Memory;
 using RAINA.Services;
 using Aislinn.Core.Query;
+using Aislinn.Core.Services;
 
 namespace RAINA;
+
 class Program
 {
     static async Task Main(string[] args)
     {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.WriteLine("Initializing RAINA - Realtime Adaptive Intelligence Neural Assistant");
 
         // Get API key from environment or config
@@ -24,6 +27,13 @@ class Program
         {
             Console.WriteLine("Please set the OPENAI_API_KEY environment variable");
             Console.WriteLine("Example: set OPENAI_API_KEY=your-api-key-here");
+            return;
+        }
+        string voyageAPIKey = Environment.GetEnvironmentVariable("VOYAGE_API_KEY");
+        if (string.IsNullOrEmpty(voyageAPIKey))
+        {
+            Console.WriteLine("Please set the VOYAGE_API_KEY environment variable");
+            Console.WriteLine("Example: set VOYAGE_API_KEY=your-api-key-here");
             return;
         }
 
@@ -43,18 +53,26 @@ class Program
 
         try
         {
+            var config = new RainaConfiguration();
+            config.ChunkCollectionId = "raina_main";
+            config.AssociationCollectionId = "raina_associations";
+            config.OpenAIApiKey = openAIApiKey;
+
+            var vectorConfig = new VoyageConfiguration();
+            vectorConfig.VoyageApiKey = voyageAPIKey;
             // Configure RAINA with the bootstrapper
             var serviceProvider = new RainaBootstrapper(services)
+            .ConfigureWithSettings(config, vectorConfig)
                 .ConfigureChunkMemorySystem()  // Set up the Aislinn memory system
-                .SetCollectionIds("raina_main", "raina_associations")  // Set collection IDs
-                .ConfigureCore(openAIApiKey)
+                .ConfigureCore()
                 .RegisterStandardModules()
                 .ConfigureIntegrations()
                 .Build();
 
             // Get the intent processor
             var intentProcessor = serviceProvider.GetRequiredService<IntentProcessor>();
-
+            var conversationManager = serviceProvider.GetRequiredService<ConversationManager>();
+            conversationManager.Init();
             // Get the chunk manager for direct memory operations
             var chunkManager = serviceProvider.GetRequiredService<ChunkManager>();
 
@@ -62,6 +80,9 @@ class Program
             var workingMemoryController = serviceProvider.GetRequiredService<WorkingMemoryController>();
 
             var chunkQueryService = serviceProvider.GetRequiredService<ChunkQueryService>();
+
+            var entityRelationshipExtractionService = serviceProvider.GetRequiredService<EntityRelationshipExtractionService>();
+            entityRelationshipExtractionService.LoadCacheAsync("relationship_cache.json").Wait();
 
             // Create a simple user context
             var userContext = new UserContext
@@ -86,8 +107,12 @@ class Program
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
 
-                if (input.ToLower() == "exit")
+                if (input.ToLower() == "exit" || input.ToLower() == "quit")
+                {
+                    conversationManager.Shutdown();
+                    await entityRelationshipExtractionService.SaveCacheAsync("relationship_cache.json");
                     break;
+                }
 
                 if (input.ToLower() == "help")
                 {
@@ -118,6 +143,7 @@ class Program
                         foreach (var chunk in response.RelevantChunks)
                         {
                             Console.WriteLine($"- {chunk.Name} (Activation: {chunk.ActivationLevel:F2})");
+                            chunk.DebugConsole();
                         }
                     }
 
@@ -158,7 +184,7 @@ class Program
         // lookup the speaker
         var query = new ChunkQuery
         {
-            ChunkType = "Declaritive",
+            ChunkType = "Declarative",
             SemanticType = "entity.person.instance",
             Name = userContext.UserName,  // Variable containing the username
             NameHandling = NameMatchType.ExactMatch,  // Require exact name match
@@ -169,7 +195,7 @@ class Program
         var results = await queryService.ExecuteQueryAsync(query);
         if (results.Count == 0)
         {
-            var personChunk = await chunkManager.CreateChunkAsync("Declaritive", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName } });
+            var personChunk = await chunkManager.CreateChunkAsync("Declarative", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName }, { "Role", "User" } });
             userContext.UserChunk = personChunk;
             Console.WriteLine($"Created new user chunk for {userContext.UserName}");
         }
@@ -185,7 +211,7 @@ class Program
         results = await queryService.ExecuteQueryAsync(query);
         if (results.Count == 0)
         {
-            var personChunk = await chunkManager.CreateChunkAsync("Declaritive", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName }, { "Role", "AI Assistant" } });
+            var personChunk = await chunkManager.CreateChunkAsync("Declarative", "entity.person.instance", userContext.UserName, new Dictionary<string, object> { { "Name", userContext.UserName }, { "Role", "AI Assistant" } });
             userContext.RainaChunk = personChunk;
             Console.WriteLine($"Created new user chunk for {userContext.UserName}");
         }

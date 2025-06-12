@@ -33,7 +33,7 @@ namespace Aislinn.VectorStorage.Storage
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentException("Text cannot be null or empty", nameof(text));
 
-            double[] vector = await vectorizer.StringToVectorAsync(text);
+            double[] vector = await vectorizer.StringToVectorAsync(text, "document");
             var vectorItem = new VectorItem(vectorId, text, vector, metadata);
             vectorStore[vectorId] = vectorItem;
             return vectorItem.Clone(); //return a copy, so we don't mess up the store
@@ -47,14 +47,16 @@ namespace Aislinn.VectorStorage.Storage
             if (topN <= 0)
                 throw new ArgumentException("TopN must be greater than zero", nameof(topN));
 
-            double[] queryVector = await vectorizer.StringToVectorAsync(query);
+            double[] queryVector = await vectorizer.StringToVectorAsync(query, "query");
             return await SearchVectorsAsync(queryVector, topN, minSimilarity);
         }
 
-        public Task<List<SearchResult>> SearchVectorsAsync(double[] queryVector, int topN, double minSimilarity = 0.0)
+        public async Task<List<SearchResult>> SearchVectorsAsync(double[] queryVector, int topN, double minSimilarity = 0.0)
         {
             if (queryVector == null || queryVector.Length == 0)
-                throw new ArgumentException("QueryVector cannot be null or empty", nameof(queryVector));
+            {
+                return new List<SearchResult>();
+            }
 
             if (topN <= 0)
                 throw new ArgumentException("TopN must be greater than zero", nameof(topN));
@@ -90,7 +92,7 @@ namespace Aislinn.VectorStorage.Storage
                 result.Similarity,
                 result.Collection
             )).ToList();
-            return Task.FromResult(deepCopies);
+            return deepCopies;
         }
 
         public Task<bool> DeleteVectorAsync(string vectorId)
@@ -135,8 +137,10 @@ namespace Aislinn.VectorStorage.Storage
         private double CosineSimilarity(double[] vector1, double[] vector2)
         {
             // Check if vectors have the same dimensions
+            if (vector1 == null || vector2 == null)
+                return 0.0;
             if (vector1.Length != vector2.Length)
-                throw new ArgumentException("Vectors must have the same dimensions");
+                return 0.0;
 
             double dotProduct = 0;
             double magnitude1 = 0;

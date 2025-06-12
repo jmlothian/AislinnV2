@@ -6,6 +6,8 @@ using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Core.Models;
 using Aislinn.Core.Services;
 using Aislinn.Core.Relationships;
+using Aislinn.Configuration;
+using System.Runtime.CompilerServices;
 
 namespace Aislinn.Core.Goals
 {
@@ -60,15 +62,14 @@ namespace Aislinn.Core.Goals
             IAssociationStore associationStore,
             ChunkActivationService activationService,
             RelationshipTraversalService relationshipService,
-            string chunkCollectionId = "default",
-            string associationCollectionId = "default")
+            AislinnConfiguration config)
         {
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
             _activationService = activationService ?? throw new ArgumentNullException(nameof(activationService));
             _relationshipService = relationshipService ?? throw new ArgumentNullException(nameof(relationshipService));
-            _chunkCollectionId = chunkCollectionId;
-            _associationCollectionId = associationCollectionId;
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
 
             // Initialize the relationship matcher
             _relationshipMatcher = new GoalRelationshipMatcher(

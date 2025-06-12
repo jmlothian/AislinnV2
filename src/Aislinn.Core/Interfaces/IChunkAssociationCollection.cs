@@ -1,11 +1,12 @@
 // Interface for ChunkAssociation collection
 using Aislinn.Core.Models;
 namespace Aislinn.ChunkStorage.Interfaces;
+
 public interface IChunkAssociationCollection
 {
     Task<ChunkAssociation> AddAssociationAsync(ChunkAssociation association);
-    Task<ChunkAssociation> GetAssociationAsync(Guid chunkAId, Guid chunkBId);
+    Task<ChunkAssociation> GetAssociationAsync(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA);
     Task<bool> UpdateAssociationAsync(ChunkAssociation association);
-    Task<bool> DeleteAssociationAsync(Guid chunkAId, Guid chunkBId);
+    Task<bool> DeleteAssociationAsync(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA);
     Task<List<ChunkAssociation>> GetAssociationsForChunkAsync(Guid chunkId);
 }

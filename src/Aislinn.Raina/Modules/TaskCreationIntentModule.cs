@@ -80,10 +80,11 @@ namespace RAINA.Modules.Implementations
             var task = new RainaTask();
 
             // Extract title from entities
-            var titleEntity = intent.Entities.Find(e => e.EntityType == "task");
+            // we will need to add domains to our entity ontology list, this will likely change
+            var titleEntity = intent.Entities.Find(e => e.Type == "task");
             if (titleEntity != null)
             {
-                task.Title = titleEntity.Value;
+                task.Title = titleEntity.Name;
             }
 
             // // Extract due date if available

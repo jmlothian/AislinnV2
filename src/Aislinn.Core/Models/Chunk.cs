@@ -30,5 +30,57 @@ namespace Aislinn.Core.Models
             Slots = new Dictionary<string, ModelSlot>();
             ActivationHistory = new List<ActivationHistoryItem>();
         }
+        //we'll move this to a utility function later, good for now
+        public void DebugConsole()
+        {
+            Console.WriteLine("==== Chunk Details ====");
+            Console.WriteLine($"ID: {this.ID}");
+            Console.WriteLine($"Name: {this.Name}");
+            Console.WriteLine($"ChunkType: {this.ChunkType}");
+            Console.WriteLine($"CognitiveCategory: {this.CognitiveCategory}");
+            Console.WriteLine($"SemanticType: {this.SemanticType}");
+            Console.WriteLine($"ActivationLevel: {this.ActivationLevel:F4}");
+
+            if (this.Vector != null && this.Vector.Length > 0)
+            {
+                Console.WriteLine("Vector: [" + string.Join(", ", this.Vector.Select(v => v.ToString("F4"))) + "]");
+            }
+            else
+            {
+                Console.WriteLine("Vector: null or empty");
+            }
+
+            Console.WriteLine("\n-- Slots --");
+            if (this.Slots != null && this.Slots.Any())
+            {
+                foreach (var kvp in this.Slots)
+                {
+                    var slot = kvp.Value;
+                    Console.WriteLine($"Slot Key: {kvp.Key}");
+                    Console.WriteLine($"  Name: {slot.Name}");
+                    Console.WriteLine($"  SlotType: {slot.SlotType}");
+                    Console.WriteLine($"  Value: {slot.Value ?? "null"}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No slots defined.");
+            }
+
+            Console.WriteLine("\n-- Activation History --");
+            if (this.ActivationHistory != null && this.ActivationHistory.Any())
+            {
+                foreach (var entry in this.ActivationHistory)
+                {
+                    Console.WriteLine($"  {entry}"); // Customize this based on ActivationHistoryItem's ToString()
+                }
+            }
+            else
+            {
+                Console.WriteLine("No activation history.");
+            }
+
+            Console.WriteLine("========================\n");
+        }
     }
 }

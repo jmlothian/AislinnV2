@@ -31,7 +31,7 @@ namespace Aislinn.Core.Agent
         public Chunk CurrentPrimaryGoal { get; set; }
         public List<Chunk> CurrentSecondaryGoals { get; set; } = new List<Chunk>();
         public Dictionary<ContextContainer.ContextCategory, Dictionary<string, object>> CurrentContext { get; set; }
-        public double SystemTime { get; set; }
+        public long SystemTime { get; set; }
         public DateTime LastActivityTime { get; set; }
         public GoalExecutionService.ExecutionState ExecutionState { get; set; }
     }
@@ -148,7 +148,7 @@ namespace Aislinn.Core.Agent
             // Raise initialization event
             RaiseCognitiveEvent("AgentInitialized", new Dictionary<string, object>
             {
-                { "SystemTime", _timeManager.GetCurrentTime() }
+                { "SystemTime", _timeManager.GetCognitiveSteps() }
             });
         }
 
@@ -253,7 +253,7 @@ namespace Aislinn.Core.Agent
                 _isCognitiveProcessingActive = true;
 
                 // Update time
-                _timeManager.UpdateTime();
+                _timeManager.AdvanceStep(150);
 
                 // Apply decay to chunks
                 await _activationService.ApplyDecayAsync();
@@ -284,7 +284,7 @@ namespace Aislinn.Core.Agent
                 // Raise cognitive cycle event
                 RaiseCognitiveEvent("CognitiveCycle", new Dictionary<string, object>
                 {
-                    { "SystemTime", _timeManager.GetCurrentTime() },
+                    { "SystemTime", _timeManager.GetCognitiveSteps() },
                     { "WorkingMemoryCount", workingMemoryContents.Count }
                 });
             }
@@ -464,7 +464,7 @@ namespace Aislinn.Core.Agent
             {
                 WorkingMemoryContents = workingMemory,
                 PrimedChunks = primedChunks,
-                SystemTime = _timeManager.GetCurrentTime(),
+                SystemTime = _timeManager.GetCognitiveSteps(),
                 LastActivityTime = _lastActivityTime,
                 CurrentPrimaryGoal = primaryGoal,
                 CurrentSecondaryGoals = secondaryGoals,

@@ -17,3 +17,4 @@ api/*.yml
 # NuGet Packages
 *.nupkg
 packages/
+/data

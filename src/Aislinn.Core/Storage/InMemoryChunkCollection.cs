@@ -100,7 +100,9 @@ namespace Aislinn.ChunkStorage.Storage
                 ID = chunk.ID,
                 ChunkType = chunk.ChunkType,
                 Name = chunk.Name,
-                ActivationLevel = chunk.ActivationLevel
+                ActivationLevel = chunk.ActivationLevel,
+                SemanticType = chunk.SemanticType,
+                CognitiveCategory = chunk.CognitiveCategory,                 
             };
 
             // Copy vector

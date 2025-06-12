@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Aislinn.Core.Models;
 using Aislinn.ChunkStorage.Interfaces;
+using Aislinn.Configuration;
 
 namespace Aislinn.Core.Query
 {
@@ -21,10 +22,10 @@ namespace Aislinn.Core.Query
         /// <summary>
         /// Creates a new chunk query service
         /// </summary>
-        public ChunkQueryService(IChunkStore chunkStore, string chunkCollectionId = "default")
+        public ChunkQueryService(IChunkStore chunkStore, AislinnConfiguration config)
         {
-            _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
-            _chunkCollectionId = chunkCollectionId;
+            _chunkStore = chunkStore;
+            _chunkCollectionId = config.ChunkCollectionId;
         }
 
         /// <summary>

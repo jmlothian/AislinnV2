@@ -6,6 +6,7 @@ using Aislinn.ChunkStorage.Storage;
 using Aislinn.Core.Models;
 using Aislinn.Core.Activation;
 using Aislinn.Models.Activation;
+using Aislinn.Configuration;
 
 namespace Aislinn.Core.Services
 {
@@ -15,6 +16,7 @@ namespace Aislinn.Core.Services
         private readonly IAssociationStore _associationStore;
         private readonly string _chunkCollectionId;
         private readonly string _associationCollectionId;
+        private readonly CognitiveTimeManager _timeManager;
         private readonly IActivationModel _activationModel;
 
         // Default spreading configuration 
@@ -25,16 +27,18 @@ namespace Aislinn.Core.Services
             IChunkStore chunkStore,
             IAssociationStore associationStore,
             IActivationModel activationModel,
-            ActivationParametersRegistry parametersRegistry = null,
-            string chunkCollectionId = "default",
-            string associationCollectionId = "default")
+            CognitiveTimeManager cognitiveTimeManager,
+            AislinnConfiguration config,
+            ActivationParametersRegistry parametersRegistry = null
+)
         {
+            _timeManager = cognitiveTimeManager;
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
             _activationModel = activationModel ?? throw new ArgumentNullException(nameof(activationModel));
             _parametersRegistry = parametersRegistry ?? new ActivationParametersRegistry();
-            _chunkCollectionId = chunkCollectionId ?? throw new ArgumentNullException(nameof(chunkCollectionId));
-            _associationCollectionId = associationCollectionId ?? throw new ArgumentNullException(nameof(associationCollectionId));
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
         }
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace Aislinn.Core.Services
                     ? chunk.ActivationHistory[0].SequenceNumber + 1
                     : 1,
                 EmotionName = emotionName,
-                ActivationDate = DateTime.Now
+                ActivationDate = _timeManager.GetCognitiveSteps()
             };
 
             // Add to history (most recent first)
@@ -165,7 +169,7 @@ namespace Aislinn.Core.Services
                 throw new InvalidOperationException($"Chunk collection '{_chunkCollectionId}' not found");
 
             // Check if the association already exists
-            var existingAssociation = await associationCollection.GetAssociationAsync(chunkAId, chunkBId);
+            var existingAssociation = await associationCollection.GetAssociationAsync(chunkAId, chunkBId, relationAtoB, relationBtoA);
             if (existingAssociation != null)
                 return existingAssociation;
 
@@ -178,7 +182,7 @@ namespace Aislinn.Core.Services
                 RelationBtoA = relationBtoA,
                 WeightAtoB = initialWeightAtoB,
                 WeightBtoA = initialWeightBtoA,
-                LastActivated = DateTime.Now
+                LastActivated = _timeManager.GetCognitiveSteps()
             };
 
             // Get chunks to update their slots
@@ -271,7 +275,7 @@ namespace Aislinn.Core.Services
                         ? targetChunk.ActivationHistory[0].SequenceNumber + 1
                         : 1,
                     EmotionName = originalActivation.EmotionName,
-                    ActivationDate = DateTime.Now,
+                    ActivationDate = _timeManager.GetCognitiveSteps(),
                     ActivatedByChunk = sourceChunk.ID
                 };
 
@@ -297,7 +301,7 @@ namespace Aislinn.Core.Services
                     association.WeightBtoA = Math.Min(1.0, association.WeightBtoA + parameters.AssociationStrengthIncrement);
 
                 // Update association timestamp
-                association.LastActivated = DateTime.Now;
+                association.LastActivated = _timeManager.GetCognitiveSteps();
 
                 // Add to association history
                 var associationHistoryItem = new ActivationHistoryItem
@@ -305,7 +309,7 @@ namespace Aislinn.Core.Services
                     PreviousValue = previousWeight,
                     NewValue = isSourceA ? association.WeightAtoB : association.WeightBtoA,
                     Change = parameters.AssociationStrengthIncrement,
-                    ActivationDate = DateTime.Now,
+                    ActivationDate = _timeManager.GetCognitiveSteps(),
                     ActivatedByChunk = sourceChunk.ID
                 };
                 association.ActivationHistory.Add(associationHistoryItem);

@@ -6,6 +6,7 @@ using Aislinn.Core.Activation;
 using Aislinn.Core.Memory;
 using Aislinn.Core.Models;
 using Aislinn.Core.Services;
+using Aislinn.Configuration;
 
 namespace Aislinn.Core.Cognitive
 {
@@ -18,7 +19,7 @@ namespace Aislinn.Core.Cognitive
         // Core memory systems
         private readonly WorkingMemoryManager _workingMemory;
         private readonly ChunkActivationService _activationService;
-        private readonly CognitiveTimeManager _timeManager;
+        public readonly CognitiveTimeManager _timeManager;
 
         // Storage references
         private readonly IChunkStore _chunkStore;
@@ -36,51 +37,49 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Creates a new cognitive memory system with working memory and activation components
         /// </summary>
+        // public CognitiveMemorySystem(
+        //     IChunkStore chunkStore,
+        //     IAssociationStore associationStore,
+        //     IActivationModel activationModel,
+        //     CognitiveTimeManager timeManager,
+        //     
+        //     ChunkActivationService chunkActivationService,
+        //     WorkingMemoryManager workingMemoryManager,
+        //     string chunkCollectionId = "default",
+        //     string associationCollectionId = "default")
         public CognitiveMemorySystem(
             IChunkStore chunkStore,
             IAssociationStore associationStore,
-            IActivationModel activationModel,
             CognitiveTimeManager timeManager,
             ActivationParametersRegistry parametersRegistry,
-            string chunkCollectionId = "default",
-            string associationCollectionId = "default")
+            ChunkActivationService chunkActivationService,
+            WorkingMemoryManager workingMemoryManager,
+            AislinnConfiguration config)
         {
-            // Store references
-            _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
-            _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
-            _timeManager = timeManager ?? throw new ArgumentNullException(nameof(timeManager));
-            _parametersRegistry = parametersRegistry ?? throw new ArgumentNullException(nameof(parametersRegistry));
-            _chunkCollectionId = chunkCollectionId;
-            _associationCollectionId = associationCollectionId;
+            _chunkStore = chunkStore;
+            _associationStore = associationStore;
+            _activationService = chunkActivationService;
 
-            // Initialize activation service
-            _activationService = new ChunkActivationService(
-                _chunkStore,
-                _associationStore,
-                activationModel,
-                _parametersRegistry,
-                _chunkCollectionId,
-                _associationCollectionId);
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
+            // Store references
+            _timeManager = timeManager;
+            _parametersRegistry = parametersRegistry ?? throw new ArgumentNullException(nameof(parametersRegistry));
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
+
 
             // Initialize working memory
-            _workingMemory = new WorkingMemoryManager(
-                _chunkStore,
-                _associationStore,
-                totalCapacity: 5, // Default human-like capacity
-                chunkCollectionId: _chunkCollectionId,
-                associationCollectionId: _associationCollectionId);
+            _workingMemory = workingMemoryManager;
         }
 
-        public double GetCurrentCognitiveTime()
-        {
-            return _timeManager.GetCurrentTime();
-        }
+
         #region Working Memory Management
 
         /// <summary>
         /// Start automatic working memory refresh on a timer
         /// </summary>
-        public void StartWorkingMemoryRefresh(double intervalMs = 200)
+        public void StartWorkingMemoryRefresh(long intervalMs = 200)
         {
             _workingMemory.StartAutoRefresh(intervalMs);
         }
@@ -240,7 +239,8 @@ namespace Aislinn.Core.Cognitive
             if (includeTimestamp)
             {
                 chunk.Slots["$CreatedOn"] = new ModelSlot { Name = "$CreatedOn", Value = DateTime.Now };
-                chunk.Slots["$CreatedOnCognitiveTime"] = new ModelSlot { Name = "$CreatedOn", Value = _timeManager.GetCurrentTime() };
+                chunk.Slots["$CreatedOnCognitiveTime"] = new ModelSlot { Name = "$CreatedOn", Value = _timeManager.GetCognitiveSteps() };
+                chunk.Slots["$CreatedOnAgentTime"] = new ModelSlot { Name = "$CreatedOn", Value = _timeManager.GetAgentTime() };
             }
 
             return await chunkCollection.AddChunkAsync(chunk);
@@ -274,7 +274,14 @@ namespace Aislinn.Core.Cognitive
         }
 
         #endregion
-
+        public async Task<Chunk> FindChunkBySemanticTypeAndName(string semanticType, string chunkName)
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            var allChunks = await chunkCollection.GetAllChunksAsync();
+            return allChunks.FirstOrDefault(c =>
+                string.Equals(c.SemanticType, semanticType, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.Name, chunkName, StringComparison.OrdinalIgnoreCase));
+        }
         /// <summary>
         /// Disposes of resources
         /// </summary>
@@ -285,6 +292,61 @@ namespace Aislinn.Core.Cognitive
 
             _workingMemory.Dispose();
             _isDisposed = true;
+        }
+
+        /// <summary>
+        /// Activate multiple chunks with different boost levels
+        /// </summary>
+        public async Task ActivateChunksAsync(Dictionary<Guid, double> chunkBoosts, string emotionName = null)
+        {
+            foreach (var kvp in chunkBoosts)
+            {
+                await ActivateChunkAsync(kvp.Key, emotionName, kvp.Value);
+            }
+        }
+
+        /// <summary>
+        /// Get the top N chunks by activation level from the entire memory system
+        /// </summary>
+        public async Task<List<Chunk>> GetTopActivatedChunksAsync(int topN, bool excludeWorkingMemory = true)
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection == null)
+                return new List<Chunk>();
+
+            var allChunks = await chunkCollection.GetAllChunksAsync();
+
+            // Filter out working memory chunks if requested
+            List<Chunk> candidateChunks = allChunks;
+            if (excludeWorkingMemory)
+            {
+                var workingMemoryChunks = await GetWorkingMemoryContentsAsync();
+                var workingMemoryIds = workingMemoryChunks.Select(c => c.ID).ToHashSet();
+                candidateChunks = allChunks.Where(c => !workingMemoryIds.Contains(c.ID)).ToList();
+            }
+
+            return candidateChunks
+                .OrderByDescending(c => c.ActivationLevel)
+                .Take(topN)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Push highly activated chunks into working memory without focus
+        /// </summary>
+        public async Task PushChunksToWorkingMemoryAsync(List<Guid> chunkIds)
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection == null) return;
+
+            foreach (var chunkId in chunkIds)
+            {
+                var chunk = await chunkCollection.GetChunkAsync(chunkId);
+                if (chunk != null)
+                {
+                    await _workingMemory.UpdateWorkingMemoryAsync(chunk, forceEntry: true);
+                }
+            }
         }
     }
 }

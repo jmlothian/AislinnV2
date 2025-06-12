@@ -7,6 +7,7 @@ using Aislinn.Core.Context;
 using Aislinn.Core.Goals;
 using Aislinn.Core.Models;
 using Aislinn.Core.Services;
+using Aislinn.Configuration;
 
 namespace Aislinn.Core.Goals.Selection
 {
@@ -118,9 +119,7 @@ namespace Aislinn.Core.Goals.Selection
             GoalManagementService goalManagementService,
             ChunkActivationService activationService,
             ContextContainer contextContainer,
-            string chunkCollectionId = "default",
-            string associationCollectionId = "default",
-            GoalSelectionConfig config = null)
+            AislinnConfiguration config, GoalSelectionConfig config2 = null)
         {
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
@@ -128,9 +127,9 @@ namespace Aislinn.Core.Goals.Selection
             _activationService = activationService ?? throw new ArgumentNullException(nameof(activationService));
             _contextContainer = contextContainer ?? throw new ArgumentNullException(nameof(contextContainer));
 
-            _chunkCollectionId = chunkCollectionId;
-            _associationCollectionId = associationCollectionId;
-            _config = config ?? new GoalSelectionConfig();
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
+            _config = config2 ?? new GoalSelectionConfig();
 
             _lastEvaluationResults = new List<GoalEvaluationResult>();
             _lastEvaluationTime = DateTime.MinValue;

@@ -10,7 +10,7 @@ namespace Aislinn.Core.Models
         public string SubTypeRelationshipBtoA { get; set; }
         public double WeightAtoB { get; set; } = 0.0;
         public double WeightBtoA { get; set; } = 0.0;
-        public DateTime LastActivated { get; set; } = DateTime.Now;
+        public long LastActivated { get; set; } = 0;
         public List<ActivationHistoryItem> ActivationHistory { get; set; } = new List<ActivationHistoryItem>();
 
         public void Strengthen(bool directionAtoB, double amount = 0.1)
@@ -20,7 +20,7 @@ namespace Aislinn.Core.Models
             else
                 WeightBtoA += amount;
 
-            LastActivated = DateTime.Now;
+            LastActivated = 0;
         }
     }
     public enum RelationshipType

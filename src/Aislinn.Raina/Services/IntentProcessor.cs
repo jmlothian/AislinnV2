@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Aislinn.Core.Models;
+using Aislinn.Configuration;
 using RAINA.Modules;
 using RAINA.Services;
 
@@ -22,15 +23,15 @@ namespace RAINA
         private readonly Dictionary<string, IIntentModule> _modules = new Dictionary<string, IIntentModule>();
 
         public IntentProcessor(
-            string openAIApiKey,
-            ConversationManager conversationManager,
-            ContextDetector contextDetector)
+            RainaServices rainaServices,
+            ContextDetector contextDetector,
+            AislinnConfiguration config)
         {
-            _openAIApiKey = openAIApiKey ?? throw new ArgumentNullException(nameof(openAIApiKey));
+            _openAIApiKey = config.OpenAIApiKey;
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_openAIApiKey}");
 
-            _conversationManager = conversationManager ?? throw new ArgumentNullException(nameof(conversationManager));
+            _conversationManager = rainaServices.ConversationManager;
             _contextDetector = contextDetector ?? throw new ArgumentNullException(nameof(contextDetector));
         }
 
@@ -61,13 +62,39 @@ namespace RAINA
             // Classify intent using OpenAI
             var intent = await ClassifyIntentAsync(userInput, context);
 
-            // Update context based on input
+            //add input to conversation manager....
+
+            // Update context based on input... should probably do this
+            // not sure we need a separate class for this, it kind of fits in here.
+
+            // revisit context - do we pull out more entities? or leave that to intents?
+            // update conversation context (utterances, summaries, etc.)
+            // newly created summaries should have lower activation than utterances
+            // update topic
+            // update intent
+            // activate/prime memories (entities, tasks, etc.)
+            // load relevant chunks (e.g. memories, tasks, etc.) into context
+            // we should build a "Context" text block via LLM that takes the highest activated items and summariezes them.  For Entities, we should look for where they're
+            // associated with other conversation memories or highly activated items, and include those.
+            // Context:
+            //  Recent Conversation Hisory
+            //  Current Topic
+            //  Current Intent
+            //  Relevant Entities
+            //    relevant summaries
+            //        //relevant utterances?
+
+            //handle intent below, should consider context in generating response or adding tasks
+
+
             await _contextDetector.UpdateContextAsync(userInput, intent);
 
             // Route to appropriate module
             Console.WriteLine("Intent: " + intent.IntentType);
             if (_modules.TryGetValue(intent.IntentType, out var module))
             {
+                //we should pass back the response data here, instead of trying to handle it in the module
+                // that way we can use a generic response method for GenerateResponseAsync that includes memory recording, etc. 
                 return await module.HandleAsync(userInput, intent, context);
             }
 
@@ -110,9 +137,9 @@ Provide your response in JSON format:
   }}
 }}
 ";
-            Console.WriteLine(prompt);
+            //Console.WriteLine(prompt);
             var response = await CallOpenAIAsync(prompt, 0.1);
-            Console.WriteLine(response.Choices[0].Message.Content);
+            //Console.WriteLine(response.Choices[0].Message.Content);
             try
             {
                 return JsonSerializer.Deserialize<Intent>(response.Choices[0].Message.Content);
@@ -217,13 +244,6 @@ Provide your response in JSON format:
         public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
     }
 
-    public class Entity
-    {
-        [JsonPropertyName("type")]
-        public string EntityType { get; set; }
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-    }
 
 
 

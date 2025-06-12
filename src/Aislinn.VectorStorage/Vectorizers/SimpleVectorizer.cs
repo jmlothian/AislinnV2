@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Aislinn.VectorStorage.Interfaces;
 
-namespace Aislinn.VectorStorage.Storage
+namespace Aislinn.VectorStorage.Vectorizers
 {
     /// <summary>
     /// A simple implementation of IVectorizer that creates vectors based on character frequencies
@@ -30,31 +30,31 @@ namespace Aislinn.VectorStorage.Storage
         {
             // Simulate some async work
             await Task.Delay(1);
-            
+
             if (string.IsNullOrEmpty(text))
                 return new double[Dimensions]; // Return zero vector
 
             // Create a simple character frequency-based vector
             // This is not a proper embedding but serves as a placeholder
             var vector = new double[Dimensions];
-            
+
             // Normalize the text
             text = text.ToLowerInvariant();
-            
+
             // Fill the first part of the vector with character frequencies
             for (int i = 0; i < Math.Min(128, text.Length); i++)
             {
                 int charIndex = text[i] % Dimensions;
                 vector[charIndex] += 1.0 / text.Length;
             }
-            
+
             // Apply some basic normalization
             double sum = 0;
             for (int i = 0; i < Dimensions; i++)
             {
                 sum += vector[i] * vector[i];
             }
-            
+
             if (sum > 0)
             {
                 double norm = Math.Sqrt(sum);
@@ -63,8 +63,13 @@ namespace Aislinn.VectorStorage.Storage
                     vector[i] /= norm;
                 }
             }
-            
+
             return vector;
+        }
+
+        public async Task<double[]> StringToVectorAsync(string text, string inputType)
+        {
+            return await StringToVectorAsync(text);
         }
     }
 }

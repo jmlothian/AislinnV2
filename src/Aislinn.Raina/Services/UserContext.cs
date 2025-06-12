@@ -16,6 +16,7 @@ public class UserContext
 
     // Recent utterances in this context
     private List<Chunk> _utteranceHistory = new List<Chunk>();
+    //we should also have a view of the conversation, not just the utterances here, so we can build responses or at least activate memories
     private const int MaxUtteranceHistory = 20;
 
     public void AddUtterance(Chunk utteranceChunk)

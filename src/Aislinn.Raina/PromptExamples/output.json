@@ -1,0 +1,215 @@
+{
+    "Environment": {
+        "UserUtterance_20250609_121536.SpeakerName": "User",
+        "UserUtterance_20250609_121536.ListenerName": "Raina",
+        "UserUtterance_20250609_121536.Speaker": {
+            "ID": "21d79ad8-cfac-4db8-aeed-18c3533d37d1",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6446123-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0638177,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121536.Listener": {
+            "ID": "aecddffc-c5a5-42de-b20d-1e59dd1a20d0",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "Role": {
+                    "SlotType": "System.String",
+                    "Value": "AI Assistant",
+                    "Name": "Role"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6459916-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0650966,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121536.Text": "Hi Raina!",
+        "UserUtterance_20250609_121536.Intent": "Conversation",
+        "UserUtterance_20250609_121536.ConversationId": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112",
+        "UserUtterance_20250609_121536.IntentConfidence": 0.95,
+        "UserUtterance_20250609_121536.$CreatedOn": "2025-06-09T12:15:36.1776489-04:00",
+        "UserUtterance_20250609_121536.$CreatedOnCognitiveTime": 9.5967524,
+        "UserUtterance_20250609_121536.PartOf": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112",
+        "UserUtterance_20250609_121721.SpeakerName": "User",
+        "UserUtterance_20250609_121721.ListenerName": "Raina",
+        "UserUtterance_20250609_121721.Speaker": {
+            "ID": "21d79ad8-cfac-4db8-aeed-18c3533d37d1",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6446123-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0638177,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121721.Listener": {
+            "ID": "aecddffc-c5a5-42de-b20d-1e59dd1a20d0",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "Role": {
+                    "SlotType": "System.String",
+                    "Value": "AI Assistant",
+                    "Name": "Role"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6459916-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0650966,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121721.Text": "Well, I built you I was mostly just checking in to see how you\u0027re doing",
+        "UserUtterance_20250609_121721.Intent": "Conversation",
+        "UserUtterance_20250609_121721.ConversationId": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112",
+        "UserUtterance_20250609_121721.IntentConfidence": 0.95,
+        "UserUtterance_20250609_121721.$CreatedOn": "2025-06-09T12:17:21.5872377-04:00",
+        "UserUtterance_20250609_121721.$CreatedOnCognitiveTime": 115.0063348,
+        "UserUtterance_20250609_121721.PartOf": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112",
+        "UserUtterance_20250609_121721.HasResponse": "f32b8969-63fc-4c53-b9a0-e3ef25b9537a",
+        "UserUtterance_20250609_121721.ReferencedBy": "f297bfc1-0747-4e41-a7e4-5f31dfc61209",
+        "UserUtterance_20250609_121905.SpeakerName": "User",
+        "UserUtterance_20250609_121905.ListenerName": "Raina",
+        "UserUtterance_20250609_121905.Speaker": {
+            "ID": "21d79ad8-cfac-4db8-aeed-18c3533d37d1",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6446123-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0638177,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121905.Listener": {
+            "ID": "aecddffc-c5a5-42de-b20d-1e59dd1a20d0",
+            "ChunkType": "Declaritive",
+            "CognitiveCategory": null,
+            "SemanticType": null,
+            "Name": "User",
+            "Vector": null,
+            "ActivationLevel": 0,
+            "Slots": {
+                "Name": {
+                    "SlotType": "System.String",
+                    "Value": "User",
+                    "Name": "Name"
+                },
+                "Role": {
+                    "SlotType": "System.String",
+                    "Value": "AI Assistant",
+                    "Name": "Role"
+                },
+                "$CreatedOn": {
+                    "SlotType": "System.DateTime",
+                    "Value": "2025-06-09T12:15:26.6459916-04:00",
+                    "Name": "$CreatedOn"
+                },
+                "$CreatedOnCognitiveTime": {
+                    "SlotType": "System.Double",
+                    "Value": 0.0650966,
+                    "Name": "$CreatedOn"
+                }
+            },
+            "ActivationHistory": []
+        },
+        "UserUtterance_20250609_121905.Text": "umm.  Raina?",
+        "UserUtterance_20250609_121905.Intent": "Conversation",
+        "UserUtterance_20250609_121905.ConversationId": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112",
+        "UserUtterance_20250609_121905.IntentConfidence": 0.85,
+        "UserUtterance_20250609_121905.$CreatedOn": "2025-06-09T12:19:05.5567527-04:00",
+        "UserUtterance_20250609_121905.$CreatedOnCognitiveTime": 218.97584430000003,
+        "UserUtterance_20250609_121905.PartOf": "6c4df7b3-ea3f-4bf5-97ed-43f80cf85112"
+    },
+    "Internal": {},
+    "Social": {},
+    "Task": {},
+    "Temporal": {},
+    "Resource": {}
+}

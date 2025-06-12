@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Aislinn.ChunkStorage.Interfaces;
@@ -21,7 +22,9 @@ namespace Aislinn.Core.Context
             Social,        // Social environment (present entities, relationships, roles)
             Task,          // Task-related context (current activities, progress, history)
             Temporal,      // Time-related context (time of day, day of week, deadlines)
-            Resource       // Available resources (tools, information, capabilities)
+            Resource,      // Available resources (tools, information, capabilities)
+            Communication, //dialog, text, posts, transcripts
+            Information    //any other information
         }
 
         // Main context storage - category -> context factors
@@ -283,10 +286,10 @@ namespace Aislinn.Core.Context
                 return;
 
             // Clear current active chunks (will be repopulated)
-            foreach (var category in _activeContextChunks.Keys)
-            {
-                _activeContextChunks[category].Clear();
-            }
+            //foreach (var category in _activeContextChunks.Keys)
+            //{
+            //    _activeContextChunks[category].Clear();
+            //}
 
             // Categorize chunks into context categories
             foreach (var chunk in workingMemoryChunks)
@@ -406,22 +409,16 @@ namespace Aislinn.Core.Context
                 return 0;
 
             // For numeric values, calculate percentage change
-            if (oldValue is IConvertible && newValue is IConvertible)
+            if (double.TryParse(Convert.ToString(oldValue), out double oldDouble) &&
+                double.TryParse(Convert.ToString(newValue), out double newDouble))
             {
-                try
+                if (Math.Abs(oldDouble) < 0.0001) // Avoid division by zero
                 {
-                    double oldDouble = Convert.ToDouble(oldValue);
-                    double newDouble = Convert.ToDouble(newValue);
-
-                    if (Math.Abs(oldDouble) < 0.0001) // Avoid division by zero
-                    {
-                        return importance;
-                    }
-
-                    double percentChange = Math.Abs((newDouble - oldDouble) / oldDouble);
-                    return Math.Min(1.0, percentChange) * importance;
+                    return importance;
                 }
-                catch { }
+
+                double percentChange = Math.Abs((newDouble - oldDouble) / oldDouble);
+                return Math.Min(1.0, percentChange) * importance;
             }
 
             // For boolean, true/false changes are significant
@@ -523,15 +520,17 @@ namespace Aislinn.Core.Context
                 chunkType.Contains("tool") ||
                 chunkType.Contains("capability"))
                 return ContextCategory.Resource;
+            if (chunkType.Contains("Utterance"))
+                return ContextCategory.Communication;
 
             // Default to environment if no match
-            return ContextCategory.Environment;
+            return ContextCategory.Information;
         }
 
         /// <summary>
         /// Extract relevant context factors from a chunk's slots
         /// </summary>
-        private void ExtractContextFactorsFromChunk(ContextCategory category, Chunk chunk)
+        public void ExtractContextFactorsFromChunk(ContextCategory category, Chunk chunk)
         {
             if (chunk == null) return;
 
@@ -540,25 +539,68 @@ namespace Aislinn.Core.Context
             {
                 // Skip certain system or internal slots
                 if (slot.Key == "ID" || slot.Key == "ChunkType" ||
-                    slot.Key == "ActivationLevel" || slot.Key == "Vector")
+                    slot.Key == "ActivationLevel" || slot.Key == "Vector"
+                    || slot.Key == "$CreatedOn" || slot.Key == "$CreatedOnCognitiveTime"
+                    || slot.Key == "ConversationId" || slot.Key == "PartOf" || slot.Key == "HasResponse"
+                    || slot.Key.Contains("ExtractedFromLLM") || slot.Key.Contains("Timestamp") || slot.Key.Contains("LastUpdated")
+                    )
                     continue;
-
-                // Add as context factor with moderate importance
-                UpdateContextFactor(
-                    category,
-                    $"{chunk.Name}.{slot.Key}",
-                    slot.Value.Value,
-                    importance: 0.4,
-                    confidence: 0.8,
-                    metadata: new Dictionary<string, object>
-                    {
+                if (chunk.SemanticType == "Utterance") 
+                { 
+                    ExtractUtteranceContext(chunk); 
+                } else {
+                    // Add as context factor with moderate importance
+                    UpdateContextFactor(
+                        category,
+                        $"{chunk.Name}.{slot.Key}",
+                        slot.Value.Value,
+                        importance: 0.4,
+                        confidence: 0.8,
+                        metadata: new Dictionary<string, object>
+                        {
                         { "SourceChunk", chunk.ID },
                         { "SlotName", slot.Key }
-                    }
-                );
+                        }
+                    );
+                }
             }
         }
+        private void ExtractUtteranceContext(Chunk chunk)
+        {
+            var speakerName = chunk.Slots.GetValueOrDefault("SpeakerName")?.Value?.ToString();
+            var text = chunk.Slots.GetValueOrDefault("Text")?.Value?.ToString();
+            var listenerName = chunk.Slots.GetValueOrDefault("ListenerName")?.Value?.ToString();
+            var intent = chunk.Slots.GetValueOrDefault("Intent")?.Value?.ToString();
 
+            // Format: "User: Hi Raina!" instead of just "Hi Raina!"
+            if (!string.IsNullOrEmpty(speakerName) && !string.IsNullOrEmpty(text))
+            {
+                var speakerChunk = chunk.Slots.GetValueOrDefault("Speaker")?.Value as Chunk;
+
+                var role = speakerChunk?.Slots.GetValueOrDefault("Role")?.Value?.ToString();
+
+                UpdateContextFactor(ContextCategory.Communication, $"{chunk.Name}.Text", $"{speakerName}: {text}", importance: 0.8);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Speaker", speakerName, importance: 0.6);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, importance: 0.7);
+            }
+
+            // Format: "Raina - AI Assistant" instead of just the chunk object
+            if (!string.IsNullOrEmpty(listenerName))
+            {
+                var listenerChunk = chunk.Slots.GetValueOrDefault("Listener")?.Value as Chunk;
+                var role = listenerChunk?.Slots.GetValueOrDefault("Role")?.Value?.ToString();
+
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Listener", listenerName, importance: 0.6);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, importance: 0.7);
+
+            }
+
+            // Keep intent as-is
+            if (!string.IsNullOrEmpty(intent))
+            {
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Intent", intent, importance: 0.6);
+            }
+        }
         #endregion
     }
 }

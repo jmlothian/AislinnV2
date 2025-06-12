@@ -76,7 +76,8 @@ namespace RAINA.Modules.Implementations
             var queryResults = await _queryEngine.SearchAsync(queryParameters, context);
 
             // Generate response using conversation manager
-            return await _conversationManager.GenerateQueryResponseAsync(userInput, intent, queryResults, context);
+            //return await _conversationManager.GenerateQueryResponseAsync(userInput, intent, queryResults, context);
+            return await _conversationManager.GenerateResponseAsync(userInput, intent, context);
         }
 
         private List<string> ExtractKeywords(Intent intent)
@@ -84,7 +85,7 @@ namespace RAINA.Modules.Implementations
             var keywords = new List<string>();
             foreach (var entity in intent.Entities)
             {
-                keywords.Add(entity.Value);
+                keywords.Add(entity.Name);
             }
             return keywords;
         }

@@ -5,21 +5,23 @@ using System.Text.Json;
 namespace Aislinn.Core.Services
 {
     /// <summary>
-    /// Manages an internal time reference for the cognitive system that persists across sessions
+    /// Manages three distinct time references for the cognitive system
     /// </summary>
     public class CognitiveTimeManager
     {
         private const string DEFAULT_STATE_FILE = "agent_state.json";
         private string _stateFilePath;
 
-        // The time when the agent was first started (in seconds)
-        public double SystemStartTime { get; private set; } = 0;
+        // Real wall-clock time
+        public DateTime RealTime => DateTime.Now;
 
-        // Current system time (in seconds since start)
-        public double CurrentTime { get; private set; } = 0;
+        // Agent processing time (only advances when agent is actively thinking)
+        public double AgentTime { get; private set; } = 0;
+        private DateTime _lastAgentTimeUpdate = DateTime.Now;
+        private bool _isProcessing = false;
 
-        // Last time the state was saved
-        public DateTime LastSaveTime { get; private set; }
+        // Cognitive step time (discrete units, advances manually)
+        public long CognitiveSteps { get; private set; } = 0;
 
         public CognitiveTimeManager(string stateFilePath = DEFAULT_STATE_FILE)
         {
@@ -28,7 +30,90 @@ namespace Aislinn.Core.Services
         }
 
         /// <summary>
-        /// Load the time state from persistent storage
+        /// Start counting agent processing time
+        /// </summary>
+        public void StartProcessing()
+        {
+            if (!_isProcessing)
+            {
+                _isProcessing = true;
+                _lastAgentTimeUpdate = DateTime.Now;
+            }
+        }
+
+        /// <summary>
+        /// Stop counting agent processing time (for pauses, debugging, etc.)
+        /// </summary>
+        public void PauseProcessing()
+        {
+            if (_isProcessing)
+            {
+                UpdateAgentTime();
+                _isProcessing = false;
+            }
+        }
+
+        /// <summary>
+        /// Advance cognitive step time by one unit
+        /// </summary>
+        public long AdvanceStep(long milliseconds = 100)
+        {
+            CognitiveSteps += milliseconds;
+            return CognitiveSteps;
+        }
+
+        /// <summary>
+        /// Get current agent time (updates if currently processing)
+        /// </summary>
+        public double GetAgentTime()
+        {
+            if (_isProcessing)
+            {
+                UpdateAgentTime();
+            }
+            return AgentTime;
+        }
+
+        /// <summary>
+        /// Get current cognitive steps
+        /// </summary>
+        public long GetCognitiveSteps()
+        {
+            return CognitiveSteps;
+        }
+
+        /// <summary>
+        /// Get real time
+        /// </summary>
+        public DateTime GetRealTime()
+        {
+            return DateTime.Now;
+        }
+
+        /// <summary>
+        /// Update agent time based on elapsed real time (only if processing)
+        /// </summary>
+        private void UpdateAgentTime()
+        {
+            if (_isProcessing)
+            {
+                TimeSpan elapsed = DateTime.Now - _lastAgentTimeUpdate;
+                AgentTime += elapsed.TotalSeconds;
+                _lastAgentTimeUpdate = DateTime.Now;
+            }
+        }
+
+        /// <summary>
+        /// Convert a real DateTime to agent time (approximate)
+        /// </summary>
+        public double ConvertToAgentTime(DateTime dateTime)
+        {
+            // This is approximate - assumes continuous processing
+            return AgentTime - (DateTime.Now - dateTime).TotalSeconds;
+        }
+
+        /// <summary>
+        /// Load state from file
         /// </summary>
         public void LoadState()
         {
@@ -37,24 +122,17 @@ namespace Aislinn.Core.Services
                 try
                 {
                     string json = File.ReadAllText(_stateFilePath);
-                    var state = JsonSerializer.Deserialize<AgentState>(json);
+                    var state = JsonSerializer.Deserialize<TimeState>(json);
 
                     if (state != null)
                     {
-                        SystemStartTime = state.SystemStartTime;
-                        CurrentTime = state.CurrentTime;
-
-                        // Calculate time passed since last save
-                        TimeSpan timeSinceLastSave = DateTime.Now - state.LastSaveTime;
-
-                        // Update current time to account for the time that passed while system was offline
-                        CurrentTime += timeSinceLastSave.TotalSeconds;
-                        LastSaveTime = DateTime.Now;
+                        AgentTime = state.AgentTime;
+                        CognitiveSteps = state.CognitiveSteps;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error loading agent state: {ex.Message}");
+                    Console.WriteLine($"Error loading time state: {ex.Message}");
                     InitializeNewState();
                 }
             }
@@ -62,27 +140,21 @@ namespace Aislinn.Core.Services
             {
                 InitializeNewState();
             }
+
+            _lastAgentTimeUpdate = DateTime.Now;
         }
 
         /// <summary>
-        /// Initialize a new time state
-        /// </summary>
-        private void InitializeNewState()
-        {
-            SystemStartTime = 0;
-            CurrentTime = 0;
-            LastSaveTime = DateTime.Now;
-        }
-
-        /// <summary>
-        /// Save the current time state to persistent storage
+        /// Save state to file
         /// </summary>
         public void SaveState()
         {
-            var state = new AgentState
+            UpdateAgentTime(); // Make sure agent time is current
+
+            var state = new TimeState
             {
-                SystemStartTime = SystemStartTime,
-                CurrentTime = CurrentTime,
+                AgentTime = AgentTime,
+                CognitiveSteps = CognitiveSteps,
                 LastSaveTime = DateTime.Now
             };
 
@@ -91,39 +163,21 @@ namespace Aislinn.Core.Services
         }
 
         /// <summary>
-        /// Update the current system time based on elapsed real time
+        /// Initialize new state
         /// </summary>
-        public double UpdateTime()
+        private void InitializeNewState()
         {
-            TimeSpan timeSinceLastSave = DateTime.Now - LastSaveTime;
-            CurrentTime += timeSinceLastSave.TotalSeconds;
-            LastSaveTime = DateTime.Now;
-            return CurrentTime;
+            AgentTime = 0;
+            CognitiveSteps = 0;
         }
 
         /// <summary>
-        /// Gets the current system time, updating it first
+        /// State persistence class
         /// </summary>
-        public double GetCurrentTime()
+        private class TimeState
         {
-            return UpdateTime();
-        }
-
-        /// <summary>
-        /// Convert a real DateTime to internal system time
-        /// </summary>
-        public double ConvertToSystemTime(DateTime dateTime)
-        {
-            return (dateTime - LastSaveTime).TotalSeconds + CurrentTime;
-        }
-
-        /// <summary>
-        /// Class to represent the agent's persistent state
-        /// </summary>
-        private class AgentState
-        {
-            public double SystemStartTime { get; set; }
-            public double CurrentTime { get; set; }
+            public double AgentTime { get; set; }
+            public long CognitiveSteps { get; set; }
             public DateTime LastSaveTime { get; set; }
         }
     }

@@ -19,6 +19,7 @@ using Aislinn.Core.Services;
 using Aislinn.VectorStorage.Interfaces;
 using Aislinn.VectorStorage.Storage;
 using Aislinn.Storage.AssociationStore;
+using Aislinn.VectorStorage.Vectorizers;
 
 namespace Aislinn
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Core.Models;
+using Aislinn.Configuration;
 
 namespace Aislinn.Core.Relationships
 {
@@ -37,13 +38,12 @@ namespace Aislinn.Core.Relationships
         public RelationshipTraversalService(
             IChunkStore chunkStore,
             IAssociationStore associationStore,
-            string chunkCollectionId = "default",
-            string associationCollectionId = "default")
+            AislinnConfiguration config)
         {
             _chunkStore = chunkStore ?? throw new ArgumentNullException(nameof(chunkStore));
             _associationStore = associationStore ?? throw new ArgumentNullException(nameof(associationStore));
-            _chunkCollectionId = chunkCollectionId;
-            _associationCollectionId = associationCollectionId;
+            _chunkCollectionId = config.ChunkCollectionId;
+            _associationCollectionId = config.AssociationCollectionId;
 
             _directRelationshipCache = new Dictionary<string, bool>();
             _transitiveRelationshipCache = new Dictionary<string, bool>();

@@ -22,13 +22,13 @@ namespace Aislinn.Storage.AssociationStore
         }
 
         // Generate a consistent key for the association regardless of the order of IDs
-        private string GetAssociationKey(Guid chunkAId, Guid chunkBId)
+        private string GetAssociationKey(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA)
         {
-            // Always put the smaller ID first to ensure consistency
+            // Always put the smaller ID first to ensure consistency, but include relationship types
             if (chunkAId.CompareTo(chunkBId) <= 0)
-                return $"{chunkAId}_{chunkBId}";
+                return $"{chunkAId}_{chunkBId}_{relationAtoB}_{relationBtoA}";
             else
-                return $"{chunkBId}_{chunkAId}";
+                return $"{chunkBId}_{chunkAId}_{relationBtoA}_{relationAtoB}";
         }
 
         public Task<ChunkAssociation> AddAssociationAsync(ChunkAssociation association)
@@ -43,7 +43,7 @@ namespace Aislinn.Storage.AssociationStore
             var associationCopy = DeepCopyAssociation(association);
 
             // Generate the key
-            var key = GetAssociationKey(association.ChunkAId, association.ChunkBId);
+            var key = GetAssociationKey(association.ChunkAId, association.ChunkBId, association.RelationAtoB, association.RelationBtoA);
 
             // Add to store
             if (!associationStore.TryAdd(key, associationCopy))
@@ -52,12 +52,12 @@ namespace Aislinn.Storage.AssociationStore
             return Task.FromResult(DeepCopyAssociation(associationCopy));
         }
 
-        public Task<ChunkAssociation> GetAssociationAsync(Guid chunkAId, Guid chunkBId)
+        public Task<ChunkAssociation> GetAssociationAsync(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA)
         {
             if (chunkAId == Guid.Empty || chunkBId == Guid.Empty)
                 throw new ArgumentException("Both chunk IDs must be valid");
 
-            var key = GetAssociationKey(chunkAId, chunkBId);
+            var key = GetAssociationKey(chunkAId, chunkBId, relationAtoB, relationBtoA);
 
             if (associationStore.TryGetValue(key, out var association))
                 return Task.FromResult(DeepCopyAssociation(association));
@@ -73,7 +73,7 @@ namespace Aislinn.Storage.AssociationStore
             if (association.ChunkAId == Guid.Empty || association.ChunkBId == Guid.Empty)
                 throw new ArgumentException("Both chunk IDs must be valid");
 
-            var key = GetAssociationKey(association.ChunkAId, association.ChunkBId);
+            var key = GetAssociationKey(association.ChunkAId, association.ChunkBId, association.RelationAtoB, association.RelationBtoA);
 
             // Check if exists
             if (!associationStore.ContainsKey(key))
@@ -84,12 +84,12 @@ namespace Aislinn.Storage.AssociationStore
             return Task.FromResult(true);
         }
 
-        public Task<bool> DeleteAssociationAsync(Guid chunkAId, Guid chunkBId)
+        public Task<bool> DeleteAssociationAsync(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA)
         {
             if (chunkAId == Guid.Empty || chunkBId == Guid.Empty)
                 throw new ArgumentException("Both chunk IDs must be valid");
 
-            var key = GetAssociationKey(chunkAId, chunkBId);
+            var key = GetAssociationKey(chunkAId, chunkBId, relationAtoB, relationBtoA);
             return Task.FromResult(associationStore.TryRemove(key, out _));
         }
 

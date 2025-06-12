@@ -29,7 +29,7 @@ namespace Aislinn.Core.Activation
             // Get parameters for this chunk type
             var parameters = _parametersRegistry.GetParameters(chunk);
             // Get current system time
-            double currentSystemTime = _timeManager.GetCurrentTime();
+            long currentSystemTime = _timeManager.GetCognitiveSteps();
 
             // Calculate base-level activation using ACT-R equation
             double baseLevelActivation = CalculateBaseLevelActivation(chunk, currentSystemTime, parameters.DecayRate);
@@ -44,7 +44,7 @@ namespace Aislinn.Core.Activation
             return Math.Min(parameters.ActivationCeiling, totalActivation);
         }
 
-        private double CalculateBaseLevelActivation(Chunk chunk, double currentSystemTime, double decayRate)
+        private double CalculateBaseLevelActivation(Chunk chunk, long currentSystemTime, double decayRate)
         {
             if (chunk.ActivationHistory == null || chunk.ActivationHistory.Count == 0)
                 return 0;
@@ -54,18 +54,16 @@ namespace Aislinn.Core.Activation
             // Sum over all previous accesses
             foreach (var history in chunk.ActivationHistory)
             {
-                // Convert the historical activation date to system time
-                double historySystemTime = _timeManager.ConvertToSystemTime(history.ActivationDate);
-
                 // Calculate time since this access in system time units
-                double timeElapsed = currentSystemTime - historySystemTime;
+                long timeElapsed = currentSystemTime - history.ActivationDate;
 
                 // Avoid division by zero or negative time
-                if (timeElapsed <= 0.001)
-                    timeElapsed = 0.001;
+                if (timeElapsed <= 1)
+                    timeElapsed = 1;
+                double timeElapsedSeconds = timeElapsed / 1000.0;
 
                 // Add this access's contribution to activation
-                sum += Math.Pow(timeElapsed, -decayRate);
+                sum += Math.Pow(timeElapsedSeconds, -decayRate);
             }
 
             // ACT-R equation: Bi = ln(Σj tj^-d)

@@ -19,3 +19,5 @@ api/*.yml
 packages/
 /data
 src/Aislinn.Raina/ToDo.txt
+*.db
+src/RAINA.ConsoleApp/Raina.json

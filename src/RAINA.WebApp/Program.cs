@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +11,8 @@ using Aislinn.Core.Query;
 using Aislinn.Core.Models;
 using Aislinn.Core.Cognitive;
 using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.SignalR;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 namespace RAINA.Web
 {
@@ -19,14 +21,26 @@ namespace RAINA.Web
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
+            {
+                options.ConnectionString = "InstrumentationKey=327ff7f2-ea28-45c3-bd14-7b855dcd643f;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=d904bdef-7076-4f9b-b55c-b14dcb74e08e";
+            });
             // Configure logging
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
-
+            // builder.Services.AddCors(options =>
+            // {
+            //     options.AddDefaultPolicy(policy =>
+            //     {
+            //         policy
+            //             .AllowAnyOrigin() // ⚠️ Unsafe in production
+            //             .AllowAnyHeader()
+            //             .AllowAnyMethod();
+            //     });
+            // });
             // Add services to the container
-            ConfigureServicesAsync(builder.Services);
+            await ConfigureServicesAsync(builder.Services);
 
             var app = builder.Build();
 
@@ -52,6 +66,8 @@ namespace RAINA.Web
                 });
             });
 
+            // Add controllers
+            services.AddControllers();
             // Add SignalR
             services.AddSignalR(options =>
             {
@@ -59,9 +75,9 @@ namespace RAINA.Web
                 options.KeepAliveInterval = TimeSpan.FromSeconds(10);
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
             });
-
-            // Add controllers
-            services.AddControllers();
+            //services.AddSingleton<RainaHub>();
+            // After AddSignalR(), register the hub context
+            //services.AddSingleton<IHubContext<RainaHub>>();
 
             // Add Swagger/OpenAPI
             services.AddEndpointsApiExplorer();
@@ -70,9 +86,20 @@ namespace RAINA.Web
                 c.SwaggerDoc("v1", new() { Title = "RAINA API", Version = "v1" });
             });
 
+            services.AddSingleton<UserContextManager>();
+
             // Configure RAINA services using the bootstrapper
-            var rainaServiceCollection = new ServiceCollection();
-            var bootstrapper = new RainaBootstrapper(rainaServiceCollection);
+            //var rainaServiceCollection = new ServiceCollection();
+            services.AddHostedService<WebEventSubscriber>();
+            services.AddSingleton<ChunkManager>();
+            //rainaServiceCollection.AddSingleton<RainaHub>();
+            // services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<AislinnCoreServices>());
+            // services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<RainaServices>());
+            // services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<IntentProcessor>());
+
+            // Add web-specific services
+            services.AddSingleton<UserContextManager>();
+            var bootstrapper = new RainaBootstrapper(services);
 
             // Load configuration
             string openAIApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
@@ -93,6 +120,7 @@ namespace RAINA.Web
                 .ConfigureWithSettings(config, voyageConfig)
                 .ConfigureChunkMemorySystem()
                 .ConfigureCore()
+
                 .RegisterStandardModules()
                 .ConfigureIntegrations()
                 .Build();
@@ -101,13 +129,13 @@ namespace RAINA.Web
 
             // Get services
             var rainaServices = rainaServiceProvider.GetRequiredService<RainaServices>();
-            var webEventSubscriber = rainaServiceProvider.GetRequiredService<WebEventSubscriber>();
-            var userContextManager = rainaServiceProvider.GetRequiredService<UserContextManager>();
+            Console.WriteLine("... RAINA Core Services Loaded");
             // Initialize conversation manager
             rainaServices.ConversationManager.Init();
-
+            Console.WriteLine("... Conversation Manager Initialized");
             // Subscribe to events
-            webEventSubscriber.Subscribe();
+            //var webEventSubscriber = rainaServiceProvider.GetRequiredService<WebEventSubscriber>();
+            //webEventSubscriber.Subscribe();
 
             Console.WriteLine("RAINA Web API initialized successfully");
 
@@ -125,13 +153,7 @@ namespace RAINA.Web
             await LoadUserContextAsync(defaultContext, workingMemoryController, chunkManager, chunkQueryService);
             await rainaServices.ConversationManager.InitializeConversationAsync(defaultContext);
             // Register RAINA services in the main DI container
-            services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<AislinnCoreServices>());
-            services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<RainaServices>());
-            services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<IntentProcessor>());
 
-            // Add web-specific services
-            services.AddSingleton<WebEventSubscriber>();
-            services.AddSingleton<UserContextManager>();
         }
 
 
@@ -148,6 +170,8 @@ namespace RAINA.Web
 
             app.UseHttpsRedirection();
             app.UseCors("AllowFrontend");
+            //app.UseCors();
+
             app.UseRouting();
             app.UseAuthorization();
 
@@ -217,26 +241,85 @@ namespace RAINA.Web
     {
         private readonly Dictionary<string, UserContext> _userContexts = new();
         private readonly RainaServices _rainaServices;
+        private readonly AislinnCoreServices _coreServices;
 
-        public UserContextManager(RainaServices rainaServices)
+        public UserContextManager(RainaServices rainaServices, AislinnCoreServices coreServices)
         {
             _rainaServices = rainaServices;
+            _coreServices = coreServices;
         }
 
 
 
-        public UserContext GetOrCreateContext(string sessionId)
+        public async Task<UserContext> GetOrCreateContext(string sessionId)
         {
-            if (!_userContexts.TryGetValue(sessionId, out var context))
+            var userContext = new UserContext
             {
-                context = new UserContext
+                UserId = "user1",
+                UserName = "User",
+                CurrentTopic = "general"
+            };
+            try
+            {
+                // Try to find existing user chunk
+                var userChunk = await _coreServices.MemorySystem.FindChunkBySemanticTypeAndName("entity.person.instance", userContext.UserName);
+                if (userChunk != null)
                 {
-                    UserName = $"User_{sessionId[..8]}",
-                    // Initialize other properties
-                };
-                _userContexts[sessionId] = context;
+                    userContext.UserChunk = userChunk;
+                    Console.WriteLine($"Loaded existing user context for: {userContext.UserName}");
+                }
+                else
+                {
+                    // Create new user chunk
+                    var newUserChunk = new Chunk
+                    {
+                        ChunkType = "Declarative",
+                        CognitiveCategory = "Instance",
+                        SemanticType = "entity.person.instance",
+                        Name = userContext.UserName,
+                        Slots = new Dictionary<string, ModelSlot>
+                        {
+                            { "EntityName", new ModelSlot { Name = "EntityName", Value = userContext.UserName } },
+                            { "Role", new ModelSlot { Name = "Role", Value = "User" } },
+                            { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } }
+                        }
+                    };
+
+                    userContext.UserChunk = await _coreServices.MemorySystem.AddChunkAsync(newUserChunk);
+                    Console.WriteLine($"Created new user context for: {userContext.UserName}");
+                }
+
+                // Try to find RAINA chunk
+                var rainaChunk = await _coreServices.MemorySystem.FindChunkBySemanticTypeAndName("entity.person.instance", "Raina");
+                if (rainaChunk == null)
+                {
+                    var newRainaChunk = new Chunk
+                    {
+                        ChunkType = "Declarative",
+                        CognitiveCategory = "Instance",
+                        SemanticType = "entity.person.instance",
+                        Name = "Raina",
+                        Slots = new Dictionary<string, ModelSlot>
+                        {
+                            { "EntityName", new ModelSlot { Name = "EntityName", Value = "Raina" } },
+                            { "Role", new ModelSlot { Name = "Role", Value = "AI Assistant" } },
+                            { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } }
+                        }
+                    };
+
+                    userContext.RainaChunk = await _coreServices.MemorySystem.AddChunkAsync(newRainaChunk);
+                }
+                else
+                {
+                    userContext.RainaChunk = rainaChunk;
+                }
             }
-            return context;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading user context: {ex.Message}");
+            }
+            return userContext;
+
         }
 
         public UserContext GetDefaultContext()

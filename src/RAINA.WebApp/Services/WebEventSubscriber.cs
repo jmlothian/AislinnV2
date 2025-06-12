@@ -9,15 +9,18 @@ namespace RAINA.Web.Services
     /// <summary>
     /// Subscribes to RAINA events and forwards them to SignalR clients
     /// </summary>
-    public class WebEventSubscriber
+    public class WebEventSubscriber : IHostedService
     {
         private readonly IHubContext<RainaHub> _hubContext;
         private readonly ILogger<WebEventSubscriber> _logger;
 
         public WebEventSubscriber(IHubContext<RainaHub> hubContext, ILogger<WebEventSubscriber> logger)
         {
+            Console.WriteLine("... Creating WebEventSubscriber");
+
             _hubContext = hubContext;
             _logger = logger;
+            Console.WriteLine("... WebEventSubscriber Created");
         }
 
         /// <summary>
@@ -25,18 +28,44 @@ namespace RAINA.Web.Services
         /// </summary>
         public void Subscribe()
         {
-            // IntentProcessor events
-            IntentProcessor.IntentClassified += OnIntentClassified;
-            IntentProcessor.EntitiesExtracted += OnEntitiesExtracted;
+            Console.WriteLine("WebEventSubscriber.Subscribe() - Starting");
+            try
+            {
+                Console.WriteLine("Subscribing to IntentProcessor.IntentClassified...");
+                IntentProcessor.IntentClassified += OnIntentClassified;
+                Console.WriteLine("✓ IntentProcessor.IntentClassified subscribed");
 
-            // ConversationManager events
-            ConversationManager.MessageReceived += OnMessageReceived;
-            ConversationManager.ResponseGenerated += OnResponseGenerated;
-            ConversationManager.ContextUpdated += OnContextUpdated;
-            ConversationManager.WorkingMemoryChanged += OnWorkingMemoryChanged;
-            ConversationManager.SummaryCreated += OnSummaryCreated;
+                Console.WriteLine("Subscribing to IntentProcessor.EntitiesExtracted...");
+                IntentProcessor.EntitiesExtracted += OnEntitiesExtracted;
+                Console.WriteLine("✓ IntentProcessor.EntitiesExtracted subscribed");
 
-            _logger.LogInformation("WebEventSubscriber initialized - listening for RAINA events");
+                Console.WriteLine("Subscribing to ConversationManager.MessageReceived...");
+                ConversationManager.MessageReceived += OnMessageReceived;
+                Console.WriteLine("✓ ConversationManager.MessageReceived subscribed");
+
+                Console.WriteLine("Subscribing to ConversationManager.ResponseGenerated...");
+                ConversationManager.ResponseGenerated += OnResponseGenerated;
+                Console.WriteLine("✓ ConversationManager.ResponseGenerated subscribed");
+
+                Console.WriteLine("Subscribing to ConversationManager.ContextUpdated...");
+                ConversationManager.ContextUpdated += OnContextUpdated;
+                Console.WriteLine("✓ ConversationManager.ContextUpdated subscribed");
+
+                Console.WriteLine("Subscribing to ConversationManager.WorkingMemoryChanged...");
+                ConversationManager.WorkingMemoryChanged += OnWorkingMemoryChanged;
+                Console.WriteLine("✓ ConversationManager.WorkingMemoryChanged subscribed");
+
+                Console.WriteLine("Subscribing to ConversationManager.SummaryCreated...");
+                ConversationManager.SummaryCreated += OnSummaryCreated;
+                Console.WriteLine("✓ ConversationManager.SummaryCreated subscribed");
+
+                Console.WriteLine("WebEventSubscriber initialized - listening for RAINA events");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in WebEventSubscriber.Subscribe(): {ex}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -118,6 +147,7 @@ namespace RAINA.Web.Services
         {
             try
             {
+                Console.WriteLine($"WebEventSubscriber: Received message event: {e.UserInput}");
                 var messageData = new MessageReceivedEvent
                 {
                     UserInput = e.UserInput,
@@ -127,11 +157,15 @@ namespace RAINA.Web.Services
                     Timestamp = DateTime.UtcNow
                 };
 
-                await _hubContext.Clients.All.SendAsync("MessageReceived", messageData);
+                Console.WriteLine($"WebEventSubscriber: Sending to SignalR clients...");
+                await _hubContext.Clients.Group("All").SendAsync("MessageReceived", messageData);
+                Console.WriteLine($"WebEventSubscriber: SignalR message sent successfully");
+
                 _logger.LogDebug("Sent MessageReceived event: {UserInput}", e.UserInput);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"WebEventSubscriber ERROR: {ex}");
                 _logger.LogError(ex, "Error sending MessageReceived event");
             }
         }
@@ -240,6 +274,18 @@ namespace RAINA.Web.Services
             {
                 _logger.LogError(ex, "Error sending SummaryCreated event");
             }
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Subscribe();
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            Unsubscribe();
+            return Task.CompletedTask;
         }
 
         #endregion

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Send,
   Search,
   Play,
   Pause,
@@ -17,67 +16,40 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { SignalRService } from "./services/signalRService";
+import type {
+  ContextData,
+  DebugLog,
+  Entity,
+  Intent,
+  Message,
+  SummaryDepthData,
+  SummaryItem,
+  Tab,
+  WorkingMemoryChunk,
+} from "./models/models";
+import { ChatTab } from "./ChatTab";
 
 const RainaUI = () => {
-  const [chatInput, setChatInput] = useState("");
-  const [queryInput, setQueryInput] = useState("");
-  const [isDebugPaused, setIsDebugPaused] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
-  const [expandedDepths, setExpandedDepths] = useState({ 0: true, 1: false, 2: false, 3: false });
-  // Inside your RainaUI component, add these state variables and useEffect:
-  const [signalRService] = useState(() => new SignalRService());
-  const [isConnected, setIsConnected] = useState(false);
-
-  // Add this useEffect to establish connection and set up listeners
-  useEffect(() => {
-    const connectSignalR = async () => {
-      await signalRService.start();
-      setIsConnected(true);
-
-      // Set up event listeners
-      signalRService.onWorkingMemoryChanged((data) => {
-        console.log("Working Memory Updated:", data);
-        // TODO: Update your mockWorkingMemory state with real data
-      });
-
-      signalRService.onContextUpdated((data) => {
-        console.log("Context Updated:", data);
-        // TODO: Update your mockContext state with real data
-      });
-
-      signalRService.onMessageReceived((data) => {
-        console.log("Message Received:", data);
-        // TODO: Add message to your mockMessages state
-      });
-    };
-
-    connectSignalR();
-
-    // Cleanup on unmount
-    return () => {
-      signalRService.stop();
-    };
-  }, [signalRService]);
   // Mock data
-  const mockCurrentIntent = {
+  const mockCurrentIntent: Intent = {
     type: "PlanningAssistance",
     confidence: 0.89,
   };
 
-  const mockIntentEntities = [
+  const mockIntentEntities: Entity[] = [
     { name: "meeting", type: "event" },
     { name: "report", type: "task" },
     { name: "3PM", type: "time" },
   ];
 
-  const mockExtractedEntities = [
+  const mockExtractedEntities: Entity[] = [
     { name: "John", type: "entity.person.instance" },
     { name: "day planning", type: "entity.abstract.goal" },
     { name: "time management", type: "entity.abstract.concept" },
     { name: "office work", type: "entity.abstract.category" },
   ];
 
-  const mockSummaryData = {
+  const mockSummaryData: Record<number, SummaryDepthData> = {
     3: {
       currentTokens: 245,
       maxTokens: 8000,
@@ -238,7 +210,7 @@ const RainaUI = () => {
     },
   };
 
-  const mockMessages = [
+  const mockMessages: Message[] = [
     { id: 1, type: "user", text: "Hi Raina, can you help me plan my day?", timestamp: "2:34 PM" },
     {
       id: 2,
@@ -255,7 +227,7 @@ const RainaUI = () => {
     },
   ];
 
-  const mockWorkingMemory = [
+  const mockWorkingMemory: WorkingMemoryChunk[] = [
     { id: "chunk-1", name: "Current Conversation", type: "Utterance", activation: 0.95, subsystem: "Episodic" },
     { id: "chunk-2", name: "User Profile: John", type: "Person", activation: 0.87, subsystem: "Semantic" },
     { id: "chunk-3", name: "Task: Plan Day", type: "Goal", activation: 0.82, subsystem: "Procedural" },
@@ -263,7 +235,7 @@ const RainaUI = () => {
     { id: "chunk-5", name: "Report Task", type: "Task", activation: 0.75, subsystem: "Procedural" },
   ];
 
-  const mockContext = {
+  const mockContext: ContextData = {
     environment: {
       currentTime: "Tuesday, 2:35 PM",
       location: "Home Office",
@@ -284,7 +256,7 @@ const RainaUI = () => {
     },
   };
 
-  const mockDebugLogs = [
+  const mockDebugLogs: DebugLog[] = [
     {
       id: 1,
       timestamp: "14:35:23.456",
@@ -316,7 +288,7 @@ const RainaUI = () => {
     { id: 5, timestamp: "14:35:23.501", level: "INFO", category: "ConversationManager", message: "Generated response (token count: 156)" },
   ];
 
-  const tabs = [
+  const tabs: Tab[] = [
     { id: "chat", name: "Chat", icon: MessageCircle },
     { id: "memory", name: "Memory", icon: Brain },
     { id: "context", name: "Context", icon: BarChart },
@@ -327,47 +299,177 @@ const RainaUI = () => {
     { id: "viz", name: "Viz", icon: Eye },
   ];
 
-  const renderChatTab = () => (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {mockMessages.map((message) => (
-          <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                message.type === "user" ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-900"
-              }`}
-            >
-              <p className="text-sm">{message.text}</p>
-              <p className={`text-xs mt-1 ${message.type === "user" ? "text-blue-100" : "text-gray-500"}`}>{message.timestamp}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+  const [chatInput, setChatInput] = useState<string>("");
+  const [queryInput, setQueryInput] = useState<string>("");
+  const [isDebugPaused, setIsDebugPaused] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("chat");
+  const [expandedDepths, setExpandedDepths] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false, 3: false });
+  // Inside your RainaUI component, add these state variables and useEffect:
+  const [signalRService] = useState(() => new SignalRService());
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [messageCount, setMessageCount] = useState<number>(1);
+  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [currentIntent, setCurrentIntent] = useState<Intent>(mockCurrentIntent);
+  const [intentEntities, setIntentEntities] = useState<Entity[]>(mockIntentEntities);
+  const [extractedEntities, setExtractedEntities] = useState<Entity[]>(mockExtractedEntities);
+  const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>(mockWorkingMemory);
+  const [context, setContext] = useState<ContextData>(mockContext);
+  const [summaryData, setSummaryData] = useState<Record<number, SummaryDepthData>>(mockSummaryData);
 
-      <div className="border-t border-gray-200 p-4">
-        {/* Intent Status */}
-        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-blue-700 font-medium">Intent: {mockCurrentIntent.type}</span>
-            <span className="text-blue-600">({(mockCurrentIntent.confidence * 100).toFixed(0)}%)</span>
-          </div>
-        </div>
+  // Add this useEffect to establish connection and set up listeners
+  useEffect(() => {
+    const connectSignalR = async () => {
+      await signalRService.start();
+      setIsConnected(true);
+      console.log(isConnected);
+      // Set up event listeners
+      signalRService.onWorkingMemoryChanged((data) => {
+        console.log("Working Memory Updated:", data);
+        const newWorkingMemory: WorkingMemoryChunk[] = data.workingMemoryItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.chunkType,
+          activation: item.activationLevel,
+          subsystem: item.subsystem,
+        }));
+        setWorkingMemory(newWorkingMemory);
+      });
 
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0">
-            <Send size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+      // Context Updates
+      signalRService.onContextUpdated((data) => {
+        console.log("Context Updated:", data);
+        // Convert the context snapshot to your ContextData format
+        // This is a simplified conversion - you may need to adjust based on your actual data structure
+        const newContext: ContextData = {
+          environment: {
+            currentTime: (data.contextSnapshot.Temporal?.currentTime as string) || context.environment.currentTime,
+            location: (data.contextSnapshot.Environment?.location as string) || context.environment.location,
+          },
+          social: {
+            currentSpeaker: (data.contextSnapshot.Social?.currentSpeaker as string) || context.social.currentSpeaker,
+            conversationTopic: (data.contextSnapshot.Social?.conversationTopic as string) || context.social.conversationTopic,
+            relationshipType: (data.contextSnapshot.Social?.relationshipType as string) || context.social.relationshipType,
+          },
+          task: {
+            primaryActivity: (data.contextSnapshot.Task?.primaryActivity as string) || context.task.primaryActivity,
+            currentGoal: (data.contextSnapshot.Task?.currentGoal as string) || context.task.currentGoal,
+            urgency: (data.contextSnapshot.Task?.urgency as string) || context.task.urgency,
+          },
+          temporal: {
+            timeOfDay: (data.contextSnapshot.Temporal?.timeOfDay as string) || context.temporal.timeOfDay,
+            upcomingEvents: (data.contextSnapshot.Temporal?.upcomingEvents as string) || context.temporal.upcomingEvents,
+          },
+        };
+        setContext(newContext);
+      });
+
+      // Message Received
+      //we can use this to update the processing status of a message to mark it as "seen" essentially
+      // signalRService.onMessageReceived((data) => {
+      //   console.log("Message Received:", data);
+      //   const newMessage: Message = {
+      //     id: Date.now(), // Simple ID generation
+      //     type: "user",
+      //     text: data.userInput,
+      //     timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      //   };
+      //   setMessages((prev) => [...prev, newMessage]);
+      // });
+
+      // Intent Classification
+      signalRService.onIntentClassified((data) => {
+        console.log("Intent Classified:", data);
+        console.log(`Intent: ${data.intentType} (${(data.confidence * 100).toFixed(1)}%)`);
+
+        setCurrentIntent({
+          type: data.intentType,
+          confidence: data.confidence,
+        });
+
+        const newIntentEntities: Entity[] = data.entities.map((entity) => ({
+          name: entity.name,
+          type: entity.type,
+        }));
+        setIntentEntities(newIntentEntities);
+      });
+
+      // Entities Extracted
+      signalRService.onEntitiesExtracted((data) => {
+        console.log("Entities Extracted:", data);
+        console.log(`Intent entities: ${data.intentEntities.length}, Extracted: ${data.extractedEntities.length}`);
+
+        const newExtractedEntities: Entity[] = data.extractedEntities.map((entity) => ({
+          name: entity.name,
+          type: entity.type,
+        }));
+        setExtractedEntities(newExtractedEntities);
+      });
+
+      // Response Generated
+      signalRService.onResponseGenerated((data) => {
+        console.log("Response Generated:", data);
+        console.log(`Response: ${data.responseText}`);
+        setMessageCount(messageCount + 1);
+        const newMessage: Message = {
+          id: messageCount, // Simple ID generation, +1 to avoid collision
+          type: "assistant",
+          text: data.responseText,
+          timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setMessages((prev) => [...prev, newMessage]);
+      });
+      signalRService.onSystemStatus((data) => {
+        console.log("SYSTEMSTATUS");
+        console.log(data);
+      });
+      signalRService.onTest((data) => {
+        console.log("Test");
+        console.log(data);
+      });
+      // Summary Created
+      signalRService.onSummaryCreated((data) => {
+        console.log("Summary Created:", data);
+        console.log(`Created ${data.newSummaries.length} new summaries`);
+
+        // Update summary data with new summaries
+        setSummaryData((prev) => {
+          const newSummaryData = { ...prev };
+
+          data.newSummaries.forEach((summary) => {
+            const depth = summary.depth;
+
+            if (!newSummaryData[depth]) {
+              newSummaryData[depth] = {
+                currentTokens: 0,
+                maxTokens: 8000,
+                items: [],
+              };
+            }
+
+            const newSummaryItem: SummaryItem = {
+              id: summary.id,
+              text: summary.text,
+              tokens: summary.tokenCount,
+              timestamp: new Date(summary.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              chunkId: summary.id,
+            };
+
+            newSummaryData[depth].items.push(newSummaryItem);
+            newSummaryData[depth].currentTokens += summary.tokenCount;
+          });
+
+          return newSummaryData;
+        });
+      });
+    };
+
+    connectSignalR();
+
+    // Cleanup on unmount
+    return () => {
+      signalRService.stop();
+    };
+  }, []);
 
   const renderMemoryTab = () => (
     <div className="h-full overflow-y-auto p-4">
@@ -376,7 +478,7 @@ const RainaUI = () => {
         <p className="text-sm text-gray-500">{mockWorkingMemory.length}/7 slots</p>
       </div>
       <div className="space-y-3">
-        {mockWorkingMemory.map((chunk) => (
+        {workingMemory.map((chunk) => (
           <div key={chunk.id} className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex justify-between items-start mb-2">
               <div className="flex-1 min-w-0">
@@ -409,11 +511,11 @@ const RainaUI = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Time:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.environment.currentTime}</span>
+              <span className="text-sm font-medium text-gray-900">{context.environment.currentTime}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Location:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.environment.location}</span>
+              <span className="text-sm font-medium text-gray-900">{context.environment.location}</span>
             </div>
           </div>
         </div>
@@ -423,15 +525,15 @@ const RainaUI = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Speaker:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.social.currentSpeaker}</span>
+              <span className="text-sm font-medium text-gray-900">{context.social.currentSpeaker}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Topic:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.social.conversationTopic}</span>
+              <span className="text-sm font-medium text-gray-900">{context.social.conversationTopic}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Relationship:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.social.relationshipType}</span>
+              <span className="text-sm font-medium text-gray-900">{context.social.relationshipType}</span>
             </div>
           </div>
         </div>
@@ -441,15 +543,15 @@ const RainaUI = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Activity:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.task.primaryActivity}</span>
+              <span className="text-sm font-medium text-gray-900">{context.task.primaryActivity}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Goal:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.task.currentGoal}</span>
+              <span className="text-sm font-medium text-gray-900">{context.task.currentGoal}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Urgency:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.task.urgency}</span>
+              <span className="text-sm font-medium text-gray-900">{context.task.urgency}</span>
             </div>
           </div>
         </div>
@@ -459,11 +561,11 @@ const RainaUI = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Time of Day:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.temporal.timeOfDay}</span>
+              <span className="text-sm font-medium text-gray-900">{context.temporal.timeOfDay}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Upcoming:</span>
-              <span className="text-sm font-medium text-gray-900">{mockContext.temporal.upcomingEvents}</span>
+              <span className="text-sm font-medium text-gray-900">{context.temporal.upcomingEvents}</span>
             </div>
           </div>
         </div>
@@ -478,7 +580,7 @@ const RainaUI = () => {
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Intent Entities</h3>
           <div className="space-y-2">
-            {mockIntentEntities.map((entity, index) => (
+            {intentEntities.map((entity, index) => (
               <div key={index} className="bg-white border border-gray-200 rounded-lg p-3">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-900">{entity.name}</span>
@@ -493,7 +595,7 @@ const RainaUI = () => {
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Extracted Entities</h3>
           <div className="space-y-2">
-            {mockExtractedEntities.map((entity, index) => (
+            {extractedEntities.map((entity, index) => (
               <div key={index} className="bg-white border border-gray-200 rounded-lg p-3">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-900">{entity.name}</span>
@@ -507,7 +609,7 @@ const RainaUI = () => {
     </div>
   );
 
-  const toggleDepth = (depth) => {
+  const toggleDepth = (depth: number): void => {
     setExpandedDepths((prev) => ({
       ...prev,
       [depth]: !prev[depth],
@@ -518,7 +620,7 @@ const RainaUI = () => {
     <div className="h-full overflow-y-auto p-4">
       <div className="space-y-4">
         {/* Render depths from highest to lowest (3, 2, 1, 0) */}
-        {Object.keys(mockSummaryData)
+        {Object.keys(summaryData)
           .map(Number)
           .sort((a, b) => b - a)
           .map((depth) => {
@@ -663,7 +765,17 @@ const RainaUI = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case "chat":
-        return renderChatTab();
+        return (
+          <ChatTab
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            messages={messages}
+            setMessages={setMessages}
+            messageCount={messageCount}
+            setMessageCount={setMessageCount}
+            currentIntent={currentIntent}
+          />
+        );
       case "memory":
         return renderMemoryTab();
       case "context":
@@ -679,7 +791,17 @@ const RainaUI = () => {
       case "viz":
         return renderVizTab();
       default:
-        return renderChatTab();
+        return (
+          <ChatTab
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            messages={messages}
+            setMessages={setMessages}
+            messageCount={messageCount}
+            setMessageCount={setMessageCount}
+            currentIntent={currentIntent}
+          />
+        );
     }
   };
 

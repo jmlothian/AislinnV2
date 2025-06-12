@@ -99,6 +99,7 @@ public class ConversationManager
         _rainaConfig = config;
 
     }
+
     public void Shutdown()
     {
         summaryService.SaveToJson(_agentName + ".json");
@@ -203,6 +204,11 @@ public class ConversationManager
 
         //create vector
         var vectorText = $"[{DateTime.Now.ToString("F")}] {context.UserName}: {userInput}";
+        Console.WriteLine(context.UserChunk);
+        Console.WriteLine(context.RainaChunk);
+        Console.WriteLine(_currentConversationChunk);
+        Console.WriteLine(intent);
+
         var vectorMeta = new Dictionary<string, string>()
         {
             {"DataType", "Utterance"},

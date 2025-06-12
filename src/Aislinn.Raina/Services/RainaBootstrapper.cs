@@ -102,7 +102,10 @@ namespace RAINA
             _services.AddSingleton<OntologyLoader>();
             _services.AddSingleton<AssociationLoader>();
             _services.AddSingleton<VectorStore>();
-            _services.AddSingleton<IVectorCollection, FastMemoryVectorCollection>();
+            _services.AddSingleton<IVectorCollection, FastMemoryVectorCollection>(sp =>
+            {
+                return new FastMemoryVectorCollection("vector_collection", sp.GetRequiredService<IVectorizer>());
+            });
             _services.AddSingleton<IVectorizer, VoyageVectorizer>();
             _services.AddSingleton<IVectorCollection>(sp =>
             {

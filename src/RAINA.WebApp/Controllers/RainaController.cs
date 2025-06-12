@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RAINA.Services;
 using RAINA.Web.Models;
 using Aislinn.Core;
+using RAINA.Events;
 
 namespace RAINA.Web.Controllers
 {
@@ -14,19 +15,22 @@ namespace RAINA.Web.Controllers
         private readonly RainaServices _rainaServices;
         private readonly UserContextManager _userContextManager;
         private readonly ILogger<RainaController> _logger;
+        private readonly ConversationManager convo;
 
         public RainaController(
             IntentProcessor intentProcessor,
             AislinnCoreServices coreServices,
             RainaServices rainaServices,
             UserContextManager userContextManager,
-            ILogger<RainaController> logger)
+            ILogger<RainaController> logger,
+            ConversationManager convo)
         {
             _intentProcessor = intentProcessor;
             _coreServices = coreServices;
             _rainaServices = rainaServices;
             _userContextManager = userContextManager;
             _logger = logger;
+            this.convo = convo;
         }
 
         /// <summary>
@@ -47,7 +51,7 @@ namespace RAINA.Web.Controllers
                     });
                 }
 
-                var userContext = _userContextManager.GetOrCreateContext(request.SessionId);
+                var userContext = await _userContextManager.GetOrCreateContext(request.SessionId);
                 var response = await _intentProcessor.ProcessInputAsync(request.Message, userContext);
 
                 return Ok(new ChatResponse

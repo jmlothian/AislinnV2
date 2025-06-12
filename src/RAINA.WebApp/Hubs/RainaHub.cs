@@ -39,7 +39,7 @@ namespace RAINA.Web.Hubs
             {
                 _logger.LogInformation("Received message from client: {Message}", message);
 
-                var userContext = _userContextManager.GetOrCreateContext(sessionId);
+                var userContext = await _userContextManager.GetOrCreateContext(sessionId);
                 var response = await _intentProcessor.ProcessInputAsync(message, userContext);
 
                 // Send response back to the client
@@ -166,7 +166,9 @@ namespace RAINA.Web.Hubs
         public override async Task OnConnectedAsync()
         {
             _logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, "All");
 
+            await Clients.All.SendAsync("Test");
             // Send initial system status
             await Clients.Caller.SendAsync("SystemStatus", new
             {

@@ -13,6 +13,7 @@ using Aislinn.VectorStorage.Interfaces;
 using Aislinn.VectorStorage.Models;
 using Aislinn.Configuration;
 using static Aislinn.Core.Context.ContextContainer;
+using RAINA.Events;
 
 namespace RAINA.Services;
 
@@ -71,6 +72,11 @@ public class ConversationManager
     /// Default agent name for the system
     /// </summary>
     private string _agentName = "Raina";
+    public static event EventHandler<MessageReceivedEventArgs> MessageReceived;
+    public static event EventHandler<ResponseGeneratedEventArgs> ResponseGenerated;
+    public static event EventHandler<ContextUpdatedEventArgs> ContextUpdated;
+    public static event EventHandler<WorkingMemoryChangedEventArgs> WorkingMemoryChanged;
+    public static event EventHandler<SummaryCreatedEventArgs> SummaryCreated;
 
     public ConversationManager(
         AislinnCoreServices coreServices,
@@ -209,7 +215,13 @@ public class ConversationManager
 
         // Add to memory system
         utteranceChunk = await _memorySystem.AddChunkAsync(utteranceChunk);
-        summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, 0, utteranceChunk.ID);
+        OnMessageReceived(userInput, intent, context, utteranceChunk);
+
+        var summaries = summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, 0, utteranceChunk.ID);
+        if (summaries.Any())
+        {
+            OnSummaryCreated(summaries, userInput);
+        }
         // Increment utterance count in conversation
         int utteranceCount = _currentConversationChunk.Slots.ContainsKey("UtteranceCount") ? (int)(_currentConversationChunk.Slots["UtteranceCount"].Value ?? 0) : 0;
         _currentConversationChunk.Slots["UtteranceCount"] = new ModelSlot { Name = "UtteranceCount", Value = utteranceCount + 1 };
@@ -480,6 +492,7 @@ public class ConversationManager
         //Console.WriteLine(prompt);
         Console.WriteLine(resp.Choices[0].Message.Content);
         var contextSummary = resp.Choices[0].Message.Content;
+        OnContextUpdated(contextSnapshot, contextSummary);
         var newChunk = new Chunk
         {
             ChunkType = "ContextSummary",
@@ -521,7 +534,10 @@ public class ConversationManager
         {
             await _memorySystem.PushChunksToWorkingMemoryAsync(chunkIdsToPush);
         }
-
+        //these might go in the "if" not sure...
+        var workingMemory = await _memorySystem.GetWorkingMemoryContentsAsync();
+        var primedChunks = await _memorySystem.GetPrimedChunksAsync();
+        OnWorkingMemoryChanged(workingMemory, primedChunks);
 
         // Activate it to bring into working memory
         await _memorySystem.ActivateChunkAsync(savedChunk.ID, null, 0.8);
@@ -623,7 +639,7 @@ public class ConversationManager
         // Activate the response chunk in memory
         await _memorySystem.ActivateChunkAsync(responseChunk.ID);
 
-
+        OnResponseGenerated(responseText, responseChunk, context);
         // Return response object
         return new Response
         {
@@ -887,6 +903,54 @@ public class ConversationManager
             }
         }
     }
+    private void OnMessageReceived(string userInput, Intent intent, UserContext context, Chunk utteranceChunk)
+    {
+        MessageReceived?.Invoke(this, new MessageReceivedEventArgs
+        {
+            UserInput = userInput,
+            Intent = intent,
+            Context = context,
+            UtteranceChunk = utteranceChunk
+        });
+    }
+
+    private void OnResponseGenerated(string responseText, Chunk responseChunk, UserContext context)
+    {
+        ResponseGenerated?.Invoke(this, new ResponseGeneratedEventArgs
+        {
+            ResponseText = responseText,
+            ResponseChunk = responseChunk,
+            Context = context
+        });
+    }
+
+    private void OnContextUpdated(Dictionary<ContextCategory, Dictionary<string, object>> contextSnapshot, string contextSummary)
+    {
+        ContextUpdated?.Invoke(this, new ContextUpdatedEventArgs
+        {
+            ContextSnapshot = contextSnapshot,
+            ContextSummary = contextSummary
+        });
+    }
+
+    private void OnWorkingMemoryChanged(List<Chunk> workingMemory, List<Chunk> primedChunks)
+    {
+        WorkingMemoryChanged?.Invoke(this, new WorkingMemoryChangedEventArgs
+        {
+            WorkingMemoryContents = workingMemory,
+            PrimedChunks = primedChunks
+        });
+    }
+
+    private void OnSummaryCreated(List<Utterance> summaries, string userInput)
+    {
+        SummaryCreated?.Invoke(this, new SummaryCreatedEventArgs
+        {
+            NewSummaries = summaries,
+            UserInput = userInput
+        });
+    }
+
 }
 
 

@@ -11,6 +11,7 @@ using Aislinn.Core.Memory;
 using RAINA.Services;
 using Aislinn.Core.Query;
 using Aislinn.Core.Services;
+using RAINA.ConsoleEvents;
 
 namespace RAINA;
 
@@ -50,6 +51,7 @@ class Program
 
         // Set up dependency injection
         var services = new ServiceCollection();
+        var eventSubscriber = new ConsoleEventSubscriber(showTimestamps: true, useColors: true);
 
         try
         {
@@ -94,6 +96,7 @@ class Program
 
             // Load any active context from memory
             await LoadUserContextAsync(userContext, workingMemoryController, chunkManager, chunkQueryService);
+            eventSubscriber.Subscribe();
 
             Console.WriteLine("RAINA is ready! Type 'exit' to quit, 'help' for commands.");
             Console.WriteLine();
@@ -161,6 +164,7 @@ class Program
             Console.WriteLine($"Failed to initialize RAINA: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
         }
+        eventSubscriber.Unsubscribe();
 
         Console.WriteLine("Thank you for using RAINA. Goodbye!");
     }

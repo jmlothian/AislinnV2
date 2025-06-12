@@ -10,6 +10,7 @@ using Aislinn.Core.Models;
 using Aislinn.Configuration;
 using RAINA.Modules;
 using RAINA.Services;
+using RAINA.Events;
 
 namespace RAINA
 {
@@ -19,6 +20,9 @@ namespace RAINA
         private readonly string _openAIApiKey;
         private readonly ConversationManager _conversationManager;
         private readonly ContextDetector _contextDetector;
+        public static event EventHandler<IntentClassifiedEventArgs> IntentClassified;
+        public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
+
 
         private readonly Dictionary<string, IIntentModule> _modules = new Dictionary<string, IIntentModule>();
 
@@ -61,6 +65,8 @@ namespace RAINA
         {
             // Classify intent using OpenAI
             var intent = await ClassifyIntentAsync(userInput, context);
+            OnIntentClassified(userInput, intent, context);
+
 
             //add input to conversation manager....
 
@@ -88,6 +94,8 @@ namespace RAINA
 
 
             await _contextDetector.UpdateContextAsync(userInput, intent);
+            OnEntitiesExtracted(intent.Entities, new List<Entity>(), userInput); // Will need to get actual extracted entities
+
 
             // Route to appropriate module
             Console.WriteLine("Intent: " + intent.IntentType);
@@ -228,6 +236,25 @@ Provide your response in JSON format:
 
             var responseString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
+        }
+        private void OnIntentClassified(string userInput, Intent intent, UserContext context)
+        {
+            IntentClassified?.Invoke(this, new IntentClassifiedEventArgs
+            {
+                UserInput = userInput,
+                Intent = intent,
+                Context = context
+            });
+        }
+
+        private void OnEntitiesExtracted(List<Entity> intentEntities, List<Entity> extractedEntities, string userInput)
+        {
+            EntitiesExtracted?.Invoke(this, new EntitiesExtractedEventArgs
+            {
+                IntentEntities = intentEntities,
+                ExtractedEntities = extractedEntities,
+                UserInput = userInput
+            });
         }
     }
 

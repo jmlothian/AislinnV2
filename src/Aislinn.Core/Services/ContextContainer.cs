@@ -8,6 +8,17 @@ using Aislinn.Core.Models;
 
 namespace Aislinn.Core.Context
 {
+    public enum ContextCategory
+    {
+        Environment,   // Physical environment state (location, objects, conditions)
+        Internal,      // Agent's internal state (energy, emotions, physiological)
+        Social,        // Social environment (present entities, relationships, roles)
+        Task,          // Task-related context (current activities, progress, history)
+        Temporal,      // Time-related context (time of day, day of week, deadlines)
+        Resource,      // Available resources (tools, information, capabilities)
+        Communication, //dialog, text, posts, transcripts
+        Information    //any other information
+    }
     /// <summary>
     /// Maintains situational awareness by tracking and organizing context information
     /// that influences goal selection and execution.
@@ -15,17 +26,7 @@ namespace Aislinn.Core.Context
     public class ContextContainer
     {
         // Context categories
-        public enum ContextCategory
-        {
-            Environment,   // Physical environment state (location, objects, conditions)
-            Internal,      // Agent's internal state (energy, emotions, physiological)
-            Social,        // Social environment (present entities, relationships, roles)
-            Task,          // Task-related context (current activities, progress, history)
-            Temporal,      // Time-related context (time of day, day of week, deadlines)
-            Resource,      // Available resources (tools, information, capabilities)
-            Communication, //dialog, text, posts, transcripts
-            Information    //any other information
-        }
+
 
         // Main context storage - category -> context factors
         private Dictionary<ContextCategory, Dictionary<string, ContextFactor>> _contextFactors;
@@ -545,10 +546,12 @@ namespace Aislinn.Core.Context
                     || slot.Key.Contains("ExtractedFromLLM") || slot.Key.Contains("Timestamp") || slot.Key.Contains("LastUpdated")
                     )
                     continue;
-                if (chunk.SemanticType == "Utterance") 
-                { 
-                    ExtractUtteranceContext(chunk); 
-                } else {
+                if (chunk.SemanticType == "Utterance")
+                {
+                    ExtractUtteranceContext(chunk);
+                }
+                else
+                {
                     // Add as context factor with moderate importance
                     UpdateContextFactor(
                         category,

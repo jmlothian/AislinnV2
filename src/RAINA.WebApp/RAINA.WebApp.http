@@ -1,0 +1,6 @@
+@RAINA.WebApp_HostAddress = http://localhost:5299
+
+GET {{RAINA.WebApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

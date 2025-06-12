@@ -1347,13 +1347,13 @@ namespace Aislinn.Core.Goals.Execution
                 {
                     // Update context with current execution state
                     _contextContainer.UpdateContextFactor(
-                        ContextContainer.ContextCategory.Task,
+                        ContextCategory.Task,
                         "CurrentGoal",
                         _currentGoalId,
                         importance: 0.8);
 
                     _contextContainer.UpdateContextFactor(
-                        ContextContainer.ContextCategory.Task,
+                        ContextCategory.Task,
                         "ExecutionProgress",
                         _executionProgress,
                         importance: 0.6);

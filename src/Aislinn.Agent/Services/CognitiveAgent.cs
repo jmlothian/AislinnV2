@@ -30,7 +30,7 @@ namespace Aislinn.Core.Agent
         public List<Chunk> PrimedChunks { get; set; } = new List<Chunk>();
         public Chunk CurrentPrimaryGoal { get; set; }
         public List<Chunk> CurrentSecondaryGoals { get; set; } = new List<Chunk>();
-        public Dictionary<ContextContainer.ContextCategory, Dictionary<string, object>> CurrentContext { get; set; }
+        public Dictionary<ContextCategory, Dictionary<string, object>> CurrentContext { get; set; }
         public long SystemTime { get; set; }
         public DateTime LastActivityTime { get; set; }
         public GoalExecutionService.ExecutionState ExecutionState { get; set; }
@@ -206,7 +206,7 @@ namespace Aislinn.Core.Agent
 
                     // Update context with the new input
                     _contextContainer.UpdateContextFactor(
-                        ContextContainer.ContextCategory.Environment,
+                        ContextCategory.Environment,
                         "LatestInput",
                         input,
                         importance: 0.8,
@@ -234,7 +234,7 @@ namespace Aislinn.Core.Agent
         /// <summary>
         /// Update the agent's context with environmental information
         /// </summary>
-        public void UpdateContext(ContextContainer.ContextCategory category, string factorName, object value,
+        public void UpdateContext(ContextCategory category, string factorName, object value,
             double importance = 0.5, double confidence = 1.0)
         {
             _contextContainer.UpdateContextFactor(category, factorName, value, importance, confidence);
@@ -426,9 +426,9 @@ namespace Aislinn.Core.Agent
             }
 
             // Add some context information
-            if (contextSnapshot.ContainsKey(ContextContainer.ContextCategory.Environment))
+            if (contextSnapshot.ContainsKey(ContextCategory.Environment))
             {
-                var environmentContext = contextSnapshot[ContextContainer.ContextCategory.Environment];
+                var environmentContext = contextSnapshot[ContextCategory.Environment];
                 if (environmentContext.Count > 0)
                 {
                     response.AppendLine("\nEnvironment context:");

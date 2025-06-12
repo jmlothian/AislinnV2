@@ -638,7 +638,7 @@ namespace Aislinn.Core.Goals.Selection
                     if (resource is string resourceName)
                     {
                         if (!_contextContainer.HasRecentContextFactor(
-                            ContextContainer.ContextCategory.Resource, resourceName))
+                            ContextCategory.Resource, resourceName))
                         {
                             return false;
                         }
@@ -650,7 +650,7 @@ namespace Aislinn.Core.Goals.Selection
                 foreach (var resource in resourceDict)
                 {
                     var factor = _contextContainer.GetContextFactor(
-                        ContextContainer.ContextCategory.Resource, resource.Key);
+                        ContextCategory.Resource, resource.Key);
 
                     if (factor == null)
                         return false;

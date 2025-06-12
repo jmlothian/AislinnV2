@@ -18,3 +18,4 @@ api/*.yml
 *.nupkg
 packages/
 /data
+src/Aislinn.Raina/ToDo.txt

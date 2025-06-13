@@ -22,7 +22,11 @@ export interface Entity {
   type: string;
   formal: string;
 }
-
+export interface EntityInfo {
+  name: string;
+  type: string;
+  formal: string;
+}
 export interface SummaryItem {
   id: string;
   text: string;

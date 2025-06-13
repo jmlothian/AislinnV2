@@ -21,7 +21,6 @@ import { SignalRService } from "./services/signalRService";
 import type {
   ContextData,
   DebugLog,
-  Entity,
   Intent,
   Message,
   SummaryDepthData,
@@ -30,6 +29,7 @@ import type {
   WorkingMemoryChunk,
   AuthState,
   LoadingState,
+  EntityInfo,
 } from "./models/models";
 import { ChatTab } from "./ChatTab";
 import { LoginScreen } from "./LoginScreen";
@@ -107,8 +107,8 @@ const RainaUI = () => {
   const [messageCount, setMessageCount] = useState<number>(1);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [currentIntent, setCurrentIntent] = useState<Intent>(mockCurrentIntent);
-  const [intentEntities, setIntentEntities] = useState<Entity[]>([]);
-  const [extractedEntities, setExtractedEntities] = useState<Entity[]>([]);
+  const [intentEntities, setIntentEntities] = useState<EntityInfo[]>([]);
+  const [extractedEntities, setExtractedEntities] = useState<EntityInfo[]>([]);
   const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>([]);
   const [context, setContext] = useState<ContextData>({
     environment: {},
@@ -174,7 +174,6 @@ const RainaUI = () => {
       saveChatHistory(messages);
     }
   }, [messages]);
-  console.log(summariesLoading);
   // Add this useEffect to establish connection and set up listeners
   useEffect(() => {
     const savedAuth = sessionStorage.getItem("raina_auth");
@@ -219,26 +218,22 @@ const RainaUI = () => {
         console.log("Context Updated:", data);
         // Convert the context snapshot to your ContextData format
         // This is a simplified conversion - you may need to adjust based on your actual data structure
-        const newContext: ContextData = {
-          environment: {
-            currentTime: (data.contextSnapshot.Temporal?.currentTime as string) || context.environment.currentTime,
-            location: (data.contextSnapshot.Environment?.location as string) || context.environment.location,
-          },
-          social: {
-            currentSpeaker: (data.contextSnapshot.Social?.currentSpeaker as string) || context.social.currentSpeaker,
-            conversationTopic: (data.contextSnapshot.Social?.conversationTopic as string) || context.social.conversationTopic,
-            relationshipType: (data.contextSnapshot.Social?.relationshipType as string) || context.social.relationshipType,
-          },
-          task: {
-            primaryActivity: (data.contextSnapshot.Task?.primaryActivity as string) || context.task.primaryActivity,
-            currentGoal: (data.contextSnapshot.Task?.currentGoal as string) || context.task.currentGoal,
-            urgency: (data.contextSnapshot.Task?.urgency as string) || context.task.urgency,
-          },
-          temporal: {
-            timeOfDay: (data.contextSnapshot.Temporal?.timeOfDay as string) || context.temporal.timeOfDay,
-            upcomingEvents: (data.contextSnapshot.Temporal?.upcomingEvents as string) || context.temporal.upcomingEvents,
-          },
-        };
+
+        const newContext: ContextData = {};
+
+        // Iterate through each category in the context snapshot
+        Object.entries(data.contextSnapshot).forEach(([categoryName, categoryData]) => {
+          newContext[categoryName] = {};
+
+          // Extract properties with .Value suffix and convert to string
+          Object.entries(categoryData as Record<string, unknown>).forEach(([key, value]) => {
+            if (key.endsWith(".Value")) {
+              const propertyName = key.replace(".Value", "");
+              newContext[categoryName][propertyName] = String(value);
+            }
+          });
+        });
+
         setContext(newContext);
       });
 
@@ -265,9 +260,10 @@ const RainaUI = () => {
           confidence: data.confidence,
         });
 
-        const newIntentEntities: Entity[] = data.entities.map((entity) => ({
+        const newIntentEntities: EntityInfo[] = data.entities.map((entity) => ({
           name: entity.name,
           type: entity.type,
+          formal: entity.formal,
         }));
         setIntentEntities(newIntentEntities);
       });
@@ -277,9 +273,10 @@ const RainaUI = () => {
         console.log("Entities Extracted:", data);
         console.log(`Intent entities: ${data.intentEntities.length}, Extracted: ${data.extractedEntities.length}`);
 
-        const newExtractedEntities: Entity[] = data.extractedEntities.map((entity) => ({
+        const newExtractedEntities: EntityInfo[] = data.extractedEntities.map((entity) => ({
           name: entity.name,
           type: entity.type,
+          formal: entity.formal,
         }));
         setExtractedEntities(newExtractedEntities);
       });
@@ -736,6 +733,7 @@ const RainaUI = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">RAINA</h1>
+        <h2 className="text-l sm:text-xl font-bold text-gray-800">Aislinn</h2>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 text-xs sm:text-sm">
             <span className="text-gray-500 hidden sm:inline">Cognitive Steps: 1,247,893</span>

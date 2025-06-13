@@ -1,4 +1,5 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import type { EntityInfo } from "../models/models";
 
 // Copy these types from your Models.cs or create a types file
 interface SummariesLoadedEvent {
@@ -40,10 +41,6 @@ interface ContextUpdatedEvent {
   contextSummary: string;
   categoryCount: number;
   timestamp: string;
-}
-interface EntityInfo {
-  name: string;
-  type: string;
 }
 
 interface IntentClassifiedEvent {

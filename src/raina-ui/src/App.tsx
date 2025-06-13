@@ -210,22 +210,7 @@ const RainaUI = () => {
     },
   };
 
-  const mockMessages: Message[] = [
-    { id: 1, type: "user", text: "Hi Raina, can you help me plan my day?", timestamp: "2:34 PM" },
-    {
-      id: 2,
-      type: "assistant",
-      text: "Of course! I'd be happy to help you plan your day. What do you have coming up?",
-      timestamp: "2:34 PM",
-    },
-    { id: 3, type: "user", text: "I have a meeting at 3 PM and need to finish a report", timestamp: "2:35 PM" },
-    {
-      id: 4,
-      type: "assistant",
-      text: "Great! Let me help you organize that. Since it's currently 2:35 PM, you have about 25 minutes before your meeting. Would you like me to help prioritize what you can accomplish with the report in that time?",
-      timestamp: "2:35 PM",
-    },
-  ];
+  const mockMessages: Message[] = [];
 
   const mockWorkingMemory: WorkingMemoryChunk[] = [
     { id: "chunk-1", name: "Current Conversation", type: "Utterance", activation: 0.95, subsystem: "Episodic" },
@@ -411,7 +396,7 @@ const RainaUI = () => {
         console.log(`Response: ${data.responseText}`);
         setMessageCount(messageCount + 1);
         const newMessage: Message = {
-          id: messageCount, // Simple ID generation, +1 to avoid collision
+          id: data.chunkId, // Simple ID generation, +1 to avoid collision
           type: "assistant",
           text: data.responseText,
           timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),

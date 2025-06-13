@@ -88,7 +88,7 @@ namespace RAINA.Services
                 {"Entity", entityName },
                 {"OntologyType", ontologyType },
             };
-            entityInstance.Vector = (await _vectorCollection.AddVectorAsync(vectorText, entityInstance.ID.ToString(), vectorMeta)).Vector;
+            entityInstance.Vector = (await _vectorCollection.AddVectorAsync(entityInstance.ID.ToString(), vectorText, vectorMeta)).Vector;
             // Save the entity instance
             entityInstance = await chunkCollection.AddChunkAsync(entityInstance);
 
@@ -147,6 +147,7 @@ namespace RAINA.Services
         /// </summary>
         private async Task<Dictionary<string, Chunk>> BatchCreateOntologyConceptsAsync(IEnumerable<string> entityTypes)
         {
+            Console.WriteLine("[ENTITY] BatchCreateOntology");
             var uniqueTypes = entityTypes.Distinct().ToList();
             var results = new Dictionary<string, Chunk>();
 
@@ -185,13 +186,13 @@ namespace RAINA.Services
                 int level = parts.Length - 1;
                 return new Dictionary<string, string>()
                 {
-            {"DataType", "OntologyType"},
-            {"Level", level.ToString()},
-            {"OntologyType", type},
-            {"ParentID", Guid.Empty.ToString()},
+                    {"DataType", "OntologyType"},
+                    {"Level", level.ToString()},
+                    {"OntologyType", type},
+                    {"ParentID", Guid.Empty.ToString()},
                 };
             }).ToList();
-
+            Console.WriteLine("[ENTITY] Calling AddVectorssss");
             var vectorResults = await _vectorCollection.AddVectorsAsync(vectorTexts, vectorMetadata);
 
             // Create all new ontology concepts
@@ -277,7 +278,7 @@ namespace RAINA.Services
                     vectorMeta["ParentID"] = parentConcept.ID.ToString();
                 }
             }
-            ontologyConcept.Vector = (await _vectorCollection.AddVectorAsync(vectorText, ontologyConcept.ID.ToString(), vectorMeta)).Vector;
+            ontologyConcept.Vector = (await _vectorCollection.AddVectorAsync(ontologyConcept.ID.ToString(), vectorText, vectorMeta)).Vector;
 
             return await chunkCollection.AddChunkAsync(ontologyConcept);
         }
@@ -429,6 +430,7 @@ namespace RAINA.Services
         {
             if (utteranceChunk == null || entities == null || !entities.Any())
                 return;
+            Console.WriteLine("[PROCESS ENTITY] ProcessEntitiesForUtteranceAsync");
 
             // First, batch check for existing entities (check both name and formal if present)
             var entityChunks = new List<Chunk>();
@@ -493,7 +495,7 @@ namespace RAINA.Services
                         {"CanonicalName", vectorName}
                     });
                 }
-
+                Console.WriteLine("[PROCESS ENTITY] Calling AddVectorsssss");
                 // Batch vectorize all new entities using formal names
                 var vectorResults = await _vectorCollection.AddVectorsAsync(vectorTexts, vectorMetadata);
 
@@ -635,6 +637,8 @@ namespace RAINA.Services
                 ontologyConcept = await FindOntologyConceptAsync(entity.Type);
                 if (ontologyConcept == null)
                 {
+                    Console.WriteLine("[PROCESS ENTITY] Calling CreateOntologyConcept");
+
                     ontologyConcept = await CreateOntologyConceptAsync(entity.Type);
                 }
             }

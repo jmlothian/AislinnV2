@@ -35,7 +35,7 @@ export const ChatTab: React.FC<ChatTabProps> = ({
 
     setMessageCount(messageCount + 1);
     const userMessage: Message = {
-      id: messageCount,
+      id: messageCount + 1 + " ",
       type: "user",
       text: chatInputBuffer,
       timestamp,

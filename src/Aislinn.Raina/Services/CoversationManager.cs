@@ -218,7 +218,7 @@ public class ConversationManager
             {"SpeakerID", context.UserChunk.ID.ToString() },
             {"ListenerID", context.RainaChunk.ID.ToString() }
         };
-        utteranceChunk.Vector = (await _vectorCollection.AddVectorAsync(vectorText, utteranceChunk.ID.ToString(), vectorMeta)).Vector;
+        utteranceChunk.Vector = (await _vectorCollection.AddVectorAsync(utteranceChunk.ID.ToString(), vectorText, vectorMeta)).Vector;
 
         // Add to memory system
         utteranceChunk = await _memorySystem.AddChunkAsync(utteranceChunk);
@@ -597,7 +597,7 @@ public class ConversationManager
             {"ListenerID", context.UserChunk.ID.ToString() },
             {"SpeakerID", context.RainaChunk.ID.ToString() }
         };
-        responseChunk.Vector = (await _vectorCollection.AddVectorAsync(vectorText, responseChunk.ID.ToString(), vectorMeta)).Vector;
+        responseChunk.Vector = (await _vectorCollection.AddVectorAsync(responseChunk.ID.ToString(), vectorText, vectorMeta)).Vector;
 
         // update cognitive time, 150ms for now
         _memorySystem._timeManager.AdvanceStep(150);

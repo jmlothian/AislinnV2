@@ -58,6 +58,8 @@ namespace Aislinn.VectorStorage.Implementations
         private async Task<(bool flowControl, double[] value)> RequestVector(VoyageEmbeddingRequest request)
         {
             var retryCount = 0;
+            Console.WriteLine("RequestVector (single): " + string.Join(", ", request.input));
+
             while (retryCount <= _config.VoyageMaxRetries)
             {
                 try
@@ -106,10 +108,12 @@ namespace Aislinn.VectorStorage.Implementations
         private async Task<(bool flowControl, List<double[]> values)> RequestVectors(VoyageEmbeddingRequest request)
         {
             var retryCount = 0;
+            Console.WriteLine("RequestVectors (multi): " + string.Join(", ", request.input));
             while (retryCount <= _config.VoyageMaxRetries)
             {
                 try
                 {
+
                     // Use the batch endpoint for multiple inputs
                     var response = await _httpClient.PostAsJsonAsync(_config.VoyageBaseUrl, request);
 
@@ -164,6 +168,8 @@ namespace Aislinn.VectorStorage.Implementations
 
         public async Task<List<double[]>> StringsToVectorsAsync(IEnumerable<string> texts, string inputType = null)
         {
+            Console.WriteLine("StringToVector (multi): " + string.Join(", ", texts));
+
             if (texts == null)
                 throw new ArgumentNullException(nameof(texts));
 
@@ -212,6 +218,7 @@ namespace Aislinn.VectorStorage.Implementations
 
         public async Task<double[]> StringToVectorAsync(string text, string inputType = null)
         {
+            Console.WriteLine("StringToVector (single): " + text);
             var request = new VoyageEmbeddingRequest
             {
                 input = new[] { text },

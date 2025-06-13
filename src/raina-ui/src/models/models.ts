@@ -14,29 +14,13 @@ export interface WorkingMemoryChunk {
 }
 
 export interface ContextData {
-  environment: {
-    currentTime: string;
-    location: string;
-  };
-  social: {
-    currentSpeaker: string;
-    conversationTopic: string;
-    relationshipType: string;
-  };
-  task: {
-    primaryActivity: string;
-    currentGoal: string;
-    urgency: string;
-  };
-  temporal: {
-    timeOfDay: string;
-    upcomingEvents: string;
-  };
+  [key: string]: { [key: string]: string };
 }
 
 export interface Entity {
   name: string;
   type: string;
+  formal: string;
 }
 
 export interface SummaryItem {
@@ -66,8 +50,26 @@ export interface Tab {
   name: string;
   icon: React.ComponentType<{ size?: number }>;
 }
-
+export interface LoadingState {
+  isLoading: boolean;
+  message?: string;
+}
 export interface Intent {
   type: string;
   confidence: number;
+}
+export interface ChatTabProps {
+  chatInput: string;
+  setChatInput: (value: string) => void;
+  messages: Message[];
+  setMessages: (fn: (prev: Message[]) => Message[]) => void;
+  messageCount: number;
+  setMessageCount: (n: number) => void;
+  currentIntent: Intent;
+  username: string;
+}
+export interface AuthState {
+  username: string;
+  authenticated: boolean;
+  loginTime: string;
 }

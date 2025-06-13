@@ -21,3 +21,7 @@ packages/
 src/Aislinn.Raina/ToDo.txt
 *.db
 src/RAINA.ConsoleApp/Raina.json
+src/RAINA.WebApp/user_sessions.json
+src/RAINA.WebApp/Raina.json
+src/RAINA.WebApp/associations.db
+src/RAINA.WebApp/chunks.db

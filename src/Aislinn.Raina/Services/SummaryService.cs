@@ -22,6 +22,10 @@ public class SummaryService
     {
         ConversationId = id;
     }
+    public Dictionary<int, List<Utterance>> GetAllSummaries()
+    {
+        return depthMap;
+    }
     public List<Utterance> AddItem(string text, int depth = 0, Guid? chunkId = null)
     {
         List<Utterance> ReturnSummaries = new List<Utterance>();
@@ -164,6 +168,8 @@ public class SummaryService
             LastModified = DateTime.UtcNow;
             depthMap.Clear();
         }
+        Console.WriteLine(filePath);
+        Console.WriteLine(jsonString);
     }
 
     // Factory method to create and load from JSON in one step

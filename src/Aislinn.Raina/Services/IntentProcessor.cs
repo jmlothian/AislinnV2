@@ -21,7 +21,6 @@ namespace RAINA
         private readonly ConversationManager _conversationManager;
         private readonly ContextDetector _contextDetector;
         public static event EventHandler<IntentClassifiedEventArgs> IntentClassified;
-        public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
 
 
         private readonly Dictionary<string, IIntentModule> _modules = new Dictionary<string, IIntentModule>();
@@ -94,7 +93,6 @@ namespace RAINA
 
 
             await _contextDetector.UpdateContextAsync(userInput, intent);
-            OnEntitiesExtracted(intent.Entities, new List<Entity>(), userInput); // Will need to get actual extracted entities
 
 
             // Route to appropriate module
@@ -247,15 +245,7 @@ Provide your response in JSON format:
             });
         }
 
-        private void OnEntitiesExtracted(List<Entity> intentEntities, List<Entity> extractedEntities, string userInput)
-        {
-            EntitiesExtracted?.Invoke(this, new EntitiesExtractedEventArgs
-            {
-                IntentEntities = intentEntities,
-                ExtractedEntities = extractedEntities,
-                UserInput = userInput
-            });
-        }
+
     }
 
     // Helper classes

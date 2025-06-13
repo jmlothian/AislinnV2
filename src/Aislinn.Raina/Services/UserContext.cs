@@ -1,6 +1,7 @@
 using System.Text;
 using Aislinn.Core.Models;
 namespace RAINA.Services;
+
 public class UserContext
 {
     public string UserId { get; set; }
@@ -13,6 +14,8 @@ public class UserContext
     public Chunk CurrentConversationChunk { get; set; }
     public List<Chunk> ActiveMemoryChunks { get; set; } = new List<Chunk>();
     public Dictionary<string, object> ContextVariables { get; set; } = new Dictionary<string, object>();
+    public DateTime? LoginTime { get; set; }
+    public DateTime? LastActivity { get; set; }
 
     // Recent utterances in this context
     private List<Chunk> _utteranceHistory = new List<Chunk>();

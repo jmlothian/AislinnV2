@@ -15,19 +15,22 @@ namespace RAINA.Services
         public EntityRelationshipExtractionService EntityExtractionService { get; }
         public VectorStore VectorStore { get; }
         public IVectorCollection VectorCollection { get; }
+        public SummaryService SummaryService { get; }
 
         public RainaServices(
             ConversationManager conversationManager,
             EntityInstanceManager entityManager,
             EntityRelationshipExtractionService entityExtractionService,
             VectorStore vectorStore,
-            IVectorCollection vectorCollection)
+            IVectorCollection vectorCollection,
+            SummaryService summaryService)
         {
             ConversationManager = conversationManager ?? throw new ArgumentNullException(nameof(conversationManager));
             EntityManager = entityManager ?? throw new ArgumentNullException(nameof(entityManager));
             EntityExtractionService = entityExtractionService ?? throw new ArgumentNullException(nameof(entityExtractionService));
             VectorStore = vectorStore;
             VectorCollection = vectorCollection;
+            SummaryService = summaryService;
         }
     }
 }

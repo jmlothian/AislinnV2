@@ -1,6 +1,18 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 // Copy these types from your Models.cs or create a types file
+interface SummariesLoadedEvent {
+  summaryData: Record<
+    number,
+    {
+      currentTokens: number;
+      maxTokens: number;
+      items: SummaryInfo[];
+    }
+  >;
+  timestamp: string;
+}
+
 interface WorkingMemoryItem {
   id: string;
   name: string;
@@ -109,7 +121,18 @@ export class SignalRService {
       await this.connection.stop();
     }
   }
-
+  async requestSummaries(): Promise<void> {
+    if (this.connection.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestSummaries");
+      } catch (err) {
+        console.error("Error requesting summaries:", err);
+      }
+    }
+  }
+  onSummariesLoaded(callback: (data: SummariesLoadedEvent) => void): void {
+    this.connection.on("SummariesLoaded", callback);
+  }
   onMessageReceived(callback: (data: MessageReceivedEvent) => void): void {
     console.log("Message Received callback registered?");
 
@@ -128,6 +151,7 @@ export class SignalRService {
   }
 
   onEntitiesExtracted(callback: (data: EntitiesExtractedEvent) => void): void {
+    console.log("Entities Extracted: ");
     this.connection.on("EntitiesExtracted", callback);
   }
 
@@ -153,5 +177,6 @@ export class SignalRService {
     this.connection.off("SummaryCreated");
     this.connection.off("SystemStatus");
     this.connection.off("Test");
+    this.connection.off("SummariesLoaded");
   }
 }

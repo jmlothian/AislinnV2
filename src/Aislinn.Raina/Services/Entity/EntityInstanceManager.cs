@@ -577,6 +577,8 @@ namespace RAINA.Services
                 var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
                 await chunkCollection.UpdateChunkAsync(utteranceChunk);
             }
+
+
         }
 
         /// <summary>

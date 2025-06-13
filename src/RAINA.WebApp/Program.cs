@@ -27,8 +27,19 @@ namespace RAINA.Web
             });
             // Configure logging
             builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-            builder.Logging.AddDebug();
+            builder.Logging.AddConsole(options =>
+            {
+                options.IncludeScopes = true;
+            });
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+            using ILoggerFactory loggerFactory =
+                LoggerFactory.Create(builder =>
+                    builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
+            ILogger<Program> logger = loggerFactory.CreateLogger<Program>();
+            using (logger.BeginScope("[scope is enabled]"))
+            {
+                logger.LogInformation("Logger Initialized");
+            }
             // builder.Services.AddCors(options =>
             // {
             //     options.AddDefaultPolicy(policy =>
@@ -91,6 +102,9 @@ namespace RAINA.Web
             // Configure RAINA services using the bootstrapper
             //var rainaServiceCollection = new ServiceCollection();
             services.AddHostedService<WebEventSubscriber>();
+            //remember, HostedServices aren't available for injection on their own
+            services.AddSingleton<AppStateManager>();
+            services.AddHostedService<AppStateManager>(provider => provider.GetRequiredService<AppStateManager>());
             services.AddSingleton<ChunkManager>();
             //rainaServiceCollection.AddSingleton<RainaHub>();
             // services.AddSingleton(provider => rainaServiceProvider.GetRequiredService<AislinnCoreServices>());
@@ -256,7 +270,7 @@ namespace RAINA.Web
             var userContext = new UserContext
             {
                 UserId = "user1",
-                UserName = "User",
+                UserName = sessionId,
                 CurrentTopic = "general"
             };
             try

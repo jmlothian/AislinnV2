@@ -36,7 +36,7 @@ namespace RAINA.Web.Services
                 Console.WriteLine("✓ IntentProcessor.IntentClassified subscribed");
 
                 Console.WriteLine("Subscribing to IntentProcessor.EntitiesExtracted...");
-                IntentProcessor.EntitiesExtracted += OnEntitiesExtracted;
+                ConversationManager.EntitiesExtracted += OnEntitiesExtracted;
                 Console.WriteLine("✓ IntentProcessor.EntitiesExtracted subscribed");
 
                 Console.WriteLine("Subscribing to ConversationManager.MessageReceived...");
@@ -74,7 +74,7 @@ namespace RAINA.Web.Services
         public void Unsubscribe()
         {
             IntentProcessor.IntentClassified -= OnIntentClassified;
-            IntentProcessor.EntitiesExtracted -= OnEntitiesExtracted;
+            ConversationManager.EntitiesExtracted -= OnEntitiesExtracted;
             ConversationManager.MessageReceived -= OnMessageReceived;
             ConversationManager.ResponseGenerated -= OnResponseGenerated;
             ConversationManager.ContextUpdated -= OnContextUpdated;

@@ -14,6 +14,8 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
+  LogOut,
+  RefreshCw,
 } from "lucide-react";
 import { SignalRService } from "./services/signalRService";
 import type {
@@ -26,220 +28,28 @@ import type {
   SummaryItem,
   Tab,
   WorkingMemoryChunk,
+  AuthState,
+  LoadingState,
 } from "./models/models";
 import { ChatTab } from "./ChatTab";
+import { LoginScreen } from "./LoginScreen";
+import { LoadingSpinner } from "./LoadingSpinner"; // or wherever you put it
 
 const RainaUI = () => {
+  const generateId = (): string => {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c == "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
   // Mock data
   const mockCurrentIntent: Intent = {
     type: "PlanningAssistance",
     confidence: 0.89,
   };
 
-  const mockIntentEntities: Entity[] = [
-    { name: "meeting", type: "event" },
-    { name: "report", type: "task" },
-    { name: "3PM", type: "time" },
-  ];
-
-  const mockExtractedEntities: Entity[] = [
-    { name: "John", type: "entity.person.instance" },
-    { name: "day planning", type: "entity.abstract.goal" },
-    { name: "time management", type: "entity.abstract.concept" },
-    { name: "office work", type: "entity.abstract.category" },
-  ];
-
-  const mockSummaryData: Record<number, SummaryDepthData> = {
-    3: {
-      currentTokens: 245,
-      maxTokens: 8000,
-      items: [
-        {
-          id: "s3-1",
-          text: "Comprehensive discussion covering daily planning strategies, time management techniques, and productivity optimization for professional environments.",
-          tokens: 245,
-          timestamp: "2:30 PM",
-          chunkId: "sum-3-1",
-        },
-      ],
-    },
-    2: {
-      currentTokens: 1456,
-      maxTokens: 8000,
-      items: [
-        {
-          id: "s2-1",
-          text: "User John requested help with day planning. Discussion included upcoming 3 PM meeting and report completion task. Focus on time management and prioritization.",
-          tokens: 567,
-          timestamp: "2:32 PM",
-          chunkId: "sum-2-1",
-        },
-        {
-          id: "s2-2",
-          text: "Conversation about productivity strategies and task organization. Assistant provided guidance on managing concurrent deadlines and meeting preparations.",
-          tokens: 445,
-          timestamp: "2:33 PM",
-          chunkId: "sum-2-2",
-        },
-        {
-          id: "s2-3",
-          text: "Follow-up discussion on specific time allocation and task breakdown approaches for optimal workflow management.",
-          tokens: 444,
-          timestamp: "2:34 PM",
-          chunkId: "sum-2-3",
-        },
-      ],
-    },
-    1: {
-      currentTokens: 3247,
-      maxTokens: 8000,
-      items: [
-        {
-          id: "s1-1",
-          text: "User John asked for help planning his day, mentioning a 3 PM meeting and report task.",
-          tokens: 234,
-          timestamp: "2:31 PM",
-          chunkId: "sum-1-1",
-        },
-        {
-          id: "s1-2",
-          text: "Assistant offered to help with day planning and asked about upcoming activities.",
-          tokens: 187,
-          timestamp: "2:31 PM",
-          chunkId: "sum-1-2",
-        },
-        {
-          id: "s1-3",
-          text: "Discussion about 25 minutes available before meeting and report prioritization.",
-          tokens: 156,
-          timestamp: "2:32 PM",
-          chunkId: "sum-1-3",
-        },
-        {
-          id: "s1-4",
-          text: "User provided details about meeting timing and report completion requirements.",
-          tokens: 198,
-          timestamp: "2:32 PM",
-          chunkId: "sum-1-4",
-        },
-        {
-          id: "s1-5",
-          text: "Assistant suggested time management strategies for report completion before meeting.",
-          tokens: 223,
-          timestamp: "2:33 PM",
-          chunkId: "sum-1-5",
-        },
-        {
-          id: "s1-6",
-          text: "Follow-up questions about report complexity and meeting preparation needs.",
-          tokens: 178,
-          timestamp: "2:33 PM",
-          chunkId: "sum-1-6",
-        },
-        {
-          id: "s1-7",
-          text: "Discussion of task breakdown and priority assignment methodologies.",
-          tokens: 165,
-          timestamp: "2:34 PM",
-          chunkId: "sum-1-7",
-        },
-        {
-          id: "s1-8",
-          text: "User confirmed understanding of suggested approach and timeline feasibility.",
-          tokens: 201,
-          timestamp: "2:34 PM",
-          chunkId: "sum-1-8",
-        },
-      ],
-    },
-    0: {
-      currentTokens: 5234,
-      maxTokens: 8000,
-      items: [
-        { id: "s0-1", text: "[2:34 PM] John: Hi Raina, can you help me plan my day?", tokens: 134, timestamp: "2:34 PM", chunkId: "utt-1" },
-        {
-          id: "s0-2",
-          text: "[2:34 PM] Raina: Of course! I would be happy to help you plan your day. What do you have coming up?",
-          tokens: 178,
-          timestamp: "2:34 PM",
-          chunkId: "utt-2",
-        },
-        {
-          id: "s0-3",
-          text: "[2:35 PM] John: I have a meeting at 3 PM and need to finish a report",
-          tokens: 156,
-          timestamp: "2:35 PM",
-          chunkId: "utt-3",
-        },
-        {
-          id: "s0-4",
-          text: "[2:35 PM] Raina: Great! Let me help you organize that. Since it is currently 2:35 PM, you have about 25 minutes before your meeting. Would you like me to help prioritize what you can accomplish with the report in that time?",
-          tokens: 287,
-          timestamp: "2:35 PM",
-          chunkId: "utt-4",
-        },
-        {
-          id: "s0-5",
-          text: "[2:31 PM] John: Actually, let me back up - what's the best way to approach this?",
-          tokens: 167,
-          timestamp: "2:31 PM",
-          chunkId: "utt-5",
-        },
-        {
-          id: "s0-6",
-          text: "[2:31 PM] Raina: Good question! Let us start by understanding your priorities and constraints.",
-          tokens: 156,
-          timestamp: "2:31 PM",
-          chunkId: "utt-6",
-        },
-        {
-          id: "s0-7",
-          text: "[2:32 PM] John: The report is about 70% done, but I need to add conclusions and proofread.",
-          tokens: 189,
-          timestamp: "2:32 PM",
-          chunkId: "utt-7",
-        },
-        {
-          id: "s0-8",
-          text: "[2:32 PM] Raina: Perfect! That gives us a clear scope. With 25 minutes, I would suggest focusing on the conclusions first.",
-          tokens: 201,
-          timestamp: "2:32 PM",
-          chunkId: "utt-8",
-        },
-      ],
-    },
-  };
-
   const mockMessages: Message[] = [];
-
-  const mockWorkingMemory: WorkingMemoryChunk[] = [
-    { id: "chunk-1", name: "Current Conversation", type: "Utterance", activation: 0.95, subsystem: "Episodic" },
-    { id: "chunk-2", name: "User Profile: John", type: "Person", activation: 0.87, subsystem: "Semantic" },
-    { id: "chunk-3", name: "Task: Plan Day", type: "Goal", activation: 0.82, subsystem: "Procedural" },
-    { id: "chunk-4", name: "Meeting at 3 PM", type: "Event", activation: 0.78, subsystem: "Episodic" },
-    { id: "chunk-5", name: "Report Task", type: "Task", activation: 0.75, subsystem: "Procedural" },
-  ];
-
-  const mockContext: ContextData = {
-    environment: {
-      currentTime: "Tuesday, 2:35 PM",
-      location: "Home Office",
-    },
-    social: {
-      currentSpeaker: "John",
-      conversationTopic: "Day Planning",
-      relationshipType: "User-Assistant",
-    },
-    task: {
-      primaryActivity: "Conversation",
-      currentGoal: "Plan Day",
-      urgency: "Medium",
-    },
-    temporal: {
-      timeOfDay: "Afternoon",
-      upcomingEvents: "3 PM Meeting",
-    },
-  };
 
   const mockDebugLogs: DebugLog[] = [
     {
@@ -284,6 +94,8 @@ const RainaUI = () => {
     { id: "viz", name: "Viz", icon: Eye },
   ];
 
+  const [summariesLoading, setSummariesLoading] = useState<LoadingState>({ isLoading: false });
+  const [summariesRequested, setSummariesRequested] = useState<boolean>(false);
   const [chatInput, setChatInput] = useState<string>("");
   const [queryInput, setQueryInput] = useState<string>("");
   const [isDebugPaused, setIsDebugPaused] = useState<boolean>(false);
@@ -295,15 +107,97 @@ const RainaUI = () => {
   const [messageCount, setMessageCount] = useState<number>(1);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [currentIntent, setCurrentIntent] = useState<Intent>(mockCurrentIntent);
-  const [intentEntities, setIntentEntities] = useState<Entity[]>(mockIntentEntities);
-  const [extractedEntities, setExtractedEntities] = useState<Entity[]>(mockExtractedEntities);
-  const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>(mockWorkingMemory);
-  const [context, setContext] = useState<ContextData>(mockContext);
-  const [summaryData, setSummaryData] = useState<Record<number, SummaryDepthData>>(mockSummaryData);
+  const [intentEntities, setIntentEntities] = useState<Entity[]>([]);
+  const [extractedEntities, setExtractedEntities] = useState<Entity[]>([]);
+  const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>([]);
+  const [context, setContext] = useState<ContextData>({
+    environment: {},
+    social: {},
+    task: {},
+  });
+  const [summaryData, setSummaryData] = useState<Record<number, SummaryDepthData>>({});
+  const [authState, setAuthState] = useState<AuthState | null>(null);
 
+  // Chat history persistence functions
+  const saveChatHistory = (messages: Message[]) => {
+    try {
+      localStorage.setItem("raina_chat_history", JSON.stringify(messages));
+    } catch (error) {
+      console.error("Error saving chat history:", error);
+    }
+  };
+
+  const loadChatHistory = (): Message[] => {
+    try {
+      const saved = localStorage.getItem("raina_chat_history");
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+      return [];
+    }
+  };
+
+  const parseSummaryToMessages = (summaryData: Record<number, SummaryDepthData>): Message[] => {
+    const messages: Message[] = [];
+
+    Object.keys(summaryData)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .forEach((depth) => {
+        summaryData[depth].items.forEach((item) => {
+          const parts = item.text.split(":");
+          if (parts.length > 3) {
+            // Get everything after the 3rd colon, rejoin with colons
+            const cleanText = parts.slice(3).join(":").trim();
+
+            // Check if the username (before 3rd colon) contains "Raina"
+            const usernameSection = parts.slice(0, 3).join(":");
+            const isAssistant = usernameSection.includes("Raina");
+            if (item.chunkId == "00000000-0000-0000-0000-000000000000") {
+              item.chunkId = generateId();
+            }
+
+            messages.push({
+              id: item.chunkId,
+              type: isAssistant ? "assistant" : "user",
+              text: cleanText,
+              timestamp: item.timestamp,
+            });
+          }
+        });
+      });
+
+    return messages;
+  };
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveChatHistory(messages);
+    }
+  }, [messages]);
+  console.log(summariesLoading);
   // Add this useEffect to establish connection and set up listeners
   useEffect(() => {
+    const savedAuth = sessionStorage.getItem("raina_auth");
+    if (savedAuth) {
+      try {
+        const auth = JSON.parse(savedAuth) as AuthState;
+        if (auth.authenticated) {
+          setAuthState(auth);
+        }
+      } catch (error) {
+        console.error("Error parsing saved auth:", error);
+        sessionStorage.removeItem("raina_auth");
+      }
+    }
+  }, [authState?.authenticated]);
+  useEffect(() => {
     const connectSignalR = async () => {
+      const savedMessages = loadChatHistory();
+      if (savedMessages.length > 0) {
+        setMessages(savedMessages);
+        console.log(`Loaded ${savedMessages.length} messages from local storage`);
+      }
+
       await signalRService.start();
       setIsConnected(true);
       console.log(isConnected);
@@ -446,6 +340,32 @@ const RainaUI = () => {
           return newSummaryData;
         });
       });
+      signalRService.onSummariesLoaded((data) => {
+        console.log("Summaries Loaded:", data);
+        setSummariesLoading({ isLoading: false });
+
+        const convertedSummaryData: Record<number, SummaryDepthData> = {};
+        Object.entries(data.summaryData).forEach(([depth, depthData]) => {
+          convertedSummaryData[Number(depth)] = {
+            currentTokens: depthData.currentTokens,
+            maxTokens: depthData.maxTokens,
+            items: depthData.items.map((item) => ({
+              id: item.id,
+              text: item.text,
+              tokens: item.tokenCount,
+              timestamp: new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              chunkId: item.id,
+            })),
+          };
+        });
+        setSummaryData(convertedSummaryData);
+
+        if (messages.length === 0) {
+          const messagesFromSummary = parseSummaryToMessages(convertedSummaryData);
+          setMessages(messagesFromSummary);
+          console.log(`Built ${messagesFromSummary.length} messages from summaries`);
+        }
+      });
     };
 
     connectSignalR();
@@ -456,11 +376,41 @@ const RainaUI = () => {
     };
   }, []);
 
+  const handleRequestSummaries = async () => {
+    setSummariesLoading({ isLoading: true, message: "Loading summaries..." });
+    setSummariesRequested(true);
+    await signalRService.requestSummaries();
+  };
+
+  useEffect(() => {
+    if (activeTab === "summaries" && !summariesRequested && Object.keys(summaryData).length === 0) {
+      handleRequestSummaries();
+    }
+  }, [activeTab, summariesRequested, summaryData]);
+  const handleLogin = (username: string) => {
+    const auth: AuthState = {
+      username,
+      authenticated: true,
+      loginTime: new Date().toISOString(),
+    };
+    setAuthState(auth);
+  };
+
+  const handleSignOut = () => {
+    sessionStorage.removeItem("raina_auth");
+    setAuthState(null);
+    signalRService.stop();
+  };
+
+  // Show login screen if not authenticated
+  if (!authState?.authenticated) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
   const renderMemoryTab = () => (
     <div className="h-full overflow-y-auto p-4">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Working Memory</h3>
-        <p className="text-sm text-gray-500">{mockWorkingMemory.length}/7 slots</p>
+        <p className="text-sm text-gray-500">{workingMemory.length}/20 slots</p>
       </div>
       <div className="space-y-3">
         {workingMemory.map((chunk) => (
@@ -479,7 +429,7 @@ const RainaUI = () => {
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${chunk.activation * 100}%` }}
+                style={{ width: `${(Math.min(chunk.activation, 60) / 60) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -491,69 +441,26 @@ const RainaUI = () => {
   const renderContextTab = () => (
     <div className="h-full overflow-y-auto p-4">
       <div className="space-y-6">
-        <div>
-          <h4 className="font-semibold text-base text-gray-800 mb-3 border-b border-gray-200 pb-2">Environment</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Time:</span>
-              <span className="text-sm font-medium text-gray-900">{context.environment.currentTime}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Location:</span>
-              <span className="text-sm font-medium text-gray-900">{context.environment.location}</span>
-            </div>
-          </div>
-        </div>
+        {Object.entries(context).map(([sectionKey, sectionValue]) => {
+          if (!sectionValue) return null; // skip null section objects
 
-        <div>
-          <h4 className="font-semibold text-base text-gray-800 mb-3 border-b border-gray-200 pb-2">Social</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Speaker:</span>
-              <span className="text-sm font-medium text-gray-900">{context.social.currentSpeaker}</span>
+          return (
+            <div key={sectionKey}>
+              <h4 className="font-semibold text-base text-gray-800 mb-3 border-b border-gray-200 pb-2 capitalize">{sectionKey}</h4>
+              <div className="space-y-2">
+                {Object.entries(sectionValue).map(([label, value]) => {
+                  if (value == null) return null; // skip null or undefined values
+                  return (
+                    <div key={label} className="flex justify-between">
+                      <span className="text-sm text-gray-600">{label}:</span>
+                      <span className="text-sm font-medium text-gray-900">{value}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Topic:</span>
-              <span className="text-sm font-medium text-gray-900">{context.social.conversationTopic}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Relationship:</span>
-              <span className="text-sm font-medium text-gray-900">{context.social.relationshipType}</span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-semibold text-base text-gray-800 mb-3 border-b border-gray-200 pb-2">Task</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Activity:</span>
-              <span className="text-sm font-medium text-gray-900">{context.task.primaryActivity}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Goal:</span>
-              <span className="text-sm font-medium text-gray-900">{context.task.currentGoal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Urgency:</span>
-              <span className="text-sm font-medium text-gray-900">{context.task.urgency}</span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-semibold text-base text-gray-800 mb-3 border-b border-gray-200 pb-2">Temporal</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Time of Day:</span>
-              <span className="text-sm font-medium text-gray-900">{context.temporal.timeOfDay}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Upcoming:</span>
-              <span className="text-sm font-medium text-gray-900">{context.temporal.upcomingEvents}</span>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -601,76 +508,108 @@ const RainaUI = () => {
     }));
   };
 
-  const renderSummariesTab = () => (
-    <div className="h-full overflow-y-auto p-4">
-      <div className="space-y-4">
+  const renderSummariesTab = () => {
+    // Show loading spinner if summaries are loading and no data exists
+    if (summariesLoading.isLoading && Object.keys(summaryData).length === 0) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <LoadingSpinner message={summariesLoading.message} size="lg" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="h-full overflow-y-auto p-4">
+        {/* Header with refresh button */}
+        <div className="mb-4 flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900">Conversation Summaries</h3>
+          <button
+            onClick={handleRequestSummaries}
+            disabled={summariesLoading.isLoading}
+            className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RefreshCw size={16} className={summariesLoading.isLoading ? "animate-spin" : ""} />
+            <span>{summariesLoading.isLoading ? "Loading..." : "Refresh"}</span>
+          </button>
+        </div>
+
+        {/* Show message if no summaries */}
+        {Object.keys(summaryData).length === 0 && !summariesLoading.isLoading && (
+          <div className="text-center py-8">
+            <FileText className="mx-auto mb-4 text-gray-400" size={48} />
+            <div className="text-lg font-medium text-gray-600 mb-2">No summaries available</div>
+            <div className="text-sm text-gray-400">Click refresh to load current summaries</div>
+          </div>
+        )}
+
         {/* Render depths from highest to lowest (3, 2, 1, 0) */}
-        {Object.keys(summaryData)
-          .map(Number)
-          .sort((a, b) => b - a)
-          .map((depth) => {
-            const depthData = mockSummaryData[depth];
-            const isExpanded = expandedDepths[depth];
-            const progressPercent = (depthData.currentTokens / depthData.maxTokens) * 100;
+        <div className="space-y-4">
+          {Object.keys(summaryData)
+            .map(Number)
+            .sort((a, b) => b - a)
+            .map((depth) => {
+              const depthData = summaryData[depth];
+              const isExpanded = expandedDepths[depth];
+              const progressPercent = (depthData.currentTokens / depthData.maxTokens) * 100;
 
-            return (
-              <div key={depth} className="space-y-2">
-                {/* Depth Header */}
-                <div
-                  className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => toggleDepth(depth)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                      <h3 className="text-lg font-semibold text-gray-900">Depth {depth}</h3>
-                      <span className="text-sm text-gray-500">
-                        ({depthData.currentTokens} / {depthData.maxTokens} tokens)
-                      </span>
+              return (
+                <div key={depth} className="space-y-2">
+                  {/* Depth Header */}
+                  <div
+                    className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleDepth(depth)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        <h3 className="text-lg font-semibold text-gray-900">Depth {depth}</h3>
+                        <span className="text-sm text-gray-500">
+                          ({depthData.currentTokens} / {depthData.maxTokens} tokens)
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-500">{depthData.items.length} items</div>
                     </div>
-                    <div className="text-sm text-gray-500">{depthData.items.length} items</div>
+
+                    {/* Progress Bar */}
+                    <div className="mt-3">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            progressPercent > 75 ? "bg-red-500" : progressPercent > 50 ? "bg-yellow-500" : "bg-green-500"
+                          }`}
+                          style={{ width: `${progressPercent}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          progressPercent > 75 ? "bg-red-500" : progressPercent > 50 ? "bg-yellow-500" : "bg-green-500"
-                        }`}
-                        style={{ width: `${progressPercent}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
+                  {/* Expanded Items */}
+                  {isExpanded && (
+                    <div className="ml-6 border-l-2 border-gray-200 pl-4 space-y-3">
+                      {depthData.items.map((item) => (
+                        <div key={item.id} className="relative">
+                          {/* Dot connector */}
+                          <div className="absolute -left-6 top-3 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
 
-                {/* Expanded Items */}
-                {isExpanded && (
-                  <div className="ml-6 border-l-2 border-gray-200 pl-4 space-y-3">
-                    {depthData.items.map((item) => (
-                      <div key={item.id} className="relative">
-                        {/* Dot connector */}
-                        <div className="absolute -left-6 top-3 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
-
-                        {/* Item content */}
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                          <div className="text-sm text-gray-900 mb-2 leading-relaxed">{item.text}</div>
-                          <div className="flex justify-between items-center text-xs text-gray-500">
-                            <span>{item.tokens} tokens</span>
-                            <span>{item.timestamp}</span>
+                          {/* Item content */}
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div className="text-sm text-gray-900 mb-2 leading-relaxed">{item.text}</div>
+                            <div className="flex justify-between items-center text-xs text-gray-500">
+                              <span>{item.tokens} tokens</span>
+                              <span>{item.timestamp}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
       </div>
-    </div>
-  );
-
+    );
+  };
   const renderQueryTab = () => (
     <div className="h-full flex flex-col p-4">
       <div className="mb-4">
@@ -759,6 +698,7 @@ const RainaUI = () => {
             messageCount={messageCount}
             setMessageCount={setMessageCount}
             currentIntent={currentIntent}
+            authState={authState}
           />
         );
       case "memory":
@@ -785,6 +725,7 @@ const RainaUI = () => {
             messageCount={messageCount}
             setMessageCount={setMessageCount}
             currentIntent={currentIntent}
+            authState={authState}
           />
         );
     }
@@ -793,13 +734,24 @@ const RainaUI = () => {
   return (
     <div className="h-screen bg-gray-50 flex flex-col max-w-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">RAINA</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">RAINA</h1>
+        <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 text-xs sm:text-sm">
             <span className="text-gray-500 hidden sm:inline">Cognitive Steps: 1,247,893</span>
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-gray-500">Active</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600 hidden sm:inline">Welcome, {authState.username}</span>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Sign Out"
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
         </div>
       </div>

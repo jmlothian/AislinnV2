@@ -63,7 +63,48 @@ namespace RAINA.Web.Hubs
                 });
             }
         }
+        public async Task RequestSummaries()
+        {
+            Console.WriteLine("Requesting summaries...");
+            try
+            {
+                var depthMap = _rainaServices.SummaryService.GetAllSummaries();
+                var convertedData = new Dictionary<int, object>();
 
+                foreach (var kvp in depthMap)
+                {
+                    int depth = kvp.Key;
+                    var utterances = kvp.Value;
+
+                    convertedData[depth] = new
+                    {
+                        CurrentTokens = utterances.Sum(u => u.TokenCount),
+                        MaxTokens = 8000, // From your SummaryService constant
+                        Items = utterances.Select(u => new
+                        {
+                            Id = u.ChunkId,
+                            Text = u.Text,
+                            TokenCount = u.TokenCount,
+                            CreatedAt = u.CreatedAt,
+                            Depth = u.Depth,
+                            IsSummary = u.IsSummary
+                        }).ToList()
+                    };
+                }
+                // You'll need to implement getting summaries from your SummaryService
+                // For now, just send empty data
+                await Clients.Caller.SendAsync("SummariesLoaded", new
+                {
+                    SummaryData = convertedData,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting summaries");
+                await Clients.Caller.SendAsync("Error", "Failed to get summaries");
+            }
+        }
         /// <summary>
         /// Client requests current working memory
         /// </summary>

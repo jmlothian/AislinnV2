@@ -61,7 +61,7 @@ public class ConversationManager
     // Maximum number of recent utterances to keep in memory
     private const int MaxRecentUtterances = 10;
 
-    private SummaryService summaryService = new SummaryService();
+    private SummaryService summaryService;
     private PromptLibrary promptLibrary = new PromptLibrary();
     private EntityRelationshipExtractionService _entityRelationshipExtraction;
     private EntityInstanceManager _entityManager;
@@ -77,13 +77,16 @@ public class ConversationManager
     public static event EventHandler<ContextUpdatedEventArgs> ContextUpdated;
     public static event EventHandler<WorkingMemoryChangedEventArgs> WorkingMemoryChanged;
     public static event EventHandler<SummaryCreatedEventArgs> SummaryCreated;
+    public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
+
 
     public ConversationManager(
         AislinnCoreServices coreServices,
         EntityInstanceManager entityManager,
         EntityRelationshipExtractionService entityExtractionService,
         RainaConfiguration config,
-        IVectorCollection vectorCollection
+        IVectorCollection vectorCollection,
+        SummaryService summaryService
 )
     {
         _memorySystem = coreServices.MemorySystem;
@@ -97,6 +100,7 @@ public class ConversationManager
         _entityManager = entityManager;
         _vectorCollection = vectorCollection;
         _rainaConfig = config;
+        this.summaryService = summaryService;
 
     }
 
@@ -106,7 +110,7 @@ public class ConversationManager
     }
     public void Init()
     {
-        summaryService.LoadFromJson(_agentName + ".json");
+
     }
     // Method to initialize or retrieve an existing conversation
     public async Task<Chunk> InitializeConversationAsync(UserContext context, string conversationId = null)
@@ -413,7 +417,7 @@ public class ConversationManager
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
     }
-    private async Task<string> GenerateContextualResponse(string userInput, string conversationHistoryText, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
+    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationHistoryText, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
     {
         // Format intent information
         var intentType = intent?.IntentType ?? "Unknown";
@@ -438,7 +442,8 @@ public class ConversationManager
             ["intentConfidence"] = intentConfidence,
             ["workingMemoryItems"] = workingMemoryItems,
             //["userProfile"] = userProfile,
-            ["userInput"] = userInput
+            ["userInput"] = userInput,
+            ["userName"] = userName
         });
 
         // Generate response
@@ -450,10 +455,21 @@ public class ConversationManager
         return response.Choices[0].Message.Content;
     }
     // Generate and record a system response
+    private void OnEntitiesExtracted(List<Entity> intentEntities, List<Entity> extractedEntities, string userInput)
+    {
+        Console.WriteLine("Sending Entities...");
+        EntitiesExtracted?.Invoke(this, new EntitiesExtractedEventArgs
+        {
+            IntentEntities = intentEntities,
+            ExtractedEntities = extractedEntities,
+            UserInput = userInput
+        });
+    }
     public async Task<Response> GenerateResponseAsync(string userInput, Intent intent, UserContext context)
     {
         // Record the user input first
         var (userUtterance, extractionResult) = await RecordUserInputAsync(userInput, intent, context);
+        OnEntitiesExtracted(intent.Entities, extractionResult.Entities, userInput); // Will need to get actual extracted entities
 
         // update context from current chat state
         var conversationHistoryText = "";
@@ -563,7 +579,7 @@ public class ConversationManager
         //prompt,
         //false);
 
-        string responseText = await GenerateContextualResponse(userInput, conversationHistoryText, contextSummary, intent, workingMemoryChunks);
+        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, contextSummary, intent, workingMemoryChunks);
         // Generate response using LLM
         // This would call OpenAI or other LLM to generate a natural language response
         // For now, just create a simple response

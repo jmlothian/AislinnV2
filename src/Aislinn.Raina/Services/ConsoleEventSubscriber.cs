@@ -24,7 +24,7 @@ namespace RAINA.ConsoleEvents
         {
             // IntentProcessor events
             IntentProcessor.IntentClassified += OnIntentClassified;
-            IntentProcessor.EntitiesExtracted += OnEntitiesExtracted;
+            ConversationManager.EntitiesExtracted += OnEntitiesExtracted;
 
             // ConversationManager events
             ConversationManager.MessageReceived += OnMessageReceived;
@@ -42,7 +42,7 @@ namespace RAINA.ConsoleEvents
         public void Unsubscribe()
         {
             IntentProcessor.IntentClassified -= OnIntentClassified;
-            IntentProcessor.EntitiesExtracted -= OnEntitiesExtracted;
+            ConversationManager.EntitiesExtracted -= OnEntitiesExtracted;
             ConversationManager.MessageReceived -= OnMessageReceived;
             ConversationManager.ResponseGenerated -= OnResponseGenerated;
             ConversationManager.ContextUpdated -= OnContextUpdated;

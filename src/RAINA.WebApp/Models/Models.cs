@@ -144,4 +144,22 @@ namespace RAINA.Web.Models
         public double AgentTime { get; set; }
         public DateTime Timestamp { get; set; }
     }
+    public class LoginRequest
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class AuthResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string Username { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
+    public class ValidateSessionRequest
+    {
+        public string Username { get; set; }
+    }
 }

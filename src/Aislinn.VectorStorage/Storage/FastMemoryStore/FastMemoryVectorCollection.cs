@@ -52,7 +52,56 @@ namespace Aislinn.VectorStorage.Implementations
 
             return new VectorItem(vectorId, text, vector, metadata);
         }
+        public async Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata)
+        {
+            var textArray = texts.ToArray();
+            var metadataArray = metadata.ToArray();
 
+            if (textArray.Length != metadataArray.Length)
+                throw new ArgumentException("Texts and metadata collections must have the same length");
+
+            var vectorIds = textArray.Select(_ => Guid.NewGuid().ToString()).ToArray();
+            return await AddVectorsAsync(vectorIds, textArray, metadataArray);
+        }
+
+        public async Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> vectorIds, IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata)
+        {
+            var vectorIdArray = vectorIds.ToArray();
+            var textArray = texts.ToArray();
+            var metadataArray = metadata.ToArray();
+
+            if (vectorIdArray.Length != textArray.Length || textArray.Length != metadataArray.Length)
+                throw new ArgumentException("VectorIds, texts, and metadata collections must have the same length");
+
+            // Batch vectorize all texts
+            var vectors = await _vectorizer.StringsToVectorsAsync(textArray, "document");
+            var floatVectors = vectors.Select(v => v.Select(x => (float)x).ToArray()).ToArray();
+
+            var results = new List<VectorItem>();
+
+            _lock.EnterWriteLock();
+            try
+            {
+                var currentData = _data;
+
+                // Add all vectors to the data structure
+                for (int i = 0; i < vectorIdArray.Length; i++)
+                {
+                    var cleanMetadata = metadataArray[i] ?? new Dictionary<string, string>();
+                    currentData = currentData.Add(vectorIdArray[i], floatVectors[i], textArray[i], cleanMetadata);
+
+                    results.Add(new VectorItem(vectorIdArray[i], textArray[i], vectors[i], cleanMetadata));
+                }
+
+                _data = currentData; // Atomic swap
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+
+            return results;
+        }
         public async Task<List<SearchResult>> SearchVectorsAsync(string query, int topN, double minSimilarity = 0.0)
         {
             var queryVector = await _vectorizer.StringToVectorAsync(query, "query");

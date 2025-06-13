@@ -8,4 +8,6 @@ public class Entity
 
     [JsonPropertyName("type")]
     public string Type { get; set; }
+    [JsonPropertyName("formal")]
+    public string Formal { get; set; }
 }

@@ -162,6 +162,36 @@ namespace Aislinn.VectorStorage.Storage
             return dotProduct / (magnitude1 * magnitude2);
         }
 
+        public async Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata)
+        {
+            var textArray = texts.ToArray();
+            var metadataArray = metadata.ToArray();
 
+            if (textArray.Length != metadataArray.Length)
+                throw new ArgumentException("Texts and metadata collections must have the same length");
+
+            var vectorIds = textArray.Select(_ => Guid.NewGuid().ToString()).ToArray();
+            return await AddVectorsAsync(vectorIds, textArray, metadataArray);
+        }
+
+        public async Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> vectorIds, IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata)
+        {
+            var vectorIdArray = vectorIds.ToArray();
+            var textArray = texts.ToArray();
+            var metadataArray = metadata.ToArray();
+
+            if (vectorIdArray.Length != textArray.Length || textArray.Length != metadataArray.Length)
+                throw new ArgumentException("VectorIds, texts, and metadata collections must have the same length");
+
+            var results = new List<VectorItem>();
+
+            for (int i = 0; i < vectorIdArray.Length; i++)
+            {
+                var vectorItem = await AddVectorAsync(vectorIdArray[i], textArray[i], metadataArray[i]);
+                results.Add(vectorItem);
+            }
+
+            return results;
+        }
     }
 }

@@ -8,6 +8,7 @@ using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Configuration;
 using Aislinn.Core;
 using Aislinn.VectorStorage.Interfaces;
+using Aislinn.VectorStorage.Models;
 
 namespace RAINA.Services
 {
@@ -300,39 +301,298 @@ namespace RAINA.Services
         }
 
         /// <summary>
-        /// Handle special processing for person entities (speaker/listener slots)
+        // /// Handle special processing for person entities (speaker/listener slots)
+        // /// </summary>
+        // public async Task ProcessPersonEntitiesAsync(Chunk utteranceChunk, List<Entity> entities)
+        // {
+        //     var personEntities = entities.Where(e => e.Type.Contains("person")).ToList();
+        //     if (!personEntities.Any()) return;
+
+        //     foreach (var personEntity in personEntities)
+        //     {
+        //         var personChunk = await FindOrCreateEntityInstanceAsync(personEntity.Name, personEntity.Type);
+        //         if (personChunk == null) continue;
+
+        //         // Check if this person matches the speaker
+        //         if (utteranceChunk.Slots.TryGetValue("SpeakerName", out var speakerSlot) &&
+        //             string.Equals(speakerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+        //         {
+        //             utteranceChunk.Slots["Speaker"] = new ModelSlot { Name = "Speaker", Value = personChunk };
+        //         }
+
+        //         // Check if this person matches the listener
+        //         if (utteranceChunk.Slots.TryGetValue("ListenerName", out var listenerSlot) &&
+        //             string.Equals(listenerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+        //         {
+        //             utteranceChunk.Slots["Listener"] = new ModelSlot { Name = "Listener", Value = personChunk };
+        //         }
+        //     }
+
+        //     // Update the utterance chunk
+        //     var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+        //     await chunkCollection.UpdateChunkAsync(utteranceChunk);
+        // }
+
+        /// <summary>
+        /// Process all entities for an utterance - creates entity instances, attaches to utterance, and handles special person processing
         /// </summary>
-        public async Task ProcessPersonEntitiesAsync(Chunk utteranceChunk, List<Entity> entities)
+        public async Task ProcessEntitiesForUtteranceAsync(Chunk utteranceChunk, List<Entity> entities)
         {
-            var personEntities = entities.Where(e => e.Type.Contains("person")).ToList();
-            if (!personEntities.Any()) return;
+            if (utteranceChunk == null || entities == null || !entities.Any())
+                return;
 
-            foreach (var personEntity in personEntities)
+            // First, batch check for existing entities (check both name and formal if present)
+            var entityChunks = new List<Chunk>();
+            var newEntityData = new List<(Entity entity, string name, bool isFormal)>();
+
+            foreach (var entity in entities)
             {
-                var personChunk = await FindOrCreateEntityInstanceAsync(personEntity.Name, personEntity.Type);
-                if (personChunk == null) continue;
-
-                // Check if this person matches the speaker
-                if (utteranceChunk.Slots.TryGetValue("SpeakerName", out var speakerSlot) &&
-                    string.Equals(speakerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+                // Check original name
+                var existingOriginal = await FindExistingEntityInstanceAsync(entity.Name, entity.Type);
+                if (existingOriginal != null)
                 {
-                    utteranceChunk.Slots["Speaker"] = new ModelSlot { Name = "Speaker", Value = personChunk };
+                    entityChunks.Add(existingOriginal);
+                    if (entity.Type.Contains("person"))
+                    {
+                        await ProcessPersonEntityForUtterance(utteranceChunk, entity, existingOriginal);
+                    }
+                }
+                else
+                {
+                    newEntityData.Add((entity, entity.Name, false));
                 }
 
-                // Check if this person matches the listener
-                if (utteranceChunk.Slots.TryGetValue("ListenerName", out var listenerSlot) &&
-                    string.Equals(listenerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+                // If formal name exists and is different, check that too
+                if (!string.IsNullOrEmpty(entity.Formal) && !string.Equals(entity.Name, entity.Formal, StringComparison.OrdinalIgnoreCase))
                 {
-                    utteranceChunk.Slots["Listener"] = new ModelSlot { Name = "Listener", Value = personChunk };
+                    var existingFormal = await FindExistingEntityInstanceAsync(entity.Formal, entity.Type);
+                    if (existingFormal != null)
+                    {
+                        if (!entityChunks.Any(c => c.ID == existingFormal.ID)) // Avoid duplicates
+                        {
+                            entityChunks.Add(existingFormal);
+                        }
+                    }
+                    else
+                    {
+                        newEntityData.Add((entity, entity.Formal, true));
+                    }
                 }
             }
 
-            // Update the utterance chunk
-            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
-            await chunkCollection.UpdateChunkAsync(utteranceChunk);
+            // Only vectorize and create entities that don't exist
+            if (newEntityData.Any())
+            {
+                // Group by entity to batch vectorize (use formal name for vectorization when available)
+                var vectorTexts = new List<string>();
+                var vectorMetadata = new List<Dictionary<string, string>>();
+
+                foreach (var (entity, name, isFormal) in newEntityData)
+                {
+                    // Always use formal name for vectorization if available, otherwise use original name
+                    string vectorName = !string.IsNullOrEmpty(entity.Formal) ? entity.Formal : entity.Name;
+                    string vectorText = $"{entity.Type} : {vectorName}";
+
+                    vectorTexts.Add(vectorText);
+                    vectorMetadata.Add(new Dictionary<string, string>()
+                    {
+                        {"DataType", "EntityInstance"},
+                        {"Entity", name },
+                        {"OntologyType", entity.Type },
+                        {"IsFormal", isFormal.ToString()},
+                        {"CanonicalName", vectorName}
+                    });
+                }
+
+                // Batch vectorize all new entities using formal names
+                var vectorResults = await _vectorCollection.AddVectorsAsync(vectorTexts, vectorMetadata);
+
+                // Create new entity chunks and track relationships
+                var createdChunks = new Dictionary<string, List<Chunk>>(); // entity.Name -> chunks created for this entity
+
+                for (int i = 0; i < newEntityData.Count; i++)
+                {
+                    var (entity, name, isFormal) = newEntityData[i];
+                    var vector = vectorResults[i].Vector;
+                    var entityChunk = await CreateEntityInstanceWithName(entity.Type, name, vector);
+
+                    if (entityChunk != null)
+                    {
+                        entityChunks.Add(entityChunk);
+
+                        // Track chunks by original entity name for relationship creation
+                        if (!createdChunks.ContainsKey(entity.Name))
+                            createdChunks[entity.Name] = new List<Chunk>();
+                        createdChunks[entity.Name].Add(entityChunk);
+
+                        // Handle person processing
+                        if (entity.Type.Contains("person"))
+                        {
+                            await ProcessPersonEntityForUtterance(utteranceChunk, entity, entityChunk);
+                        }
+
+                        // Activate the new entity
+                        await _activationService.ActivateChunkAsync(entityChunk.ID, "entity_extraction", 0.8);
+                    }
+                }
+
+                // Create canonical/variant relationships between original and formal names
+                foreach (var entity in entities.Where(e => !string.IsNullOrEmpty(e.Formal) && !string.Equals(e.Name, e.Formal, StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (createdChunks.ContainsKey(entity.Name) && createdChunks[entity.Name].Count == 2)
+                    {
+                        var chunks = createdChunks[entity.Name];
+                        var originalChunk = chunks.FirstOrDefault(c => c.Name.Equals(entity.Name, StringComparison.OrdinalIgnoreCase));
+                        var formalChunk = chunks.FirstOrDefault(c => c.Name.Equals(entity.Formal, StringComparison.OrdinalIgnoreCase));
+
+                        if (originalChunk != null && formalChunk != null)
+                        {
+                            // Create canonical/variant relationships
+                            var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
+                            var association = new ChunkAssociation
+                            {
+                                ChunkAId = originalChunk.ID,
+                                ChunkBId = formalChunk.ID,
+                                RelationAtoB = "CanonicalForm",
+                                RelationBtoA = "Variant",
+                                WeightAtoB = 1.0,
+                                WeightBtoA = 1.0,
+                                LastActivated = _cognitiveTimeManager.GetCognitiveSteps()
+                            };
+                            await associationCollection.AddAssociationAsync(association);
+                        }
+                    }
+                }
+            }
+
+            // Activate existing entities too
+            var existingCount = entityChunks.Count - newEntityData.Count;
+            for (int i = 0; i < existingCount; i++)
+            {
+                await _activationService.ActivateChunkAsync(entityChunks[i].ID, "entity_extraction", 0.6);
+            }
+
+            // Add all entities to utterance slots
+            if (entityChunks.Any())
+            {
+                utteranceChunk.Slots["ExtractedEntities"] = new ModelSlot
+                {
+                    Name = "ExtractedEntities",
+                    Value = entityChunks.Select(e => e.ID).ToList()
+                };
+
+                var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+                await chunkCollection.UpdateChunkAsync(utteranceChunk);
+            }
         }
 
         /// <summary>
+        /// Create entity instance with specific name and pre-generated vector
+        /// </summary>
+        private async Task<Chunk> CreateEntityInstanceWithName(string entityType, string entityName, double[] vector)
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection == null)
+                throw new InvalidOperationException($"Chunk collection '{_chunkCollectionId}' not found");
+
+            // Find or create ontology concept
+            var ontologyConcept = await FindOntologyConceptAsync(entityType);
+            if (ontologyConcept == null)
+            {
+                ontologyConcept = await CreateOntologyConceptAsync(entityType);
+            }
+
+            // Create new entity instance with provided vector
+            var entityInstance = new Chunk
+            {
+                ChunkType = "Declarative",
+                CognitiveCategory = "Instance",
+                SemanticType = entityType,
+                Name = entityName,
+                Vector = vector,
+                Slots = new Dictionary<string, ModelSlot>
+                {
+                    { "EntityName", new ModelSlot { Name = "EntityName", Value = entityName } },
+                    { "OntologyType", new ModelSlot { Name = "OntologyType", Value = entityType } },
+                    { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } }
+                }
+            };
+
+            // Save the entity instance
+            entityInstance = await chunkCollection.AddChunkAsync(entityInstance);
+
+            // Create InstanceOf association with ontology concept
+            if (ontologyConcept != null)
+            {
+                await CreateInstanceOfAssociationAsync(entityInstance.ID, ontologyConcept.ID);
+            }
+
+            return entityInstance;
+        }
+        /// <summary>
+        /// Create entity instance with pre-generated vector
+        /// </summary>
+        private async Task<Chunk> CreateEntityInstanceWithVector(Entity entity, double[] vector)
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection == null)
+                throw new InvalidOperationException($"Chunk collection '{_chunkCollectionId}' not found");
+
+            // Find or create ontology concept
+            var ontologyConcept = await FindOntologyConceptAsync(entity.Type);
+            if (ontologyConcept == null)
+            {
+                ontologyConcept = await CreateOntologyConceptAsync(entity.Type);
+            }
+
+            // Create new entity instance with provided vector
+            var entityInstance = new Chunk
+            {
+                ChunkType = "Declarative",
+                CognitiveCategory = "Instance",
+                SemanticType = entity.Type,
+                Name = entity.Name,
+                Vector = vector,
+                Slots = new Dictionary<string, ModelSlot>
+                {
+                    { "EntityName", new ModelSlot { Name = "EntityName", Value = entity.Name } },
+                    { "OntologyType", new ModelSlot { Name = "OntologyType", Value = entity.Type } },
+                    { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } }
+                }
+            };
+
+            // Save the entity instance
+            entityInstance = await chunkCollection.AddChunkAsync(entityInstance);
+
+            // Create InstanceOf association with ontology concept
+            if (ontologyConcept != null)
+            {
+                await CreateInstanceOfAssociationAsync(entityInstance.ID, ontologyConcept.ID);
+            }
+
+            return entityInstance;
+        }
+
+        /// <summary>
+        /// Handle person entity speaker/listener matching
+        /// </summary>
+        private async Task ProcessPersonEntityForUtterance(Chunk utteranceChunk, Entity personEntity, Chunk personChunk)
+        {
+            // Check if this person matches the speaker
+            if (utteranceChunk.Slots.TryGetValue("SpeakerName", out var speakerSlot) &&
+                string.Equals(speakerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                utteranceChunk.Slots["Speaker"] = new ModelSlot { Name = "Speaker", Value = personChunk };
+            }
+
+            // Check if this person matches the listener
+            if (utteranceChunk.Slots.TryGetValue("ListenerName", out var listenerSlot) &&
+                string.Equals(listenerSlot.Value?.ToString(), personEntity.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                utteranceChunk.Slots["Listener"] = new ModelSlot { Name = "Listener", Value = personChunk };
+            }
+        }
+        // /// <summary>
         /// Get reverse relation type for bidirectional associations
         /// </summary>
         private string GetReverseRelationType(string relationType)

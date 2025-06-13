@@ -71,5 +71,26 @@ namespace Aislinn.VectorStorage.Vectorizers
         {
             return await StringToVectorAsync(text);
         }
+
+        public async Task<List<double[]>> StringsToVectorsAsync(IEnumerable<string> texts)
+        {
+            return await StringsToVectorsAsync(texts, null);
+        }
+
+        public async Task<List<double[]>> StringsToVectorsAsync(IEnumerable<string> texts, string inputType = null)
+        {
+            if (texts == null)
+                throw new ArgumentNullException(nameof(texts));
+
+            var results = new List<double[]>();
+
+            foreach (var text in texts)
+            {
+                var vector = await StringToVectorAsync(text);
+                results.Add(vector);
+            }
+
+            return results;
+        }
     }
 }

@@ -9,6 +9,10 @@ namespace Aislinn.VectorStorage.Interfaces
         string Id { get; }
         Task<VectorItem> AddVectorAsync(string text, Dictionary<string, string> metadata);
         Task<VectorItem> AddVectorAsync(string vectorId, string text, Dictionary<string, string> metadata);
+        //batch add methods
+        Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata);
+        Task<List<VectorItem>> AddVectorsAsync(IEnumerable<string> vectorIds, IEnumerable<string> texts, IEnumerable<Dictionary<string, string>> metadata);
+
         Task<List<SearchResult>> SearchVectorsAsync(string query, int topN, double minSimilarity = 0.0);
         Task<List<SearchResult>> SearchVectorsAsync(double[] queryVector, int topN, double minSimilarity = 0.0);
         Task<bool> DeleteVectorAsync(string vectorId);

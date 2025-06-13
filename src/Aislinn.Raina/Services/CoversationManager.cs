@@ -181,11 +181,12 @@ public class ConversationManager
         };
         var extractionResult = await _entityRelationshipExtraction.ExtractEntitiesAndRelationshipsAsync(userInput);
         // Process entities and attach to utterance
-        await _entityManager.AttachEntitiesToUtteranceAsync(utteranceChunk, extractionResult.Entities);
+        //await _entityManager.AttachEntitiesToUtteranceAsync(utteranceChunk, extractionResult.Entities);
 
         // Handle special person entity processing (for speaker/listener slots)
-        await _entityManager.ProcessPersonEntitiesAsync(utteranceChunk, extractionResult.Entities);
-
+        //await _entityManager.ProcessPersonEntitiesAsync(utteranceChunk, extractionResult.Entities);
+        // Process all entities with batch vectorization
+        await _entityManager.ProcessEntitiesForUtteranceAsync(utteranceChunk, extractionResult.Entities);
         // Create relationship associations between entities
         await _entityManager.CreateRelationshipAssociationsAsync(extractionResult.Relationships, extractionResult.Entities);
 

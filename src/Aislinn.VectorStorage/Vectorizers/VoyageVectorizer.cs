@@ -103,7 +103,89 @@ namespace Aislinn.VectorStorage.Implementations
 
             return (flowControl: true, value: null);
         }
+        private async Task<(bool flowControl, List<double[]> values)> RequestVectors(VoyageEmbeddingRequest request)
+        {
+            var retryCount = 0;
+            while (retryCount <= _config.VoyageMaxRetries)
+            {
+                try
+                {
+                    // Use the batch endpoint for multiple inputs
+                    var response = await _httpClient.PostAsJsonAsync(_config.VoyageBaseUrl, request);
 
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<VoyageEmbeddingResponse>(responseContent);
+
+                        if (result?.data?.Length > 0)
+                        {
+                            var vectors = result.data
+                                .OrderBy(d => d.index) // Ensure correct order matches input order
+                                .Select(d => d.embedding)
+                                .ToList();
+                            return (flowControl: false, values: vectors);
+                        }
+
+                        throw new InvalidOperationException("No embedding data returned from Voyage API");
+                    }
+
+                    // Handle rate limiting
+                    if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    {
+                        var retryAfter = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(Math.Pow(2, retryCount));
+                        await Task.Delay(retryAfter);
+                        retryCount++;
+                        continue;
+                    }
+
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    throw new HttpRequestException($"Voyage API error: {response.StatusCode} - {errorContent}");
+                }
+                catch (TaskCanceledException) when (retryCount < _config.VoyageMaxRetries)
+                {
+                    retryCount++;
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount))); // Exponential backoff
+                }
+                catch (HttpRequestException) when (retryCount < _config.VoyageMaxRetries)
+                {
+                    retryCount++;
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount))); // Exponential backoff
+                }
+            }
+
+            return (flowControl: true, values: null);
+        }
+
+        public async Task<List<double[]>> StringsToVectorsAsync(IEnumerable<string> texts)
+        {
+            return await StringsToVectorsAsync(texts, null);
+        }
+
+        public async Task<List<double[]>> StringsToVectorsAsync(IEnumerable<string> texts, string inputType = null)
+        {
+            if (texts == null)
+                throw new ArgumentNullException(nameof(texts));
+
+            var textArray = texts.ToArray();
+            if (textArray.Length == 0)
+                return new List<double[]>();
+
+            var request = new VoyageEmbeddingRequest
+            {
+                input = textArray,
+                model = _config.VoyageModel,
+                input_type = inputType ?? _config.VoyageInputType
+            };
+
+            (bool flowControl, List<double[]> values) = await RequestVectors(request);
+            if (!flowControl)
+            {
+                return values;
+            }
+
+            throw new InvalidOperationException($"Failed to get embeddings after {_config.VoyageMaxRetries + 1} attempts");
+        }
         private static int GetModelDimensions(string model)
         {
             return model?.ToLower() switch

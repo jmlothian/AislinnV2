@@ -472,44 +472,29 @@ namespace Aislinn.Core.Memory
                     double oldActivation = slot.CurrentActivation;
                     double oldFocus = slot.FocusValue;
 
-                    // Refresh focused items
-                    if (focusedChunkIds.Contains(slot.ChunkId))
+
+                    // Apply decay based on time since last refresh
+                    slot.FocusValue *= 0.9; // Gradual focus decay
+                    slot.CurrentActivation *= (1 - (_refreshDecayRate * timeSinceLastRefresh));
+
+                    Console.WriteLine($"[WM-DEBUG]   Chunk {slot.ChunkId}:");
+                    Console.WriteLine($"[WM-DEBUG]     Activation: {oldActivation:F3} -> {slot.CurrentActivation:F3}");
+                    Console.WriteLine($"[WM-DEBUG]     Focus: {oldFocus:F3} -> {slot.FocusValue:F3}");
+
+                    // If activation falls below threshold, mark for removal
+                    if (slot.CurrentActivation < _associativeThreshold)
                     {
-                        slot.FocusValue = 1.0;
-                        slot.LastRefreshTime = now;
-                        slot.RefreshCount++;
-
-                        // Focused items decay less
-                        slot.CurrentActivation *= (1 - (_refreshDecayRate * 0.2 * timeSinceLastRefresh));
-
-                        Console.WriteLine($"[WM-DEBUG]   FOCUSED chunk {slot.ChunkId}:");
-                        Console.WriteLine($"[WM-DEBUG]     Activation: {oldActivation:F3} -> {slot.CurrentActivation:F3}");
-                        Console.WriteLine($"[WM-DEBUG]     Refresh count: {slot.RefreshCount}");
+                        slotsToRemove.Add(slot);
+                        Console.WriteLine($"[WM-DEBUG]     MARKED FOR COMPLETE REMOVAL (below associative threshold {_associativeThreshold})");
                     }
-                    else
+                    else if (slot.CurrentActivation < _activationThreshold)
                     {
-                        // Apply decay based on time since last refresh
-                        slot.FocusValue *= 0.9; // Gradual focus decay
-                        slot.CurrentActivation *= (1 - (_refreshDecayRate * timeSinceLastRefresh));
-
-                        Console.WriteLine($"[WM-DEBUG]   Chunk {slot.ChunkId}:");
-                        Console.WriteLine($"[WM-DEBUG]     Activation: {oldActivation:F3} -> {slot.CurrentActivation:F3}");
-                        Console.WriteLine($"[WM-DEBUG]     Focus: {oldFocus:F3} -> {slot.FocusValue:F3}");
-
-                        // If activation falls below threshold, mark for removal
-                        if (slot.CurrentActivation < _associativeThreshold)
-                        {
-                            slotsToRemove.Add(slot);
-                            Console.WriteLine($"[WM-DEBUG]     MARKED FOR COMPLETE REMOVAL (below associative threshold {_associativeThreshold})");
-                        }
-                        else if (slot.CurrentActivation < _activationThreshold)
-                        {
-                            // Move to primed list if below WM threshold but above associative threshold
-                            slotsToRemove.Add(slot);
-                            _primedChunks[slot.ChunkId] = slot.CurrentActivation;
-                            Console.WriteLine($"[WM-DEBUG]     MARKED FOR PRIMING (below WM threshold {_activationThreshold})");
-                        }
+                        // Move to primed list if below WM threshold but above associative threshold
+                        slotsToRemove.Add(slot);
+                        _primedChunks[slot.ChunkId] = slot.CurrentActivation;
+                        Console.WriteLine($"[WM-DEBUG]     MARKED FOR PRIMING (below WM threshold {_activationThreshold})");
                     }
+
                 }
 
                 // Remove decayed items

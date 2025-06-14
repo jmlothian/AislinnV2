@@ -9,4 +9,6 @@ public interface IChunkAssociationCollection
     Task<bool> UpdateAssociationAsync(ChunkAssociation association);
     Task<bool> DeleteAssociationAsync(Guid chunkAId, Guid chunkBId, string relationAtoB, string relationBtoA);
     Task<List<ChunkAssociation>> GetAssociationsForChunkAsync(Guid chunkId);
+    Task<List<ChunkAssociation>> GetAllAssociationsAsync(); //for decay
+
 }

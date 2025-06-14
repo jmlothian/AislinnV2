@@ -152,7 +152,44 @@ namespace Aislinn.Core.Services
                 }
             }
         }
+        /// <summary>
+        /// Apply decay to association weights and remove very weak associations
+        /// </summary>
+        public async Task ApplyAssociationDecayAsync(double timeSinceLastDecay = 1.0)
+        {
+            var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
+            if (associationCollection == null) return;
 
+            var allAssociations = await associationCollection.GetAllAssociationsAsync();
+            var associationsToRemove = new List<ChunkAssociation>();
+
+            const double associationDecayRate = 0.02; // 2% decay per time unit
+            const double removalThreshold = 0.05; // Remove when weight drops below 5%
+
+            foreach (var association in allAssociations)
+            {
+                // Apply decay to both directions
+                association.WeightAtoB *= (1 - (associationDecayRate * timeSinceLastDecay));
+                association.WeightBtoA *= (1 - (associationDecayRate * timeSinceLastDecay));
+
+                // Mark for removal if both weights are very low
+                if (association.WeightAtoB < removalThreshold && association.WeightBtoA < removalThreshold)
+                {
+                    associationsToRemove.Add(association);
+                }
+                else
+                {
+                    // Update the association with new weights
+                    await associationCollection.UpdateAssociationAsync(association);
+                }
+            }
+
+            // Remove very weak associations
+            foreach (var association in associationsToRemove)
+            {
+                await associationCollection.DeleteAssociationAsync(association.ChunkAId, association.ChunkBId, association.RelationAtoB, association.RelationBtoA);
+            }
+        }
         /// <summary>
         /// Create an association between two chunks and update their slots
         /// </summary>

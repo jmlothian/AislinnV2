@@ -16,6 +16,7 @@ public class UserContext
     public Dictionary<string, object> ContextVariables { get; set; } = new Dictionary<string, object>();
     public DateTime? LoginTime { get; set; }
     public DateTime? LastActivity { get; set; }
+    public long ActivityCounter { get; set; } = 0;
 
     // Recent utterances in this context
     private List<Chunk> _utteranceHistory = new List<Chunk>();

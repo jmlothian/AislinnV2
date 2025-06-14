@@ -476,6 +476,12 @@ public class ConversationManager
     }
     public async Task<Response> GenerateResponseAsync(string userInput, Intent intent, UserContext context)
     {
+        context.ActivityCounter++;
+        if (context.ActivityCounter % 2 == 0)
+        {
+            await _memorySystem.ApplyDecayAsync();
+        }
+
         // Record the user input first
         var (userUtterance, extractionResult) = await RecordUserInputAsync(userInput, intent, context);
         OnEntitiesExtracted(intent.Entities, extractionResult.Entities, userInput); // Will need to get actual extracted entities

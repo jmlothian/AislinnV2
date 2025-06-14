@@ -402,7 +402,28 @@ namespace Aislinn.Core.Storage.SQLite
 
             return copy;
         }
+        public async Task<List<ChunkAssociation>> GetAllAssociationsAsync()
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
 
+            var query = $@"
+                SELECT AssociationKey, ChunkAId, ChunkBId, RelationAtoB, RelationBtoA, WeightAtoB, WeightBtoA, LastActivated, ActivationHistoryJson
+                FROM {_tableName} 
+                ORDER BY LastActivated DESC";
+
+            using var cmd = new SqliteCommand(query, connection);
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            var associations = new List<ChunkAssociation>();
+            while (await reader.ReadAsync())
+            {
+                var association = DeserializeAssociation(reader);
+                associations.Add(DeepCopyAssociation(association));
+            }
+
+            return associations;
+        }
         public void Dispose()
         {
             _cache.Clear();

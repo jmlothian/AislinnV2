@@ -71,6 +71,10 @@ namespace Aislinn.Core.Services
             double adjustedBoost = activationBoost * parameters.BaseActivationBoost;
             chunk.ActivationLevel += adjustedBoost;
 
+            // Enforce ceiling after boost is applied
+            chunk.ActivationLevel = Math.Min(parameters.ActivationCeiling, chunk.ActivationLevel);
+
+
             // Create activation history item
             var activationItem = new ActivationHistoryItem
             {

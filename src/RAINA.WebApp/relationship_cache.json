@@ -1,4 +1,6 @@
 {
-  "RelationshipMappings": {},
+  "RelationshipMappings": {
+    "ShowingUpIn": "DisplayedIn"
+  },
   "ApprovedNovelRelations": []
 }

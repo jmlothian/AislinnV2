@@ -13,6 +13,7 @@ using Aislinn.Core.Cognitive;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.SignalR;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using RAINA.Logging;
 
 namespace RAINA.Web
 {
@@ -40,6 +41,13 @@ namespace RAINA.Web
             {
                 logger.LogInformation("Logger Initialized");
             }
+            builder.Logging.AddSignalRLogger(options =>
+            {
+                options.MinimumLevel = LogLevel.Information;
+                options.AllowedCategories = new List<string> { "RAINA.*", "Aislinn.*" };
+                options.ExcludeCategories = new List<string> { "Microsoft.*", "System.*", "AspNetCore.*" };
+                options.HubMethodName = "ReceiveLogMessage";
+            });
             // builder.Services.AddCors(options =>
             // {
             //     options.AddDefaultPolicy(policy =>

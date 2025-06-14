@@ -1,5 +1,5 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
-import type { EntityInfo } from "../models/models";
+import type { DebugLog, EntityInfo } from "../models/models";
 
 // Copy these types from your Models.cs or create a types file
 interface SummariesLoadedEvent {
@@ -127,6 +127,9 @@ export class SignalRService {
       }
     }
   }
+  onLogMessage(callback: (data: DebugLog) => void): void {
+    this.connection.on("ReceiveLogMessage", callback);
+  }
   onSummariesLoaded(callback: (data: SummariesLoadedEvent) => void): void {
     this.connection.on("SummariesLoaded", callback);
   }
@@ -175,5 +178,6 @@ export class SignalRService {
     this.connection.off("SystemStatus");
     this.connection.off("Test");
     this.connection.off("SummariesLoaded");
+    this.connection.off("ReceiveLogMessage");
   }
 }

@@ -42,9 +42,9 @@ export interface SummaryDepthData {
 }
 
 export interface DebugLog {
-  id: number;
+  id: string;
   timestamp: string;
-  level: "INFO" | "DEBUG" | "ERROR";
+  level: "INFO" | "DEBUG" | "ERROR" | "WARNING";
   category: string;
   message: string;
 }

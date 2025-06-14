@@ -51,37 +51,37 @@ const RainaUI = () => {
 
   const mockMessages: Message[] = [];
 
-  const mockDebugLogs: DebugLog[] = [
-    {
-      id: 1,
-      timestamp: "14:35:23.456",
-      level: "INFO",
-      category: "WorkingMemory",
-      message: "Added chunk: Current Conversation (activation: 0.95)",
-    },
-    {
-      id: 2,
-      timestamp: "14:35:23.467",
-      level: "DEBUG",
-      category: "ContextContainer",
-      message: "Updated context factor: Task.PrimaryActivity = Conversation",
-    },
-    {
-      id: 3,
-      timestamp: "14:35:23.478",
-      level: "INFO",
-      category: "SpreadingActivation",
-      message: "Activated chunk: User Profile: John (boost: 0.12)",
-    },
-    {
-      id: 4,
-      timestamp: "14:35:23.489",
-      level: "DEBUG",
-      category: "IntentProcessor",
-      message: "Classified intent: PlanningAssistance (confidence: 0.89)",
-    },
-    { id: 5, timestamp: "14:35:23.501", level: "INFO", category: "ConversationManager", message: "Generated response (token count: 156)" },
-  ];
+  // const mockDebugLogs: DebugLog[] = [
+  //   {
+  //     id: 1,
+  //     timestamp: "14:35:23.456",
+  //     level: "INFO",
+  //     category: "WorkingMemory",
+  //     message: "Added chunk: Current Conversation (activation: 0.95)",
+  //   },
+  //   {
+  //     id: 2,
+  //     timestamp: "14:35:23.467",
+  //     level: "DEBUG",
+  //     category: "ContextContainer",
+  //     message: "Updated context factor: Task.PrimaryActivity = Conversation",
+  //   },
+  //   {
+  //     id: 3,
+  //     timestamp: "14:35:23.478",
+  //     level: "INFO",
+  //     category: "SpreadingActivation",
+  //     message: "Activated chunk: User Profile: John (boost: 0.12)",
+  //   },
+  //   {
+  //     id: 4,
+  //     timestamp: "14:35:23.489",
+  //     level: "DEBUG",
+  //     category: "IntentProcessor",
+  //     message: "Classified intent: PlanningAssistance (confidence: 0.89)",
+  //   },
+  //   { id: 5, timestamp: "14:35:23.501", level: "INFO", category: "ConversationManager", message: "Generated response (token count: 156)" },
+  // ];
 
   const tabs: Tab[] = [
     { id: "chat", name: "Chat", icon: MessageCircle },
@@ -110,6 +110,9 @@ const RainaUI = () => {
   const [intentEntities, setIntentEntities] = useState<EntityInfo[]>([]);
   const [extractedEntities, setExtractedEntities] = useState<EntityInfo[]>([]);
   const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>([]);
+  const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
+  const [maxDebugLogs] = useState<number>(1000); // Limit to prevent memory issues
+
   const [context, setContext] = useState<ContextData>({
     environment: {},
     social: {},
@@ -363,6 +366,29 @@ const RainaUI = () => {
           console.log(`Built ${messagesFromSummary.length} messages from summaries`);
         }
       });
+      signalRService.onLogMessage((data) => {
+        if (!isDebugPaused) {
+          // Only add if not paused
+          const newLog: DebugLog = {
+            id: generateId(),
+            timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+            level: data.level as "DEBUG" | "INFO" | "WARNING" | "ERROR",
+            category: data.category,
+            message: data.message,
+          };
+
+          setDebugLogs((prev) => {
+            const newLogs = [...prev, newLog];
+            // Keep only the most recent logs to prevent memory issues
+            return newLogs.slice(-maxDebugLogs);
+          });
+        }
+      });
     };
 
     connectSignalR();
@@ -378,7 +404,13 @@ const RainaUI = () => {
     setSummariesRequested(true);
     await signalRService.requestSummaries();
   };
-
+  // useEffect(() => {
+  //   if (activeTab === "debug" && isConnected) {
+  //     signalRService.joinLoggingGroup();
+  //   } else if (activeTab !== "debug" && isConnected) {
+  //     signalRService.leaveLoggingGroup();
+  //   }
+  // }, [activeTab, isConnected]);
   useEffect(() => {
     if (activeTab === "summaries" && !summariesRequested && Object.keys(summaryData).length === 0) {
       handleRequestSummaries();
@@ -654,12 +686,18 @@ const RainaUI = () => {
 
       <div className="flex-1 overflow-y-auto p-4 font-mono text-xs bg-gray-900 text-gray-100">
         <div className="space-y-1">
-          {mockDebugLogs.map((log) => (
+          {debugLogs.map((log) => (
             <div key={log.id} className="flex flex-wrap gap-2 leading-relaxed">
               <span className="text-gray-400 flex-shrink-0">{log.timestamp}</span>
               <span
                 className={`font-semibold flex-shrink-0 ${
-                  log.level === "INFO" ? "text-blue-400" : log.level === "DEBUG" ? "text-gray-400" : "text-red-400"
+                  log.level === "INFO"
+                    ? "text-blue-400"
+                    : log.level === "DEBUG"
+                    ? "text-gray-400"
+                    : log.level === "WARNING"
+                    ? "text-yellow-400"
+                    : "text-red-400"
                 }`}
               >
                 {log.level}

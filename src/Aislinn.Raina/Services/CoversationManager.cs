@@ -14,6 +14,7 @@ using Aislinn.VectorStorage.Models;
 using Aislinn.Configuration;
 using static Aislinn.Core.Context.ContextContainer;
 using RAINA.Events;
+using Microsoft.Extensions.Logging;
 
 namespace RAINA.Services;
 
@@ -79,14 +80,15 @@ public class ConversationManager
     public static event EventHandler<SummaryCreatedEventArgs> SummaryCreated;
     public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
 
-
+    private readonly ILogger<ConversationManager> _logger;
     public ConversationManager(
         AislinnCoreServices coreServices,
         EntityInstanceManager entityManager,
         EntityRelationshipExtractionService entityExtractionService,
         RainaConfiguration config,
         IVectorCollection vectorCollection,
-        SummaryService summaryService
+        SummaryService summaryService,
+        ILogger<ConversationManager> logger
 )
     {
         _memorySystem = coreServices.MemorySystem;
@@ -100,6 +102,7 @@ public class ConversationManager
         _entityManager = entityManager;
         _vectorCollection = vectorCollection;
         _rainaConfig = config;
+        _logger = logger;
         this.summaryService = summaryService;
 
     }
@@ -160,6 +163,8 @@ public class ConversationManager
     public async Task<(Chunk chunk, ExtractionResult extractionResult)> RecordUserInputAsync(string userInput, Intent intent, UserContext context)
     {
         // Ensure we have an active conversation
+        _logger.LogInformation("RecordUserInputAsync [" + context.CurrentTopic + "]: " + userInput);
+        _logger.LogInformation("Intent: " + intent.IntentType);
         if (_currentConversationChunk == null)
         {
             await InitializeConversationAsync(context);
@@ -213,6 +218,7 @@ public class ConversationManager
         Console.WriteLine(context.RainaChunk);
         Console.WriteLine(_currentConversationChunk);
         Console.WriteLine(intent);
+        _logger.LogInformation($"Chunks Created: User: {context.UserChunk.ID} Raina: {context.RainaChunk.ID}");
 
         var vectorMeta = new Dictionary<string, string>()
         {
@@ -269,6 +275,7 @@ public class ConversationManager
         try
         {
             var response = JsonSerializer.Deserialize<LLMContextResponse>(llmResponseJson);
+            _logger.LogInformation($"Updating Context from Analysis");
 
             await ProcessCategoryFactors(ContextCategory.Environment, response.Environment);
             await ProcessCategoryFactors(ContextCategory.Social, response.Social);
@@ -419,6 +426,8 @@ public class ConversationManager
     }
     private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationHistoryText, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
     {
+        _logger.LogInformation($"Generating Response...");
+
         // Format intent information
         var intentType = intent?.IntentType ?? "Unknown";
         var intentConfidence = intent?.Confidence.ToString("P1") ?? "Unknown";
@@ -500,6 +509,8 @@ public class ConversationManager
 
 
         //convert conversation and summarizes into context
+        _logger.LogInformation($"Extracting Context");
+
         var summaryJson = JsonSerializer.Serialize(input, new JsonSerializerOptions { WriteIndented = true });
         var prompt = promptLibrary.HydratePrompt("context.extract", new Dictionary<string, object>() { ["summaryData"] = summaryJson, ["agentName"] = "Raina" });
         var resp = await CallOpenAIAsync("You are part of Raina (she/her), an intelligent conversational AI. You are a helpful assistant specialized in conversational context extraction for her. Please respond in first person as her.", prompt, true);
@@ -508,6 +519,7 @@ public class ConversationManager
         await this.UpdateContextFromLLMResponse(resp.Choices[0].Message.Content);
 
         //convert context snapshot back into text
+        _logger.LogInformation($"Summarizing Context");
         var contextSnapshot = _contextContainer.CreateContextSnapshot();
         var snapshotJSON = JsonSerializer.Serialize(contextSnapshot, new JsonSerializerOptions { WriteIndented = true });
         prompt = promptLibrary.HydratePrompt("context.createcontextsummary", new Dictionary<string, object>() { ["contextSnapshot"] = snapshotJSON });
@@ -536,6 +548,7 @@ public class ConversationManager
             0.7
         );
 
+        _logger.LogInformation($"Searching for Context");
 
         // NEW: Perform contextual vector searches and activate relevant chunks FIRST
         var searchBoosts = await PerformContextualVectorSearchAsync(userInput, extractionResult.Entities, contextSummary, context);
@@ -544,6 +557,7 @@ public class ConversationManager
             // Activate chunks found through vector search
             await _memorySystem.ActivateChunksAsync(searchBoosts, "contextual_search");
         }
+        _logger.LogInformation($"Update Working Memory");
 
         // THEN do manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work

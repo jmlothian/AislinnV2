@@ -166,7 +166,22 @@ namespace Aislinn.Core.Cognitive
 
             return chunk;
         }
+        /// <summary>
+        /// Activate a chunk with context-filtered spreading activation
+        /// </summary>
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string emotionName = null, double activationBoost = 1.0)
+        {
+            // Activate the chunk using the activation service with context
+            var chunk = await _activationService.ActivateChunkAsync(chunkId, context, emotionName, activationBoost);
 
+            // Update working memory with the activated chunk
+            if (chunk != null)
+            {
+                await _workingMemory.UpdateWorkingMemoryAsync(chunk);
+            }
+
+            return chunk;
+        }
         /// <summary>
         /// Apply activation decay to all chunks in the system
         /// </summary>

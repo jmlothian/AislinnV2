@@ -104,12 +104,82 @@ namespace Aislinn.Core.Services
                 null,
                 maxSpreadingDepth,
                 activationBoost,
-                new HashSet<Guid> { chunkId },  // Mark the source as already visited
-                activationItem, parameters);
+                new HashSet<Guid> { chunkId },
+                activationItem,
+                parameters,
+                null); // Add this null parameter for context
 
             return chunk;
         }
+        /// <summary>
+        /// Activates a chunk with context-filtered spreading activation
+        /// </summary>
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string emotionName = null, double activationBoost = 1.0)
+        {
+            // Get the collections
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection == null)
+                throw new InvalidOperationException($"Chunk collection '{_chunkCollectionId}' not found");
 
+            var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
+            if (associationCollection == null)
+                throw new InvalidOperationException($"Association collection '{_associationCollectionId}' not found");
+
+            // Get the chunk to activate
+            var chunk = await chunkCollection.GetChunkAsync(chunkId);
+            if (chunk == null) return null;
+
+            var parameters = _parametersRegistry.GetParameters(chunk);
+
+            // Record the previous activation level for history
+            double previousActivation = chunk.ActivationLevel;
+
+            // Calculate new activation using the activation model
+            chunk.ActivationLevel = _activationModel.CalculateActivation(chunk);
+
+            // Apply activation boost adjusted by type-specific factor
+            double adjustedBoost = activationBoost * parameters.BaseActivationBoost;
+            chunk.ActivationLevel += adjustedBoost;
+
+            // Enforce ceiling after boost is applied
+            chunk.ActivationLevel = Math.Min(parameters.ActivationCeiling, chunk.ActivationLevel);
+
+            // Create activation history item
+            var activationItem = new ActivationHistoryItem
+            {
+                PreviousValue = previousActivation,
+                NewValue = chunk.ActivationLevel,
+                Change = chunk.ActivationLevel - previousActivation,
+                SequenceNumber = chunk.ActivationHistory.Count > 0
+                    ? chunk.ActivationHistory[0].SequenceNumber + 1
+                    : 1,
+                EmotionName = emotionName,
+                ActivationDate = _timeManager.GetCognitiveSteps()
+            };
+
+            // Add to history (most recent first)
+            chunk.ActivationHistory.Insert(0, activationItem);
+
+            // Update the chunk
+            await chunkCollection.UpdateChunkAsync(chunk);
+
+            // Use context for max spreading depth if provided
+            int maxSpreadingDepth = context?.MaxDepthOverride ?? Convert.ToInt32(parameters.SpreadingFactor * 3);
+            maxSpreadingDepth = Math.Max(1, Math.Min(4, maxSpreadingDepth));
+
+            // Start context-filtered spreading activation
+            await SpreadActivationAsync(
+                chunk,
+                null,
+                maxSpreadingDepth,
+                activationBoost,
+                new HashSet<Guid> { chunkId },
+                activationItem,
+                parameters,
+                context);
+
+            return chunk;
+        }
         /// <summary>
         /// Apply activation decay to all chunks in the system
         /// </summary>
@@ -265,7 +335,9 @@ namespace Aislinn.Core.Services
             int remainingDepth,
             double currentSpreadingFactor,
             HashSet<Guid> visitedChunks,
-            ActivationHistoryItem originalActivation, TypeActivationParameters parameters)
+            ActivationHistoryItem originalActivation,
+            TypeActivationParameters parameters,
+            SpreadingContext context = null)
         {
             if (remainingDepth <= 0) return;
 
@@ -294,7 +366,11 @@ namespace Aislinn.Core.Services
                 // Get the target chunk
                 var targetChunk = await chunkCollection.GetChunkAsync(targetChunkId);
                 if (targetChunk == null) continue;
-
+                // Apply context filtering if provided
+                if (context != null && !context.ShouldSpreadToTarget(targetChunk, association, isSourceA))
+                {
+                    continue; // Skip this association due to context filtering
+                }
                 // Calculate spread amount using the activation model
                 double previousActivation = targetChunk.ActivationLevel;
                 double spreadAmount = _activationModel.CalculateSpreadingActivation(
@@ -359,13 +435,16 @@ namespace Aislinn.Core.Services
                 await associationCollection.UpdateAssociationAsync(association);
 
                 // Continue spreading (recursive call with reduced factor)
+                // Continue spreading (recursive call with reduced factor)
                 await SpreadActivationAsync(
                     targetChunk,
                     association,
                     remainingDepth - 1,
                     currentSpreadingFactor * parameters.SpreadingFactor,
                     visitedChunks,
-                    originalActivation, parameters);
+                    originalActivation,
+                    parameters,
+                    context);
             }
         }
 

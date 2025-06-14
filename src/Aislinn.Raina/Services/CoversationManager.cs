@@ -561,7 +561,7 @@ public class ConversationManager
 
         // THEN do manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work
-        await _memorySystem.ManualRefreshCycleAsync(new List<Guid> { userUtterance.ID, _currentConversationChunk.ID, context.UserChunk.ID });
+        //await _memorySystem.ManualRefreshCycleAsync(new List<Guid> { userUtterance.ID, _currentConversationChunk.ID, context.UserChunk.ID });
 
         // Get top activated chunks and push some into working memory
         var topActivatedChunks = await _memorySystem.GetTopActivatedChunksAsync(10, excludeWorkingMemory: true);
@@ -572,9 +572,9 @@ public class ConversationManager
             await _memorySystem.PushChunksToWorkingMemoryAsync(chunkIdsToPush);
         }
         //these might go in the "if" not sure...
-        var workingMemory = await _memorySystem.GetWorkingMemoryContentsAsync();
-        var primedChunks = await _memorySystem.GetPrimedChunksAsync();
-        OnWorkingMemoryChanged(workingMemory, primedChunks);
+        // var workingMemory = await _memorySystem.GetWorkingMemoryContentsAsync();
+        // var primedChunks = await _memorySystem.GetPrimedChunksAsync();
+        // OnWorkingMemoryChanged(workingMemory, primedChunks);
 
         // Activate it to bring into working memory
         await _memorySystem.ActivateChunkAsync(savedChunk.ID, null, 0.8);
@@ -582,9 +582,10 @@ public class ConversationManager
         // Manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work
         await _memorySystem.ManualRefreshCycleAsync(new List<Guid> { userUtterance.ID, _currentConversationChunk.ID, context.UserChunk.ID });
-
         // NOW extract context from what's actively in working memory
         var workingMemoryChunks = await _memorySystem.GetWorkingMemoryContentsAsync();
+        var primedChunks = await _memorySystem.GetPrimedChunksAsync();
+        OnWorkingMemoryChanged(workingMemoryChunks, primedChunks);
         await _contextContainer.UpdateContextFromWorkingMemoryAsync(workingMemoryChunks);
 
         // Use context for response generation

@@ -15,6 +15,9 @@ using Aislinn.Configuration;
 using static Aislinn.Core.Context.ContextContainer;
 using RAINA.Events;
 using Microsoft.Extensions.Logging;
+using Aislinn.Core.Activation;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace RAINA.Services;
 
@@ -199,7 +202,17 @@ public class ConversationManager
         // Create relationship associations between entities
         await _entityManager.CreateRelationshipAssociationsAsync(extractionResult.Relationships, extractionResult.Entities);
 
+        var entityContext = await CreateConversationSpreadingContextAsync(context, extractionResult.Entities);
 
+        // Activate extracted entities with context
+        foreach (var entity in extractionResult.Entities)
+        {
+            var entityChunk = await _entityManager.FindExistingEntityInstanceAsync(entity.Name, entity.Type);
+            if (entityChunk != null)
+            {
+                await _memorySystem.ActivateChunkAsync(entityChunk.ID, entityContext, "entity_extraction", 0.8);
+            }
+        }
         // Add metadata based on intent if available
         if (intent != null)
         {
@@ -234,7 +247,7 @@ public class ConversationManager
         utteranceChunk = await _memorySystem.AddChunkAsync(utteranceChunk);
         OnMessageReceived(userInput, intent, context, utteranceChunk);
 
-        var summaries = summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, 0, utteranceChunk.ID);
+        var summaries = summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, context.UserName, 0, utteranceChunk.ID);
         if (summaries.Any())
         {
             OnSummaryCreated(summaries, userInput);
@@ -266,25 +279,26 @@ public class ConversationManager
         context.CurrentUtterance = utteranceChunk;
 
         // Activate the utterance chunk in memory
-        await _memorySystem.ActivateChunkAsync(utteranceChunk.ID);
+        var utteranceContext = await CreateConversationSpreadingContextAsync(context);
+        await _memorySystem.ActivateChunkAsync(utteranceChunk.ID, utteranceContext);
 
         return (utteranceChunk, extractionResult);
     }
-    public async Task UpdateContextFromLLMResponse(string llmResponseJson)
+    public async Task UpdateContextFromLLMResponse(string llmResponseJson, UserContext context)
     {
         try
         {
             var response = JsonSerializer.Deserialize<LLMContextResponse>(llmResponseJson);
             _logger.LogInformation($"Updating Context from Analysis");
 
-            await ProcessCategoryFactors(ContextCategory.Environment, response.Environment);
-            await ProcessCategoryFactors(ContextCategory.Social, response.Social);
-            await ProcessCategoryFactors(ContextCategory.Task, response.Task);
-            await ProcessCategoryFactors(ContextCategory.Internal, response.Internal);
-            await ProcessCategoryFactors(ContextCategory.Temporal, response.Temporal);
-            await ProcessCategoryFactors(ContextCategory.Resource, response.Resource);
-            await ProcessCategoryFactors(ContextCategory.Communication, response.Communication);
-            await ProcessCategoryFactors(ContextCategory.Information, response.Information);
+            await ProcessCategoryFactors(ContextCategory.Environment, response.Environment, context);
+            await ProcessCategoryFactors(ContextCategory.Social, response.Social, context);
+            await ProcessCategoryFactors(ContextCategory.Task, response.Task, context);
+            await ProcessCategoryFactors(ContextCategory.Internal, response.Internal, context);
+            await ProcessCategoryFactors(ContextCategory.Temporal, response.Temporal, context);
+            await ProcessCategoryFactors(ContextCategory.Resource, response.Resource, context);
+            await ProcessCategoryFactors(ContextCategory.Communication, response.Communication, context);
+            await ProcessCategoryFactors(ContextCategory.Information, response.Information, context);
 
         }
         catch (Exception ex)
@@ -293,7 +307,7 @@ public class ConversationManager
         }
     }
 
-    private async Task ProcessCategoryFactors(ContextCategory category, ContextCategoryFactors categoryFactors)
+    private async Task ProcessCategoryFactors(ContextCategory category, ContextCategoryFactors categoryFactors, UserContext context)
     {
         if (categoryFactors?.Factors == null) return;
 
@@ -343,7 +357,8 @@ public class ConversationManager
                 var savedChunk = await _memorySystem.AddChunkAsync(newChunk);
 
                 // Activate it to bring into working memory
-                await _memorySystem.ActivateChunkAsync(savedChunk.ID, null, 0.8);
+                var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
+                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, null, 0.8);
                 //manually import into context...
                 _contextContainer.AddContextChunk(category, savedChunk.ID);
                 _contextContainer.ExtractContextFactorsFromChunk(category, savedChunk);
@@ -368,12 +383,8 @@ public class ConversationManager
     }
 
 
-    private async Task<string> GenerateContextualResponse(string userInput, Intent intent)
-    {
 
-        return "";
-    }
-    private async Task<OpenAIResponse> CallOpenAIAsync(string systemprompt, string prompt, bool json, double temperature = 0.7)
+    private async Task<OpenAIResponse> CallOpenAIAsync(string systemprompt, string prompt, bool json, List<Utterance> history = null, double temperature = 0.7)
     {
         StringContent content;
         if (json)
@@ -401,14 +412,26 @@ public class ConversationManager
         }
         else
         {
+            List<PromptMessage> messages = new List<PromptMessage>() { new PromptMessage() { role = "system", content = systemprompt } };
+            if (history != null)
+            {
+                foreach (var mesg in history)
+                {
+                    if (mesg.Speaker == _agentName)
+                    {
+                        messages.Add(new PromptMessage() { role = "assistant", content = mesg.Text });
+                    }
+                    else
+                    {
+                        messages.Add(new PromptMessage() { role = "user", content = mesg.Text });
+                    }
+                }
+            }
+            messages.Add(new PromptMessage() { role = "user", content = prompt });
             var requestBody = new
             {
                 model = "gpt-4o",
-                messages = new[]
-                {
-                    new { role = "system", content = systemprompt },
-                    new { role = "user", content = prompt }
-                },
+                messages = messages,
                 temperature = temperature,
                 max_tokens = 6000
             };
@@ -424,7 +447,7 @@ public class ConversationManager
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
     }
-    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationHistoryText, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
+    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationSummaries, List<Utterance> history, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
     {
         _logger.LogInformation($"Generating Response...");
 
@@ -441,27 +464,62 @@ public class ConversationManager
         // var userProfile = context.UserChunk != null ?
         //     $"Name: {context.UserName}" :
         //     "No user profile available.";
-
-        // Build the full prompt
-        var prompt = promptLibrary.HydratePrompt("response.contextual", new Dictionary<string, object>
+        var systemPrompt = promptLibrary.HydratePrompt("raina.system", new Dictionary<string, object>
         {
-            ["recentConversation"] = conversationHistoryText,
             ["contextSummary"] = contextSummary,
             ["intentType"] = intentType,
             ["intentConfidence"] = intentConfidence,
             ["workingMemoryItems"] = workingMemoryItems,
+            ["userName"] = userName,
+            ["recentConversation"] = conversationSummaries,
+            ["dateTime"] = DateTime.Now.ToString("F")
+        });
+
+        // Build the full prompt
+        var prompt = promptLibrary.HydratePrompt("response.contextual", new Dictionary<string, object>
+        {
             //["userProfile"] = userProfile,
             ["userInput"] = userInput,
             ["userName"] = userName
         });
-
+        _logger.LogInformation("System Prompt: " + systemPrompt);
+        _logger.LogInformation("Prompt: " + prompt);
         // Generate response
         var response = await CallOpenAIAsync(
-            "You are Raina (she/her), an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input. Do your best to talk like a person.",
+            "You are Raina (she/her), an intelligent conversational AI. Think of yourself more as a friend than as a machine. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input. Do your best to talk like a person. Do not be overly helpful. Do not ask questions unless you need to know the answer to perform a task. Do not remind the user about how helpful you are or that you're an AI. Do not talk about 'your circuits' or another things that make you seem artificial.",
             prompt,
-            false);
+            false, history);
+        var text = response.Choices[0].Message.Content;
+        _logger.LogInformation("Response: " + text);
+        if (text.StartsWith(_agentName + ": "))
+        {
+            text = text.Substring(text.IndexOf(':') + 1).Trim();
+            _logger.LogInformation("Trimmed Response: " + text);
+        }
+        if (text.StartsWith("["))
+        {
+            text = RemoveTimestamp(text);
+            if (text.StartsWith(_agentName + ": "))
+            {
+                text = text.Substring(text.IndexOf(':') + 1).Trim();
+            }
+            _logger.LogInformation("Trimmed Response: " + text);
+        }
 
-        return response.Choices[0].Message.Content;
+
+        return text;
+    }
+    public static string RemoveTimestamp(string line)
+    {
+        // Pattern matches: [DayOfWeek, Month DD, YYYY H:MM:SS AM/PM] 
+        string pattern = @"^\[.+?, .+? \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} (AM|PM)\] ";
+
+        if (Regex.IsMatch(line, pattern))
+        {
+            return Regex.Replace(line, pattern, "").Trim();
+        }
+
+        return line;
     }
     // Generate and record a system response
     private void OnEntitiesExtracted(List<Entity> intentEntities, List<Entity> extractedEntities, string userInput)
@@ -473,6 +531,41 @@ public class ConversationManager
             ExtractedEntities = extractedEntities,
             UserInput = userInput
         });
+    }
+    // Add this helper method to ConversationManager class:
+    /// <summary>
+    /// Creates a spreading context for the current conversation state
+    /// </summary>
+    private async Task<SpreadingContext> CreateConversationSpreadingContextAsync(UserContext context, List<Entity> currentEntities = null)
+    {
+        // Get current working memory contents to use as focused chunks
+        var workingMemoryChunks = await _memorySystem.GetWorkingMemoryContentsAsync();
+        var focusedChunkIds = new HashSet<Guid>(workingMemoryChunks.Select(c => c.ID));
+
+        // Add current conversation and user chunks
+        if (_currentConversationChunk != null)
+            focusedChunkIds.Add(_currentConversationChunk.ID);
+
+        if (context.UserChunk != null)
+            focusedChunkIds.Add(context.UserChunk.ID);
+
+        if (context.RainaChunk != null)
+            focusedChunkIds.Add(context.RainaChunk.ID);
+
+        // Add current utterance if available
+        if (context.CurrentUtterance != null)
+            focusedChunkIds.Add(context.CurrentUtterance.ID);
+
+        // Create context with discovery enabled and boost reduction
+        var spreadingContext = new SpreadingContext
+        {
+            FocusedChunkIds = focusedChunkIds,
+            NonContextualBoostFactor = 0.3, // Significant reduction for non-contextual chunks
+            MinAssociationCountForDiscovery = 2, // Allow discovery of chunks with 2+ contextual connections
+            CognitiveMode = "conversation"
+        };
+
+        return spreadingContext;
     }
     public async Task<Response> GenerateResponseAsync(string userInput, Intent intent, UserContext context)
     {
@@ -490,22 +583,14 @@ public class ConversationManager
         var conversationHistoryText = "";
 
         var contextUtterances = summaryService.GetContextForPrompt();
-        var recentConversation = contextUtterances.Where(u => u.Depth == 0)
-            .Select(u => new { text = u.Text, tokenCount = u.TokenCount });
+        var recentConversation = contextUtterances.Where(u => u.Depth == 0);
+
         var summaries = contextUtterances.Where(u => u.Depth > 0)
             .Select(u => new { text = u.Text, tokenCount = u.TokenCount });
         if (summaries.Any())
         {
-            conversationHistoryText += "## Background Summary\n";
             conversationHistoryText += string.Join("\n", summaries.Select(s => s.text));
             conversationHistoryText += "\n\n";
-        }
-
-        // Add recent conversation (immediate context)
-        if (recentConversation.Any())
-        {
-            conversationHistoryText += "## Recent Conversation\n";
-            conversationHistoryText += string.Join("\n", recentConversation.Select(c => c.text));
         }
         var input = new
         {
@@ -522,7 +607,7 @@ public class ConversationManager
         var resp = await CallOpenAIAsync("You are part of Raina (she/her), an intelligent conversational AI. You are a helpful assistant specialized in conversational context extraction for her. Please respond in first person as her.", prompt, true);
         //Console.WriteLine(prompt);
         Console.WriteLine(resp.Choices[0].Message.Content);
-        await this.UpdateContextFromLLMResponse(resp.Choices[0].Message.Content);
+        await this.UpdateContextFromLLMResponse(resp.Choices[0].Message.Content, context);
 
         //convert context snapshot back into text
         _logger.LogInformation($"Summarizing Context");
@@ -583,7 +668,8 @@ public class ConversationManager
         // OnWorkingMemoryChanged(workingMemory, primedChunks);
 
         // Activate it to bring into working memory
-        await _memorySystem.ActivateChunkAsync(savedChunk.ID, null, 0.8);
+        var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
+        await _memorySystem.ActivateChunkAsync(savedChunk.ID, contextSpreadingContext, null, 0.8);
 
         // Manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work
@@ -600,7 +686,7 @@ public class ConversationManager
         //prompt,
         //false);
 
-        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, contextSummary, intent, workingMemoryChunks);
+        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, workingMemoryChunks);
         // Generate response using LLM
         // This would call OpenAI or other LLM to generate a natural language response
         // For now, just create a simple response
@@ -636,8 +722,8 @@ public class ConversationManager
         };
         responseChunk.Vector = (await _vectorCollection.AddVectorAsync(responseChunk.ID.ToString(), vectorText, vectorMeta)).Vector;
 
-        // update cognitive time, 150ms for now
-        _memorySystem._timeManager.AdvanceStep(150);
+        // update cognitive time, 250ms for now
+        _memorySystem._timeManager.AdvanceStep(250);
 
         // Add to memory system
         responseChunk = await _memorySystem.AddChunkAsync(responseChunk);
@@ -675,13 +761,14 @@ public class ConversationManager
             _recentUtterances.RemoveAt(0);
         }
         var strTimestamp2 = currentTime.ToString("F");
-        summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText);
+        summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText, (string)responseChunk.Slots["SpeakerName"].Value);
         // Update context
         context.AddUtterance(responseChunk);
         context.LastSystemUtterance = responseChunk;
 
         // Activate the response chunk in memory
-        await _memorySystem.ActivateChunkAsync(responseChunk.ID);
+        var responseContext = await CreateConversationSpreadingContextAsync(context);
+        await _memorySystem.ActivateChunkAsync(responseChunk.ID, responseContext);
 
         OnResponseGenerated(responseText, responseChunk, context);
         // Return response object

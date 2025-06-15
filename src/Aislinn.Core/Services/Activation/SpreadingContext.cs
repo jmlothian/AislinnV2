@@ -58,6 +58,21 @@ namespace Aislinn.Core.Activation
         public string CognitiveMode { get; set; }
 
         /// <summary>
+        /// Activation boost reduction factor for chunks not in working memory or focus.
+        /// 1.0 = no reduction, 0.5 = half boost, 0.0 = no boost for non-contextual chunks.
+        /// Default is 0.3 (significant reduction for non-contextual chunks).
+        /// </summary>
+        public double NonContextualBoostFactor { get; set; } = 0.3;
+
+        /// <summary>
+        /// Allow spreading to chunks that have this many or more associations 
+        /// with chunks in FocusedChunkIds, even if other filters would block them.
+        /// This enables discovery of well-connected contextually relevant chunks.
+        /// null = disabled
+        /// </summary>
+        public int? MinAssociationCountForDiscovery { get; set; } = null;
+
+        /// <summary>
         /// Checks if a relation type should be allowed based on the current context filters.
         /// </summary>
         /// <param name="relationType">The relation type to check</param>
@@ -105,22 +120,78 @@ namespace Aislinn.Core.Activation
         /// <param name="targetChunk">The target chunk to check</param>
         /// <param name="association">The association leading to this chunk</param>
         /// <param name="isSourceA">Whether the source chunk is ChunkA in the association</param>
+        /// <param name="allAssociations">All associations for the target chunk (for discovery counting)</param>
         /// <returns>True if spreading should continue to this target, false otherwise</returns>
-        public bool ShouldSpreadToTarget(Chunk targetChunk, ChunkAssociation association, bool isSourceA)
+        public bool ShouldSpreadToTarget(Chunk targetChunk, ChunkAssociation association, bool isSourceA, IEnumerable<ChunkAssociation> allAssociations = null)
         {
             if (targetChunk == null || association == null)
                 return false;
 
             // Check relation type
             string relationType = isSourceA ? association.RelationAtoB : association.RelationBtoA;
-            if (!IsRelationTypeAllowed(relationType))
-                return false;
+            bool relationAllowed = IsRelationTypeAllowed(relationType);
 
             // Check semantic type
-            if (!IsSemanticTypeAllowed(targetChunk.SemanticType))
-                return false;
+            bool semanticAllowed = IsSemanticTypeAllowed(targetChunk.SemanticType);
 
-            return true;
+            // If normal filtering passes, allow
+            if (relationAllowed && semanticAllowed)
+                return true;
+
+            // If normal filtering fails, check discovery mechanism
+            if (MinAssociationCountForDiscovery.HasValue && allAssociations != null)
+            {
+                int contextualAssociationCount = CountContextualAssociations(targetChunk.ID, allAssociations);
+                if (contextualAssociationCount >= MinAssociationCountForDiscovery.Value)
+                    return true; // Discovery override
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Counts how many associations the target chunk has with chunks in FocusedChunkIds.
+        /// </summary>
+        /// <param name="targetChunkId">The chunk to count associations for</param>
+        /// <param name="allAssociations">All associations for the target chunk</param>
+        /// <returns>Number of associations with focused chunks</returns>
+        public int CountContextualAssociations(Guid targetChunkId, IEnumerable<ChunkAssociation> allAssociations)
+        {
+            if (FocusedChunkIds.Count == 0 || allAssociations == null)
+                return 0;
+
+            int count = 0;
+            foreach (var association in allAssociations)
+            {
+                // Check if this association connects to a focused chunk
+                if (association.ChunkAId == targetChunkId && FocusedChunkIds.Contains(association.ChunkBId))
+                    count++;
+                else if (association.ChunkBId == targetChunkId && FocusedChunkIds.Contains(association.ChunkAId))
+                    count++;
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// Determines if a chunk is contextual (should get full activation boost).
+        /// Currently based on whether the chunk is in FocusedChunkIds.
+        /// </summary>
+        /// <param name="chunkId">The chunk to check</param>
+        /// <returns>True if chunk should get full boost, false if boost should be reduced</returns>
+        public bool IsChunkContextual(Guid chunkId)
+        {
+            return FocusedChunkIds.Contains(chunkId);
+        }
+
+        /// <summary>
+        /// Calculates the boost factor to apply for a given chunk.
+        /// </summary>
+        /// <param name="chunkId">The chunk to calculate boost for</param>
+        /// <returns>Boost factor (1.0 for contextual chunks, NonContextualBoostFactor for others)</returns>
+        public double GetBoostFactor(Guid chunkId)
+        {
+            return IsChunkContextual(chunkId) ? 1.0 : NonContextualBoostFactor;
         }
 
         /// <summary>

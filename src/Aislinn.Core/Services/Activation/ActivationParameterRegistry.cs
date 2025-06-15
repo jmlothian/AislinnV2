@@ -18,8 +18,8 @@ namespace Aislinn.Core.Activation
             DecayRate = 0.5,
             InitialActivation = 0.1,
             SpreadingFactor = 0.5,
-            ActivationCeiling = 1.0,
-            BaseActivationBoost = 1.0,
+            ActivationCeiling = 2.0,
+            BaseActivationBoost = 0.7,
             ActivationNoise = 0.1,
             WorkingMemoryPriority = 0.5,
             AssociationStrengthIncrement = 0.1

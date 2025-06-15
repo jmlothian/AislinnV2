@@ -160,6 +160,11 @@ namespace Aislinn.Storage.AssociationStore
 
             return copy;
         }
+
+        public Task<List<ChunkAssociation>> GetAllAssociationsAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

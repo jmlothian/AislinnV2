@@ -1,4 +1,7 @@
+using System.Linq.Expressions;
 using System.Text.Json;
+using Aislinn.ChunkStorage;
+using Aislinn.Core.Interfaces;
 
 /// <summary>
 /// SummaryService - A recursive data structure that automatically consolidates data across depth levels based on token counts.
@@ -26,7 +29,7 @@ public class SummaryService
     {
         return depthMap;
     }
-    public List<Utterance> AddItem(string text, int depth = 0, Guid? chunkId = null)
+    public List<Utterance> AddItem(string text, string speaker, int depth = 0, Guid? chunkId = null)
     {
         List<Utterance> ReturnSummaries = new List<Utterance>();
         Guid actualChunkId = chunkId ?? Guid.Empty;
@@ -43,6 +46,7 @@ public class SummaryService
             Depth = depth,
             ChunkId = actualChunkId,
             Text = text,
+            Speaker = speaker,
             TokenCount = tokenCount,
             CreatedAt = DateTime.UtcNow
         });
@@ -64,7 +68,7 @@ public class SummaryService
 
         Utterance summaryUtterance = GenerateSummary(currentList);
         ReturnSummaries.Add(summaryUtterance);
-        ReturnSummaries.AddRange(AddItem(summaryUtterance.Text, summaryUtterance.Depth, summaryUtterance.ChunkId));
+        ReturnSummaries.AddRange(AddItem(summaryUtterance.Text, "system", summaryUtterance.Depth, summaryUtterance.ChunkId));
 
         RemoveItemsToThreshold(currentDepth);
         return ReturnSummaries;
@@ -96,6 +100,7 @@ public class SummaryService
         {
             Depth = items[0].Depth + 1,
             ChunkId = Guid.NewGuid(),
+            Speaker = "system",
             Text = summaryText,
             TokenCount = EstimateTokens(summaryText),
             CreatedAt = DateTime.UtcNow,
@@ -132,7 +137,7 @@ public class SummaryService
         File.WriteAllText(filePath, jsonString);
     }
 
-    public void LoadFromJson(string filePath)
+    public void LoadFromJson(string filePath, string chunkCollectionId)
     {
         if (!File.Exists(filePath))
         {
@@ -159,6 +164,23 @@ public class SummaryService
             CreatedAt = saveData.CreatedAt;
             LastModified = saveData.LastModified;
             depthMap = saveData.DepthMap ?? new Dictionary<int, List<Utterance>>();
+            foreach (var item in depthMap[0])
+            {
+                if (item.Speaker == null || item.Speaker == "")
+                {
+                    var chunk = item.ChunkId.ToChunk(chunkCollectionId);
+                    if (chunk != null && chunk.Slots.ContainsKey("SpeakerName"))
+                    {
+                        item.Speaker = item.ChunkId.ToChunk(chunkCollectionId).Slots["SpeakerName"].Value.ToString();
+                        Console.WriteLine("Rewireing Speaker: " + item.Speaker);
+                    }
+                    else
+                    {
+                        Console.WriteLine("No Speaker Found: " + item.Text);
+                        item.Speaker = "Raina";
+                    }
+                }
+            }
         }
         else
         {
@@ -166,17 +188,16 @@ public class SummaryService
             ConversationId = Guid.NewGuid();
             CreatedAt = DateTime.UtcNow;
             LastModified = DateTime.UtcNow;
-            depthMap.Clear();
         }
         Console.WriteLine(filePath);
         Console.WriteLine(jsonString);
     }
 
     // Factory method to create and load from JSON in one step
-    public static SummaryService FromJson(string filePath)
+    public static SummaryService FromJson(string filePath, string chunkCollectionId)
     {
         var service = new SummaryService();
-        service.LoadFromJson(filePath);
+        service.LoadFromJson(filePath, chunkCollectionId);
         return service;
     }
 
@@ -276,4 +297,5 @@ public class Utterance
     public int TokenCount { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsSummary { get; set; } = false;
+    public string Speaker { get; set; } = "";
 }

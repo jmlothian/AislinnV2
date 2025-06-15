@@ -366,8 +366,14 @@ namespace Aislinn.Core.Services
                 // Get the target chunk
                 var targetChunk = await chunkCollection.GetChunkAsync(targetChunkId);
                 if (targetChunk == null) continue;
+                IEnumerable<ChunkAssociation> targetAssociations = null;
+                if (context?.MinAssociationCountForDiscovery.HasValue == true)
+                {
+                    targetAssociations = await associationCollection.GetAssociationsForChunkAsync(targetChunkId);
+                }
+
                 // Apply context filtering if provided
-                if (context != null && !context.ShouldSpreadToTarget(targetChunk, association, isSourceA))
+                if (context != null && !context.ShouldSpreadToTarget(targetChunk, association, isSourceA, targetAssociations))
                 {
                     continue; // Skip this association due to context filtering
                 }
@@ -380,14 +386,25 @@ namespace Aislinn.Core.Services
                     currentSpreadingFactor
                 );
 
-                targetChunk.ActivationLevel += spreadAmount;
+                // Apply context-based boost reduction if provided
+                if (context != null)
+                {
+                    double boostFactor = context.GetBoostFactor(targetChunkId);
+                    spreadAmount *= boostFactor;
+                }
+                var targetParameters = _parametersRegistry.GetParameters(targetChunk);
 
+                targetChunk.ActivationLevel += spreadAmount;
+                targetChunk.ActivationLevel = Math.Min(
+                    targetParameters.ActivationCeiling,
+                    targetChunk.ActivationLevel + spreadAmount
+                );
                 // Create activation history item for target chunk
                 var activationItem = new ActivationHistoryItem
                 {
                     PreviousValue = previousActivation,
                     NewValue = targetChunk.ActivationLevel,
-                    Change = spreadAmount,
+                    Change = spreadAmount, // Use the final spread amount including any context reduction
                     SequenceNumber = targetChunk.ActivationHistory.Count > 0
                         ? targetChunk.ActivationHistory[0].SequenceNumber + 1
                         : 1,

@@ -104,8 +104,9 @@ namespace RAINA
             _services.AddSingleton<VectorStore>();
             _services.AddSingleton<SummaryService>((sp) =>
             {
-                var agentName = sp.GetRequiredService<RainaConfiguration>().AgentName;
-                return SummaryService.FromJson(agentName + ".json");
+                var config = sp.GetRequiredService<RainaConfiguration>();
+                var agentName = config.AgentName;
+                return SummaryService.FromJson(agentName + ".json", config.ChunkCollectionId);
             });
             _services.AddSingleton<IVectorCollection, FastMemoryVectorCollection>(sp =>
             {

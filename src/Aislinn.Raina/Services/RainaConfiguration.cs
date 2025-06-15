@@ -13,11 +13,11 @@ public class RainaConfiguration : AislinnConfiguration
 
     public string RainaVectorCollection { get; set; } = "Raina";
     // Vector Search Configuration
-    public double VectorSearchUtteranceBoost { get; set; } = 1.0;
-    public double VectorSearchEntityBoost { get; set; } = 0.8;
-    public double VectorSearchContextBoost { get; set; } = 0.7;
-    public double VectorSearchRecentHistoryBoost { get; set; } = 0.6;
-    public double VectorSearchBackgroundBoost { get; set; } = 0.4;
+    public double VectorSearchUtteranceBoost { get; set; } = 0.4;
+    public double VectorSearchEntityBoost { get; set; } = 0.3;
+    public double VectorSearchContextBoost { get; set; } = 0.3;
+    public double VectorSearchRecentHistoryBoost { get; set; } = 0.2;
+    public double VectorSearchBackgroundBoost { get; set; } = 0.3;
     public int VectorSearchMaxResults { get; set; } = 5;
     public double VectorSearchMinSimilarity { get; set; } = 0.6;
     public int VectorSearchTopActivatedChunks { get; set; } = 10;

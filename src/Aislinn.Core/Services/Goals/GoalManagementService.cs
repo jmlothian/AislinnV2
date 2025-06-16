@@ -365,7 +365,7 @@ namespace Aislinn.Core.Goals
                                 await chunkCollection.UpdateChunkAsync(dependentGoal);
 
                                 // Increase activation of the dependent goal now that a dependency is satisfied
-                                await _activationService.ActivateChunkAsync(dependentGoalId, null, 0.5);
+                                await _activationService.ActivateChunkAsync(dependentGoalId, null, 0.05);
                             }
                         }
                     }
@@ -375,7 +375,7 @@ namespace Aislinn.Core.Goals
                 if (goal.Slots.TryGetValue(GoalSlots.ParentGoal, out var parentSlot) &&
                     parentSlot.Value is Guid parentId)
                 {
-                    await _activationService.ActivateChunkAsync(parentId, null, 0.3);
+                    await _activationService.ActivateChunkAsync(parentId, null, 0.03);
                     await CheckParentGoalCompletionAsync(parentId);
                 }
             }

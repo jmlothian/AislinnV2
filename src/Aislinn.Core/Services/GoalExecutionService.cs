@@ -1350,12 +1350,14 @@ namespace Aislinn.Core.Goals.Execution
                         ContextCategory.Task,
                         "CurrentGoal",
                         _currentGoalId,
+                        Guid.Empty,
                         importance: 0.8);
 
                     _contextContainer.UpdateContextFactor(
                         ContextCategory.Task,
                         "ExecutionProgress",
                         _executionProgress,
+                        Guid.Empty,
                         importance: 0.6);
 
                     _lastProgressUpdate = DateTime.Now;

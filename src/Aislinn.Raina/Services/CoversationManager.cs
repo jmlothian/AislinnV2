@@ -82,6 +82,7 @@ public class ConversationManager
     public static event EventHandler<WorkingMemoryChangedEventArgs> WorkingMemoryChanged;
     public static event EventHandler<SummaryCreatedEventArgs> SummaryCreated;
     public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
+    private readonly ChunkGraphGenService _chunkGraphGenService;
 
     private readonly ILogger<ConversationManager> _logger;
     public ConversationManager(
@@ -91,7 +92,8 @@ public class ConversationManager
         RainaConfiguration config,
         IVectorCollection vectorCollection,
         SummaryService summaryService,
-        ILogger<ConversationManager> logger
+        ILogger<ConversationManager> logger,
+        ChunkGraphGenService chunkGraphGenService
 )
     {
         _memorySystem = coreServices.MemorySystem;
@@ -106,6 +108,7 @@ public class ConversationManager
         _vectorCollection = vectorCollection;
         _rainaConfig = config;
         _logger = logger;
+        _chunkGraphGenService = chunkGraphGenService;
         this.summaryService = summaryService;
 
     }
@@ -210,7 +213,7 @@ public class ConversationManager
             var entityChunk = await _entityManager.FindExistingEntityInstanceAsync(entity.Name, entity.Type);
             if (entityChunk != null)
             {
-                await _memorySystem.ActivateChunkAsync(entityChunk.ID, entityContext, "entity_extraction", 0.8);
+                await _memorySystem.ActivateChunkAsync(entityChunk.ID, entityContext, "entity_extraction", 0.05);
             }
         }
         // Add metadata based on intent if available
@@ -247,7 +250,7 @@ public class ConversationManager
         utteranceChunk = await _memorySystem.AddChunkAsync(utteranceChunk);
         OnMessageReceived(userInput, intent, context, utteranceChunk);
 
-        var summaries = summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, context.UserName, 0, utteranceChunk.ID);
+        var summaries = await summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, context.UserName, 0, utteranceChunk.ID);
         if (summaries.Any())
         {
             OnSummaryCreated(summaries, userInput);
@@ -329,7 +332,7 @@ public class ConversationManager
                 await _memorySystem.UpdateChunkAsync(existingChunk);
 
                 // Activate it to bring into working memory
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, null, 0.8);
+                await _memorySystem.ActivateChunkAsync(existingChunk.ID, null, 0.2);
                 //manually import into context...
                 _contextContainer.AddContextChunk(category, existingChunk.ID);
                 _contextContainer.ExtractContextFactorsFromChunk(category, existingChunk);
@@ -358,7 +361,7 @@ public class ConversationManager
 
                 // Activate it to bring into working memory
                 var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, null, 0.8);
+                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, null, 0.05);
                 //manually import into context...
                 _contextContainer.AddContextChunk(category, savedChunk.ID);
                 _contextContainer.ExtractContextFactorsFromChunk(category, savedChunk);
@@ -447,7 +450,7 @@ public class ConversationManager
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
     }
-    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationSummaries, List<Utterance> history, string contextSummary, Intent intent, List<Chunk> workingMemoryChunks)
+    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationSummaries, List<Utterance> history, string contextSummary, Intent intent, string workingMemoryContextMarkdown)
     {
         _logger.LogInformation($"Generating Response...");
 
@@ -456,9 +459,9 @@ public class ConversationManager
         var intentConfidence = intent?.Confidence.ToString("P1") ?? "Unknown";
 
         // Build working memory summary
-        var workingMemoryItems = string.Join("\n", workingMemoryChunks
-            .Where(c => c.ChunkType != "ContextSummary") // Exclude the context summary we already show
-            .Select(c => $"- {c.ChunkType}: {c.Name}"));
+        // var workingMemoryItems = string.Join("\n", workingMemoryChunks
+        //     .Where(c => c.ChunkType != "ContextSummary") // Exclude the context summary we already show
+        //     .Select(c => $"- {c.ChunkType}: {c.Name}"));
 
         // Get user profile info
         // var userProfile = context.UserChunk != null ?
@@ -469,7 +472,7 @@ public class ConversationManager
             ["contextSummary"] = contextSummary,
             ["intentType"] = intentType,
             ["intentConfidence"] = intentConfidence,
-            ["workingMemoryItems"] = workingMemoryItems,
+            ["workingMemoryItems"] = workingMemoryContextMarkdown,
             ["userName"] = userName,
             ["recentConversation"] = conversationSummaries,
             ["dateTime"] = DateTime.Now.ToString("F")
@@ -486,7 +489,7 @@ public class ConversationManager
         _logger.LogInformation("Prompt: " + prompt);
         // Generate response
         var response = await CallOpenAIAsync(
-            "You are Raina (she/her), an intelligent conversational AI. Think of yourself more as a friend than as a machine. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input. Do your best to talk like a person. Do not be overly helpful. Do not ask questions unless you need to know the answer to perform a task. Do not remind the user about how helpful you are or that you're an AI. Do not talk about 'your circuits' or another things that make you seem artificial.",
+            systemPrompt,
             prompt,
             false, history);
         var text = response.Choices[0].Message.Content;
@@ -577,7 +580,7 @@ public class ConversationManager
 
         // Record the user input first
         var (userUtterance, extractionResult) = await RecordUserInputAsync(userInput, intent, context);
-        OnEntitiesExtracted(intent.Entities, extractionResult.Entities, userInput); // Will need to get actual extracted entities
+        OnEntitiesExtracted(intent.Entities, extractionResult.Entities, userInput);
 
         // update context from current chat state
         var conversationHistoryText = "";
@@ -614,6 +617,7 @@ public class ConversationManager
         var contextSnapshot = _contextContainer.CreateContextSnapshot();
         var snapshotJSON = JsonSerializer.Serialize(contextSnapshot, new JsonSerializerOptions { WriteIndented = true });
         prompt = promptLibrary.HydratePrompt("context.createcontextsummary", new Dictionary<string, object>() { ["contextSnapshot"] = snapshotJSON });
+        _logger.LogInformation(prompt);
         resp = await CallOpenAIAsync("You are part of Raina (she/her), an intelligent conversational AI. You are a helpful assistant specialized in conversational context summarization for her. Please respond in first person as her.", prompt, false);
         //Console.WriteLine(prompt);
         Console.WriteLine(resp.Choices[0].Message.Content);
@@ -669,7 +673,7 @@ public class ConversationManager
 
         // Activate it to bring into working memory
         var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
-        await _memorySystem.ActivateChunkAsync(savedChunk.ID, contextSpreadingContext, null, 0.8);
+        await _memorySystem.ActivateChunkAsync(savedChunk.ID, contextSpreadingContext, null, 0.05);
 
         // Manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work
@@ -680,13 +684,19 @@ public class ConversationManager
         OnWorkingMemoryChanged(workingMemoryChunks, primedChunks);
         await _contextContainer.UpdateContextFromWorkingMemoryAsync(workingMemoryChunks);
 
+
+        //get text for context
+        var contextMarkdown = _contextContainer.ToMarkdown();
+        _logger.LogInformation(contextMarkdown);
+        var json = await _chunkGraphGenService.GenerateSigmaGraphAsync(workingMemoryChunks.ToArray());
+        _logger.LogInformation(json);
         // Use context for response generation
         //You are Raina, an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input.
         //resp = await CallOpenAIAsync("You are Raina (she/her), an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input.",
         //prompt,
         //false);
 
-        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, workingMemoryChunks);
+        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, contextMarkdown);
         // Generate response using LLM
         // This would call OpenAI or other LLM to generate a natural language response
         // For now, just create a simple response
@@ -761,7 +771,7 @@ public class ConversationManager
             _recentUtterances.RemoveAt(0);
         }
         var strTimestamp2 = currentTime.ToString("F");
-        summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText, (string)responseChunk.Slots["SpeakerName"].Value);
+        await summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText, (string)responseChunk.Slots["SpeakerName"].Value);
         // Update context
         context.AddUtterance(responseChunk);
         context.LastSystemUtterance = responseChunk;

@@ -102,11 +102,12 @@ namespace RAINA
             _services.AddSingleton<OntologyLoader>();
             _services.AddSingleton<AssociationLoader>();
             _services.AddSingleton<VectorStore>();
+            _services.AddSingleton<ChunkGraphGenService>();
             _services.AddSingleton<SummaryService>((sp) =>
             {
                 var config = sp.GetRequiredService<RainaConfiguration>();
                 var agentName = config.AgentName;
-                return SummaryService.FromJson(agentName + ".json", config.ChunkCollectionId);
+                return SummaryService.FromJson(agentName + ".json", config.ChunkCollectionId, agentName, config.OpenAIApiKey);
             });
             _services.AddSingleton<IVectorCollection, FastMemoryVectorCollection>(sp =>
             {

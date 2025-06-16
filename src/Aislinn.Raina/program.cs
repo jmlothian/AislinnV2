@@ -447,7 +447,7 @@ public class TaskManager
         await _memorySystem.AddChunkAsync(taskChunk);
 
         // Activate the task to make it prominent in memory
-        await _memorySystem.ActivateChunkAsync(taskChunk.ID, null, 0.8);
+        await _memorySystem.ActivateChunkAsync(taskChunk.ID, null, 0.05);
 
         //handle Trello Update
 

@@ -16,13 +16,13 @@ namespace Aislinn.Core.Activation
         private readonly TypeActivationParameters _defaultParameters = new TypeActivationParameters
         {
             DecayRate = 0.5,
-            InitialActivation = 0.1,
-            SpreadingFactor = 0.5,
-            ActivationCeiling = 2.0,
-            BaseActivationBoost = 0.7,
-            ActivationNoise = 0.1,
+            InitialActivation = -1.0,
+            SpreadingFactor = 0.3,
+            ActivationCeiling = 3.0,
+            BaseActivationBoost = 0.2,
+            ActivationNoise = 0.15,
             WorkingMemoryPriority = 0.5,
-            AssociationStrengthIncrement = 0.1
+            AssociationStrengthIncrement = 0.05
         };
 
         // Map of chunk types to specific parameters

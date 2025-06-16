@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Core.Models;
@@ -117,6 +118,7 @@ namespace Aislinn.Core.Context
             ContextCategory category,
             string factorName,
             object value,
+            Guid sourceId,
             double importance = 0.5,
             double confidence = 1.0,
             Dictionary<string, object> metadata = null)
@@ -140,6 +142,7 @@ namespace Aislinn.Core.Context
                 existingFactor.Timestamp = DateTime.Now;
                 existingFactor.Importance = importance;
                 existingFactor.Confidence = confidence;
+                existingFactor.SourceChunkId = sourceId;
 
                 if (metadata != null)
                 {
@@ -156,6 +159,7 @@ namespace Aislinn.Core.Context
                 {
                     Importance = importance,
                     Confidence = confidence,
+                    SourceChunkId = sourceId,
                     Metadata = metadata ?? new Dictionary<string, object>()
                 };
 
@@ -322,6 +326,11 @@ namespace Aislinn.Core.Context
             }
         }
 
+
+        public Dictionary<ContextCategory, Dictionary<string, ContextFactor>> GetAllContextFactors()
+        {
+            return _contextFactors;
+        }
         /// <summary>
         /// Create a context snapshot
         /// </summary>
@@ -557,6 +566,7 @@ namespace Aislinn.Core.Context
                         category,
                         $"{chunk.Name}.{slot.Key}",
                         slot.Value.Value,
+                        chunk.ID,
                         importance: 0.4,
                         confidence: 0.8,
                         metadata: new Dictionary<string, object>
@@ -567,6 +577,50 @@ namespace Aislinn.Core.Context
                     );
                 }
             }
+        }
+        public string ToMarkdown()
+        {
+            var markdown = new StringBuilder();
+
+            foreach (var category in _contextFactors)
+            {
+                markdown.AppendLine($"### {category.Key}");
+                markdown.AppendLine();
+
+                // Group by SourceChunkId
+                var groupedByChunk = category.Value.Values
+                    .Where(f => IsSimpleType(f.Value))
+                    .GroupBy(f => f.SourceChunkId ?? Guid.Empty);
+
+                foreach (var chunkGroup in groupedByChunk)
+                {
+                    // Chunk header
+                    if (chunkGroup.Key == Guid.Empty)
+                        markdown.AppendLine("#### Other Memories: ");
+                    else
+                        markdown.AppendLine($"#### Memory: {chunkGroup.Key.ToString()} ...");
+
+                    markdown.AppendLine();
+
+                    // Individual factors under this chunk
+                    foreach (var factor in chunkGroup)
+                    {
+                        markdown.AppendLine($"- **{factor.Name}**: {factor.Value}");
+                    }
+
+                    markdown.AppendLine();
+                }
+            }
+
+            return markdown.ToString();
+        }
+
+        private bool IsSimpleType(object value)
+        {
+            return value is string ||
+                   value is int || value is long || value is short || value is byte ||
+                   value is float || value is double || value is decimal ||
+                   value is bool;
         }
         private void ExtractUtteranceContext(Chunk chunk)
         {
@@ -582,9 +636,9 @@ namespace Aislinn.Core.Context
 
                 var role = speakerChunk?.Slots.GetValueOrDefault("Role")?.Value?.ToString();
 
-                UpdateContextFactor(ContextCategory.Communication, $"{chunk.Name}.Text", $"{speakerName}: {text}", importance: 0.8);
-                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Speaker", speakerName, importance: 0.6);
-                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, importance: 0.7);
+                UpdateContextFactor(ContextCategory.Communication, $"{chunk.Name}.Text", $"{speakerName}: {text}", chunk.ID, importance: 0.8);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Speaker", speakerName, chunk.ID, importance: 0.6);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, chunk.ID, importance: 0.7);
             }
 
             // Format: "Raina - AI Assistant" instead of just the chunk object
@@ -593,15 +647,15 @@ namespace Aislinn.Core.Context
                 var listenerChunk = chunk.Slots.GetValueOrDefault("Listener")?.Value as Chunk;
                 var role = listenerChunk?.Slots.GetValueOrDefault("Role")?.Value?.ToString();
 
-                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Listener", listenerName, importance: 0.6);
-                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, importance: 0.7);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Listener", listenerName, chunk.ID, importance: 0.6);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.{listenerName}.Role", role, chunk.ID, importance: 0.7);
 
             }
 
             // Keep intent as-is
             if (!string.IsNullOrEmpty(intent))
             {
-                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Intent", intent, importance: 0.6);
+                UpdateContextFactor(ContextCategory.Social, $"{chunk.Name}.Intent", intent, chunk.ID, importance: 0.6);
             }
         }
         #endregion

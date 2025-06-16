@@ -1,7 +1,11 @@
 using System.Linq.Expressions;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Aislinn.ChunkStorage;
 using Aislinn.Core.Interfaces;
+using Aislinn.Core.Services;
+using RAINA.Services;
 
 /// <summary>
 /// SummaryService - A recursive data structure that automatically consolidates data across depth levels based on token counts.
@@ -16,10 +20,14 @@ public class SummaryService
     public Guid ConversationId { get; set; } = Guid.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
-
-    public SummaryService()
+    private PromptLibrary promptLibrary = new PromptLibrary();
+    private string _agentName = "Raina";
+    private readonly HttpClient _httpClient;
+    public SummaryService(string agentName, string openAIApiKey)
     {
         depthMap = new Dictionary<int, List<Utterance>>();
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAIApiKey}");
     }
     public void Initialize(Guid id)
     {
@@ -29,7 +37,7 @@ public class SummaryService
     {
         return depthMap;
     }
-    public List<Utterance> AddItem(string text, string speaker, int depth = 0, Guid? chunkId = null)
+    public async Task<List<Utterance>> AddItem(string text, string speaker, int depth = 0, Guid? chunkId = null)
     {
         List<Utterance> ReturnSummaries = new List<Utterance>();
         Guid actualChunkId = chunkId ?? Guid.Empty;
@@ -56,19 +64,19 @@ public class SummaryService
         int totalTokens = GetTotalTokensAtDepth(depth);
         if (totalTokens >= MAX_TOKENS_PER_DEPTH)
         {
-            ReturnSummaries.AddRange(GenerateNextDepth(depth));
+            ReturnSummaries.AddRange(await GenerateNextDepth(depth));
         }
         return ReturnSummaries;
     }
 
-    private List<Utterance> GenerateNextDepth(int currentDepth)
+    private async Task<List<Utterance>> GenerateNextDepth(int currentDepth)
     {
         List<Utterance> ReturnSummaries = new List<Utterance>();
         var currentList = depthMap[currentDepth];
 
-        Utterance summaryUtterance = GenerateSummary(currentList);
+        Utterance summaryUtterance = await GenerateSummary(currentList);
         ReturnSummaries.Add(summaryUtterance);
-        ReturnSummaries.AddRange(AddItem(summaryUtterance.Text, "system", summaryUtterance.Depth, summaryUtterance.ChunkId));
+        ReturnSummaries.AddRange(await AddItem(summaryUtterance.Text, "system", summaryUtterance.Depth, summaryUtterance.ChunkId));
 
         RemoveItemsToThreshold(currentDepth);
         return ReturnSummaries;
@@ -91,17 +99,67 @@ public class SummaryService
 
         return depthMap[depth].Sum(u => u.TokenCount);
     }
+    private async Task<OpenAIResponse> CallOpenAIAsync(string systemprompt, string prompt, List<Utterance> utterances, double temperature = 0.7)
+    {
+        StringContent content;
 
-    private Utterance GenerateSummary(List<Utterance> items)
+        List<PromptMessage> messages = new List<PromptMessage>() { new PromptMessage() { role = "system", content = systemprompt } };
+        if (utterances != null)
+        {
+            foreach (var mesg in utterances)
+            {
+                if (mesg.Speaker == _agentName)
+                {
+                    messages.Add(new PromptMessage() { role = "assistant", content = mesg.Text });
+                }
+                else if (mesg.Speaker == "system")
+                {
+                    messages.Add(new PromptMessage() { role = "assistant", content = mesg.Text });
+                }
+                else
+                {
+                    messages.Add(new PromptMessage() { role = "user", content = mesg.Text });
+                }
+            }
+        }
+        messages.Add(new PromptMessage() { role = "user", content = prompt });
+        var requestBody = new
+        {
+            model = "gpt-4o",
+            messages = messages,
+            temperature = temperature,
+            max_tokens = 6000
+        };
+
+        content = new StringContent(
+           JsonSerializer.Serialize(requestBody),
+           Encoding.UTF8,
+           "application/json");
+
+        var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+        response.EnsureSuccessStatusCode();
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
+    }
+
+    private async Task<Utterance> GenerateSummary(List<Utterance> items)
     {
         string summaryText = $"Summary of {items.Count} items ({GetTotalTokensAtDepth(items[0].Depth)} tokens) at depth {items[0].Depth}";
+
+        //nothing to hydrate yet
+        var systemPrompt = promptLibrary.HydratePrompt("raina.summarize", new Dictionary<string, object> { });
+        var response = await CallOpenAIAsync(
+            systemPrompt,
+            "",
+            items);
 
         return new Utterance
         {
             Depth = items[0].Depth + 1,
             ChunkId = Guid.NewGuid(),
             Speaker = "system",
-            Text = summaryText,
+            Text = summaryText + "\n" + response.Choices[0].Message,
             TokenCount = EstimateTokens(summaryText),
             CreatedAt = DateTime.UtcNow,
             IsSummary = true
@@ -194,9 +252,9 @@ public class SummaryService
     }
 
     // Factory method to create and load from JSON in one step
-    public static SummaryService FromJson(string filePath, string chunkCollectionId)
+    public static SummaryService FromJson(string filePath, string chunkCollectionId, string agentName, string openAIApiKey)
     {
-        var service = new SummaryService();
+        var service = new SummaryService(agentName, openAIApiKey);
         service.LoadFromJson(filePath, chunkCollectionId);
         return service;
     }

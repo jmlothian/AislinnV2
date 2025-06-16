@@ -37,17 +37,27 @@ namespace Aislinn.Core.Activation
 
             // Add noise (gaussian noise as in ACT-R)
             double noise = parameters.ActivationNoise > 0 ? GenerateActivationNoise(parameters.ActivationNoise) : 0;
-
-            // Return total activation
+            // Return total activation with dampening
             double totalActivation = baseLevelActivation + parameters.BaseActivationBoost + noise;
+            totalActivation = ApplyActivationDampening(chunk.ActivationLevel, totalActivation);
 
             return Math.Min(parameters.ActivationCeiling, totalActivation);
         }
-
+        //dampening method to reduce activation values the closer they get to the ceiling
+        public double ApplyActivationDampening(double currentActivation, double newActivation)
+        {
+            // Diminishing returns for high activations
+            if (newActivation > 1.0)
+            {
+                double excess = newActivation - 1.0;
+                newActivation = 1.0 + (excess * 0.5); // Halve the excess
+            }
+            return newActivation;
+        }
         private double CalculateBaseLevelActivation(Chunk chunk, long currentSystemTime, double decayRate)
         {
             if (chunk.ActivationHistory == null || chunk.ActivationHistory.Count == 0)
-                return 0;
+                return -2.0;
 
             double sum = 0;
 
@@ -60,14 +70,17 @@ namespace Aislinn.Core.Activation
                 // Avoid division by zero or negative time
                 if (timeElapsed <= 1)
                     timeElapsed = 1;
-                double timeElapsedSeconds = timeElapsed / 1000.0;
+                double timeElapsedSeconds = timeElapsed / 10000.0;
 
                 // Add this access's contribution to activation
                 sum += Math.Pow(timeElapsedSeconds, -decayRate);
             }
 
             // ACT-R equation: Bi = ln(Σj tj^-d)
-            return sum > 0 ? Math.Log(sum) : -10; // Floor value if no activations
+            //return sum > 0 ? Math.Log(sum) : -10; // Floor value if no activations
+            // Cap individual contributions to prevent runaway activation
+
+            return sum > 0 ? Math.Log(Math.Min(sum, 100.0)) : -10.0;
         }
 
         private double GenerateActivationNoise(double noiseLevel)

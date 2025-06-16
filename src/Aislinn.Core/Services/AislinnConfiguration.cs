@@ -13,8 +13,8 @@ namespace Aislinn.Configuration
 
         // Memory Configuration
         public int WorkingMemoryCapacity { get; set; } = 20;
-        public double ActivationThreshold { get; set; } = 0.60;
-        public double AssociativeThreshold { get; set; } = 0.3;
+        public double ActivationThreshold { get; set; } = 0.10;
+        public double AssociativeThreshold { get; set; } = -0.3;
 
         // API Configuration
         public string OpenAIApiKey { get; set; } = "";

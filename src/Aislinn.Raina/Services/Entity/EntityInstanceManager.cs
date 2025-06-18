@@ -556,6 +556,28 @@ namespace RAINA.Services
                         }
                     }
                 }
+                // Create Association to utterance
+                if (entityChunks.Any())
+                {
+                    var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
+
+                    foreach (var entityChunk in entityChunks)
+                    {
+                        // Create association between utterance and entity
+                        var association = new ChunkAssociation
+                        {
+                            ChunkAId = utteranceChunk.ID,
+                            ChunkBId = entityChunk.ID,
+                            RelationAtoB = "ReferencesOther",
+                            RelationBtoA = "ReferencedBy",
+                            WeightAtoB = 0.4,
+                            WeightBtoA = 0.2,
+                            LastActivated = _cognitiveTimeManager.GetCognitiveSteps()
+                        };
+
+                        await associationCollection.AddAssociationAsync(association);
+                    }
+                }
             }
 
             // Activate existing entities too

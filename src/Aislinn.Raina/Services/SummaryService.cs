@@ -37,6 +37,17 @@ public class SummaryService
     {
         return depthMap;
     }
+    public Utterance GetMostRecentUtterance()
+    {
+        // Get all items at depth 0 (actual utterances, not summaries)
+        var depth0Items = depthMap[0];
+
+        if (!depth0Items.Any())
+            return null;
+
+        // Return the most recent utterance based on creation time
+        return depth0Items[depth0Items.Count - 1];
+    }
     public async Task<List<Utterance>> AddItem(string text, string speaker, int depth = 0, Guid? chunkId = null)
     {
         List<Utterance> ReturnSummaries = new List<Utterance>();

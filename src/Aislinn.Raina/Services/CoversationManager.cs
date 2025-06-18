@@ -198,6 +198,20 @@ public class ConversationManager
         // Process entities and attach to utterance
         //await _entityManager.AttachEntitiesToUtteranceAsync(utteranceChunk, extractionResult.Entities);
 
+        //attach to previous utterance, if any
+        var recentUtterance = summaryService.GetMostRecentUtterance();
+        if (recentUtterance != null)
+        {
+            await _memorySystem.CreateAssociationAsync(
+                recentUtterance.ChunkId,
+                utteranceChunk.ID,
+                "HasResponse",
+                "ResponseTo",
+                0.9,
+                0.9
+            );
+        }
+
         // Handle special person entity processing (for speaker/listener slots)
         //await _entityManager.ProcessPersonEntitiesAsync(utteranceChunk, extractionResult.Entities);
         // Process all entities with batch vectorization
@@ -733,7 +747,7 @@ public class ConversationManager
         responseChunk.Vector = (await _vectorCollection.AddVectorAsync(responseChunk.ID.ToString(), vectorText, vectorMeta)).Vector;
 
         // update cognitive time, 250ms for now
-        _memorySystem._timeManager.AdvanceStep(250);
+        _memorySystem._timeManager.AdvanceStep(1000);
 
         // Add to memory system
         responseChunk = await _memorySystem.AddChunkAsync(responseChunk);

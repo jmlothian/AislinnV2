@@ -198,19 +198,7 @@ public class ConversationManager
         // Process entities and attach to utterance
         //await _entityManager.AttachEntitiesToUtteranceAsync(utteranceChunk, extractionResult.Entities);
 
-        //attach to previous utterance, if any
-        var recentUtterance = summaryService.GetMostRecentUtterance();
-        if (recentUtterance != null)
-        {
-            await _memorySystem.CreateAssociationAsync(
-                recentUtterance.ChunkId,
-                utteranceChunk.ID,
-                "HasResponse",
-                "ResponseTo",
-                0.9,
-                0.9
-            );
-        }
+
 
         // Handle special person entity processing (for speaker/listener slots)
         //await _entityManager.ProcessPersonEntitiesAsync(utteranceChunk, extractionResult.Entities);
@@ -262,6 +250,19 @@ public class ConversationManager
 
         // Add to memory system
         utteranceChunk = await _memorySystem.AddChunkAsync(utteranceChunk);
+        //attach to previous utterance, if any
+        var recentUtterance = summaryService.GetMostRecentUtterance();
+        if (recentUtterance != null)
+        {
+            await _memorySystem.CreateAssociationAsync(
+                recentUtterance.ChunkId,
+                utteranceChunk.ID,
+                "HasResponse",
+                "ResponseTo",
+                0.9,
+                0.9
+            );
+        }
         OnMessageReceived(userInput, intent, context, utteranceChunk);
 
         var summaries = await summaryService.AddItem($"[{DateTime.Now.ToString("F")}] {context.UserName}: " + userInput, context.UserName, 0, utteranceChunk.ID);

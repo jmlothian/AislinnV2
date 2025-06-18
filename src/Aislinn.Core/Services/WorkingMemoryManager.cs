@@ -6,9 +6,11 @@ using Aislinn.ChunkStorage.Interfaces;
 using Aislinn.Core.Models;
 using Aislinn.Core.Services;
 using Aislinn.Configuration;
+using System.Text.Json;
 
 namespace Aislinn.Core.Memory
 {
+
     /// <summary>
     /// Manages the contents of working memory, enforcing human-like capacity limitations,
     /// handling interference, and managing the relationship between working memory and
@@ -16,6 +18,15 @@ namespace Aislinn.Core.Memory
     /// </summary>
     public class WorkingMemoryManager
     {
+        /// <summary>
+        /// State persistence class
+        /// </summary>
+        private class WorkingMemoryState
+        {
+            public Dictionary<MemorySubsystem, List<WorkingMemorySlot>> WorkingMemorySlots { get; set; } = new();
+            public Dictionary<Guid, double> PrimedChunks { get; set; } = new();
+            public long LastRefreshTime { get; set; }
+        }
         // Working memory subsystems to simulate different capacity pools
         public enum MemorySubsystem
         {
@@ -111,18 +122,65 @@ namespace Aislinn.Core.Memory
             }
             _autoRefreshEnabled = false;
         }
+        /// <summary>
+        /// Save working memory state to file
+        /// </summary>
+        public void SaveState()
+        {
+            var state = new WorkingMemoryState
+            {
+                WorkingMemorySlots = _workingMemorySlots.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToList()
+                ),
+                PrimedChunks = new Dictionary<Guid, double>(_primedChunks),
+                LastRefreshTime = _lastRefreshTime
+            };
 
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var json = JsonSerializer.Serialize(state, options);
+            File.WriteAllText("./data/working_memory.json", json);
+        }
         // Add a disposal method to clean up timer resources
         public void Dispose()
         {
             Console.WriteLine($"[WM-DEBUG] Disposing WorkingMemoryManager");
+            SaveState();
             if (_refreshTimer != null)
             {
                 _refreshTimer.Dispose();
                 _refreshTimer = null;
             }
         }
+        /// <summary>
+        /// Load working memory state from file
+        /// </summary>
+        public void LoadState()
+        {
+            if (File.Exists("./data/working_memory.json"))
+            {
+                try
+                {
+                    var json = File.ReadAllText("./data/working_memory.json");
+                    var state = JsonSerializer.Deserialize<WorkingMemoryState>(json);
 
+                    if (state != null)
+                    {
+                        _workingMemorySlots = state.WorkingMemorySlots.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.ToList()
+                        );
+                        _primedChunks = new Dictionary<Guid, double>(state.PrimedChunks);
+                        _lastRefreshTime = state.LastRefreshTime;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading working memory state: {ex.Message}");
+                    // Continue with empty state
+                }
+            }
+        }
         /// <summary>
         /// Represents a chunk in working memory with additional metadata about its status
         /// </summary>

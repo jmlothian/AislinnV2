@@ -325,6 +325,9 @@ namespace RAINA
             var entityRelationshipExtractionService = provider.GetRequiredService<EntityRelationshipExtractionService>();
             entityRelationshipExtractionService.LoadCacheAsync(config.RelationshipCachePath).Wait();
 
+            //load previous working memory
+            var wmmanger = provider.GetRequiredService<WorkingMemoryManager>();
+            wmmanger.LoadState();
             PrintOntologyTree(allLoadedChunks);
             return provider;
         }

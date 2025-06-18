@@ -170,7 +170,7 @@ public class SummaryService
             Depth = items[0].Depth + 1,
             ChunkId = Guid.NewGuid(),
             Speaker = "system",
-            Text = summaryText + "\n" + response.Choices[0].Message,
+            Text = summaryText + "\n" + response.Choices[0].Message.Content,
             TokenCount = EstimateTokens(summaryText),
             CreatedAt = DateTime.UtcNow,
             IsSummary = true

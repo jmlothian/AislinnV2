@@ -48,11 +48,15 @@ public class ChunkGraphGenService
     // Add missing fields that are referenced in the code
     private readonly IAssociationStore _associationStore;
     private readonly string _associationCollectionId;
-    public ChunkGraphGenService(IAssociationStore associationStore,
+    private readonly IChunkStore _chunkStore;
+    private readonly string _chunkCollectionId;
+    public ChunkGraphGenService(IChunkStore chunkStore, IAssociationStore associationStore,
             AislinnConfiguration config)
     {
         _associationCollectionId = config.AssociationCollectionId;
         _associationStore = associationStore;
+        _chunkStore = chunkStore;
+        _chunkCollectionId = config.ChunkCollectionId;
     }
 
     public async Task<string> GenerateSigmaGraphDiffAsync(Chunk[] oldChunks, Chunk[] newChunks)
@@ -223,7 +227,9 @@ public class ChunkGraphGenService
                 EmotionName = h.EmotionName,
                 ActivatedByChunk = h.ActivatedByChunk.ToString(),
                 ActivatedBy = h.ActivatedBy?.Select(id => id.ToString()).ToList() ?? new List<string>(),
-                FormattedDate = FormatCognitiveTime(h.ActivationDate)
+                FormattedDate = FormatCognitiveTime(h.ActivationDate),
+                ActivationReason = h.ActivationReason,
+                ActivationSource = h.ActivationSource
             }).ToList() ?? new List<SigmaGraphActivationHistory>(),
             Slots = chunk.Slots?.ToDictionary(
                 kvp => kvp.Key,
@@ -383,11 +389,70 @@ public class ChunkGraphGenService
         var graph = new SigmaGraph();
         var random = new Random();
 
-        // Get all associations first to calculate node sizes
+
+        // Get all working memory associations first to calculate node sizes
         var allAssociations = new List<ChunkAssociation>();
         var chunkIds = chunks.Select(c => c.ID).ToHashSet();
 
-        foreach (var chunkId in chunkIds)
+
+
+
+        // Collect additional chunk IDs to load
+        var additionalChunkIds = new HashSet<Guid>();
+
+        // 1. Get chunks referenced by associations
+        foreach (var association in allAssociations)
+        {
+            additionalChunkIds.Add(association.ChunkAId);
+            additionalChunkIds.Add(association.ChunkBId);
+        }
+
+        // 2. Get chunks referenced in activation history
+        foreach (var chunk in chunks)
+        {
+            if (chunk.ActivationHistory != null)
+            {
+                foreach (var historyItem in chunk.ActivationHistory)
+                {
+                    if (historyItem.ActivatedBy != null)
+                    {
+                        additionalChunkIds.UnionWith(historyItem.ActivatedBy);
+                    }
+                }
+            }
+        }
+
+        // Remove chunks we already have
+        additionalChunkIds.ExceptWith(chunkIds);
+
+        // Load the additional chunks
+        var additionalChunks = new List<Chunk>();
+        if (additionalChunkIds.Any())
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            if (chunkCollection != null)
+            {
+                foreach (var chunkId in additionalChunkIds)
+                {
+                    try
+                    {
+                        var chunk = await chunkCollection.GetChunkAsync(chunkId);
+                        if (chunk != null)
+                        {
+                            additionalChunks.Add(chunk);
+                        }
+                    }
+                    catch
+                    {
+                        // Skip chunks that can't be loaded
+                    }
+                }
+            }
+        }
+        var allChunks = chunks.Concat(additionalChunks).ToArray();
+        var allChunkIds = allChunks.Select(c => c.ID).ToHashSet();
+
+        foreach (var chunkId in allChunkIds)
         {
             var chunkAssociations = await _associationStore.GetCollectionAsync(_associationCollectionId)
                 .ContinueWith(async collection =>
@@ -403,7 +468,6 @@ public class ChunkGraphGenService
 
             allAssociations.AddRange(filteredAssociations);
         }
-
         // Remove duplicates
         allAssociations = allAssociations
             .GroupBy(a => new { a.ChunkAId, a.ChunkBId, a.RelationAtoB, a.RelationBtoA })
@@ -412,7 +476,7 @@ public class ChunkGraphGenService
 
         // Count associations per chunk
         var associationCounts = new Dictionary<Guid, int>();
-        foreach (var chunk in chunks)
+        foreach (var chunk in allChunks)
         {
             var count = allAssociations.Count(a => a.ChunkAId == chunk.ID || a.ChunkBId == chunk.ID);
             associationCounts[chunk.ID] = count;
@@ -420,10 +484,11 @@ public class ChunkGraphGenService
 
         // Find max values for normalization
         var maxAssociations = associationCounts.Values.Any() ? associationCounts.Values.Max() : 1;
-        var maxActivation = chunks.Any() ? chunks.Max(c => c.ActivationLevel) : 1.0;
+        var maxActivation = allChunks.Any() ? allChunks.Max(c => c.ActivationLevel) : 1.0;
 
-        // Create nodes from chunks
-        foreach (var chunk in chunks)
+        // Create nodes from all chunks
+        var originalChunkIds = chunks.Select(c => c.ID).ToHashSet();
+        foreach (var chunk in allChunks)
         {
             var associationCount = associationCounts.GetValueOrDefault(chunk.ID, 0);
 
@@ -439,6 +504,7 @@ public class ChunkGraphGenService
                 CognitiveCategory = chunk.CognitiveCategory,
                 SemanticType = chunk.SemanticType,
                 ActivationLevel = chunk.ActivationLevel,
+                IsWorkingMemory = originalChunkIds.Contains(chunk.ID),
                 ActivationHistory = chunk.ActivationHistory?.Select(h => new SigmaGraphActivationHistory
                 {
                     PreviousValue = h.PreviousValue,
@@ -449,7 +515,9 @@ public class ChunkGraphGenService
                     EmotionName = h.EmotionName,
                     ActivatedByChunk = h.ActivatedByChunk.ToString(),
                     ActivatedBy = h.ActivatedBy?.Select(id => id.ToString()).ToList() ?? new List<string>(),
-                    FormattedDate = FormatCognitiveTime(h.ActivationDate)
+                    FormattedDate = FormatCognitiveTime(h.ActivationDate),
+                    ActivationReason = h.ActivationReason,
+                    ActivationSource = h.ActivationSource
                 }).ToList() ?? new List<SigmaGraphActivationHistory>(),
                 Slots = chunk.Slots?.ToDictionary(
                     kvp => kvp.Key,
@@ -483,7 +551,7 @@ public class ChunkGraphGenService
                 RelationBtoA = association.RelationBtoA,
                 WeightAtoB = association.WeightAtoB,
                 WeightBtoA = association.WeightBtoA,
-                LastActivated = association.LastActivated
+                LastActivated = association.LastActivated,
             };
 
             graph.Edges.Add(edge);
@@ -628,6 +696,10 @@ public class SigmaGraphActivationHistory
 
     [JsonPropertyName("formattedDate")]
     public string FormattedDate { get; set; }
+    [JsonPropertyName("activationReason")]
+    public string ActivationReason { get; set; }
+    [JsonPropertyName("activationSource")]
+    public string ActivationSource { get; set; }
 }
 
 public class SigmaGraphNode
@@ -668,6 +740,10 @@ public class SigmaGraphNode
 
     [JsonPropertyName("slots")]
     public Dictionary<string, object> Slots { get; set; } = new Dictionary<string, object>();
+
+    [JsonPropertyName("isWorkingMemory")]
+    public bool IsWorkingMemory { get; set; } = true;
+
 }
 
 public class SigmaGraphEdge
@@ -705,6 +781,8 @@ public class SigmaGraphEdge
 
     [JsonPropertyName("lastActivated")]
     public long LastActivated { get; set; }
+
+
 }
 
 public class SigmaGraph

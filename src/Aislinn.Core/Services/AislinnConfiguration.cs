@@ -32,11 +32,6 @@ namespace Aislinn.Configuration
             if (WorkingMemoryCapacity <= 0)
                 throw new ArgumentException("Working memory capacity must be positive");
 
-            if (ActivationThreshold <= 0 || ActivationThreshold > 1)
-                throw new ArgumentException("Activation threshold must be between 0 and 1");
-
-            if (AssociativeThreshold <= 0 || AssociativeThreshold > 1)
-                throw new ArgumentException("Associative threshold must be between 0 and 1");
         }
     }
 }

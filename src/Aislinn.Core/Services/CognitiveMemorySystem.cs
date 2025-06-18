@@ -316,7 +316,7 @@ namespace Aislinn.Core.Cognitive
         {
             foreach (var kvp in chunkBoosts)
             {
-                await ActivateChunkAsync(kvp.Key, emotionName, reason, source, kvp.Value);
+                await ActivateChunkAsync(kvp.Key, reason, source, emotionName, kvp.Value);
             }
         }
 

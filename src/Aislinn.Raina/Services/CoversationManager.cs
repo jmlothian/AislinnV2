@@ -254,14 +254,21 @@ public class ConversationManager
         var recentUtterance = summaryService.GetMostRecentUtterance();
         if (recentUtterance != null)
         {
-            await _memorySystem.CreateAssociationAsync(
-                recentUtterance.ChunkId,
-                utteranceChunk.ID,
-                "HasResponse",
-                "ResponseTo",
-                0.9,
-                0.9
-            );
+            try
+            {
+                await _memorySystem.CreateAssociationAsync(
+                    recentUtterance.ChunkId,
+                    utteranceChunk.ID,
+                    "HasResponse",
+                    "ResponseTo",
+                    0.9,
+                    0.9
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
         OnMessageReceived(userInput, intent, context, utteranceChunk);
 
@@ -786,7 +793,7 @@ public class ConversationManager
             _recentUtterances.RemoveAt(0);
         }
         var strTimestamp2 = currentTime.ToString("F");
-        await summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText, (string)responseChunk.Slots["SpeakerName"].Value);
+        await summaryService.AddItem("[" + strTimestamp2 + "] " + responseChunk.Slots["SpeakerName"].Value + ": " + responseText, (string)responseChunk.Slots["SpeakerName"].Value, 0, responseChunk.ID);
         // Update context
         context.AddUtterance(responseChunk);
         context.LastSystemUtterance = responseChunk;

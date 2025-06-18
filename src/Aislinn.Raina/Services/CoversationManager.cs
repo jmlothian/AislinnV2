@@ -213,7 +213,7 @@ public class ConversationManager
             var entityChunk = await _entityManager.FindExistingEntityInstanceAsync(entity.Name, entity.Type);
             if (entityChunk != null)
             {
-                await _memorySystem.ActivateChunkAsync(entityChunk.ID, entityContext, "entity_extraction", 0.05);
+                await _memorySystem.ActivateChunkAsync(entityChunk.ID, entityContext, "entity_extraction", "ConversationManager.RecordUserInputAsync", null, 0.05);
             }
         }
         // Add metadata based on intent if available
@@ -283,7 +283,7 @@ public class ConversationManager
 
         // Activate the utterance chunk in memory
         var utteranceContext = await CreateConversationSpreadingContextAsync(context);
-        await _memorySystem.ActivateChunkAsync(utteranceChunk.ID, utteranceContext);
+        await _memorySystem.ActivateChunkAsync(utteranceChunk.ID, utteranceContext, "user input", "ConversationManager.RecordUserInputAsync");
 
         return (utteranceChunk, extractionResult);
     }
@@ -332,7 +332,7 @@ public class ConversationManager
                 await _memorySystem.UpdateChunkAsync(existingChunk);
 
                 // Activate it to bring into working memory
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, null, 0.2);
+                await _memorySystem.ActivateChunkAsync(existingChunk.ID, "categories exist", "ConversationManager.ProcessCategoryFactors", null, 0.2);
                 //manually import into context...
                 _contextContainer.AddContextChunk(category, existingChunk.ID);
                 _contextContainer.ExtractContextFactorsFromChunk(category, existingChunk);
@@ -361,7 +361,7 @@ public class ConversationManager
 
                 // Activate it to bring into working memory
                 var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, null, 0.05);
+                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, "categories created", "ConversationManager.ProcessCategoryFactors", null, 0.05);
                 //manually import into context...
                 _contextContainer.AddContextChunk(category, savedChunk.ID);
                 _contextContainer.ExtractContextFactorsFromChunk(category, savedChunk);
@@ -650,7 +650,7 @@ public class ConversationManager
         if (searchBoosts.Any())
         {
             // Activate chunks found through vector search
-            await _memorySystem.ActivateChunksAsync(searchBoosts, "contextual_search");
+            await _memorySystem.ActivateChunksAsync(searchBoosts, "contextual vector search", "ConversationManager.GenerateResponseAsync", null);
         }
         _logger.LogInformation($"Update Working Memory");
 
@@ -673,7 +673,7 @@ public class ConversationManager
 
         // Activate it to bring into working memory
         var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
-        await _memorySystem.ActivateChunkAsync(savedChunk.ID, contextSpreadingContext, null, 0.05);
+        await _memorySystem.ActivateChunkAsync(savedChunk.ID, contextSpreadingContext, "context summary created", "ConversationManager.GenerateResponseAsync", null, 0.05);
 
         // Manual refresh to bring relevant chunks into working memory
         // Focus on the new utterance and let spreading activation do its work
@@ -778,7 +778,7 @@ public class ConversationManager
 
         // Activate the response chunk in memory
         var responseContext = await CreateConversationSpreadingContextAsync(context);
-        await _memorySystem.ActivateChunkAsync(responseChunk.ID, responseContext);
+        await _memorySystem.ActivateChunkAsync(responseChunk.ID, responseContext, "response generated", "ConversationManager.GenerateResponseAsync.response");
 
         OnResponseGenerated(responseText, responseChunk, context);
         // Return response object
@@ -878,7 +878,7 @@ public class ConversationManager
         context.LastSystemUtterance = responseChunk;
 
         // Activate the response chunk in memory
-        await _memorySystem.ActivateChunkAsync(responseChunk.ID);
+        await _memorySystem.ActivateChunkAsync(responseChunk.ID, "response generated", "ConversationManager.GenerateQueryResponseAsync");
 
         // Return response object
         return new Response

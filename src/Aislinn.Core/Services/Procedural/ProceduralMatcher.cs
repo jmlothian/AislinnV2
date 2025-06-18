@@ -363,7 +363,7 @@ namespace Aislinn.Core.Procedural
                 // Boost amount based on match score
                 double boost = 0.3 + (result.Score * 0.7);
 
-                await _activationService.ActivateChunkAsync(result.Procedure.ID, null, boost);
+                await _activationService.ActivateChunkAsync(result.Procedure.ID, "", "", null, boost);
             }
         }
 

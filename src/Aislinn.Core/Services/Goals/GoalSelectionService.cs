@@ -798,12 +798,12 @@ namespace Aislinn.Core.Goals.Selection
         {
             if (_primaryGoalId.HasValue)
             {
-                await _activationService.ActivateChunkAsync(_primaryGoalId.Value, null, 1.0);
+                await _activationService.ActivateChunkAsync(_primaryGoalId.Value, "", "", null, 1.0);
             }
 
             foreach (var goalId in _secondaryGoalIds)
             {
-                await _activationService.ActivateChunkAsync(goalId, null, 0.5);
+                await _activationService.ActivateChunkAsync(goalId, "", "", null, 0.5);
             }
         }
 
@@ -885,7 +885,7 @@ namespace Aislinn.Core.Goals.Selection
             }
 
             // Boost activation
-            await _activationService.ActivateChunkAsync(goalId, null, 1.0);
+            await _activationService.ActivateChunkAsync(goalId, "", "", null, 1.0);
 
             return true;
         }

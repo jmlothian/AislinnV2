@@ -156,6 +156,8 @@ namespace RAINA.Web.Controllers
 
                 var chunk = await _coreServices.MemorySystem.ActivateChunkAsync(
                     chunkId,
+                    "direct activation",
+                    "RainaController.ActivateChunk",
                     request.Emotion,
                     request.ActivationBoost);
 

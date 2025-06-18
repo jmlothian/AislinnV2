@@ -4,6 +4,7 @@ using System.Dynamic;
 using Aislinn.Core.Interfaces;
 
 namespace Aislinn.Core.Models;
+
 public class ActivationHistoryItem : IEmotion
 {
     public double PreviousValue { get; set; } = 0.0;
@@ -22,6 +23,9 @@ public class ActivationHistoryItem : IEmotion
     //list from most recent to grandparent for tracking spreading activation to this chunk
     public List<Guid> ActivatedBy { get; set; } = new List<Guid>();
     public Guid ActivatedByChunk { get; set; } = Guid.Empty;
+
+    public string ActivationReason { get; set; }  // "entity_extraction", "decay", "user_input", etc.
+    public string ActivationSource { get; set; }  // "ConversationManager.RecordUserInputAsync", "ChunkActivationService.SpreadActivationAsync", etc.
     //public string FormatElapsedTime()
     //{
     //    TimeSpan timeSince = DateTime.Now - ActivationDate;

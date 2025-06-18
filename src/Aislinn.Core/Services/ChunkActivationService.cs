@@ -44,7 +44,7 @@ namespace Aislinn.Core.Services
         /// <summary>
         /// Activates a chunk with the specified ID and applies spreading activation
         /// </summary>
-        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, string emotionName = null, double activationBoost = 1.0)
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, string reason, string source, string emotionName = null, double activationBoost = 1.0)
         {
             // Get the collections
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
@@ -102,6 +102,8 @@ namespace Aislinn.Core.Services
             await SpreadActivationAsync(
                 chunk,
                 null,
+                reason,
+                source,
                 maxSpreadingDepth,
                 activationBoost,
                 new HashSet<Guid> { chunkId },
@@ -114,7 +116,7 @@ namespace Aislinn.Core.Services
         /// <summary>
         /// Activates a chunk with context-filtered spreading activation
         /// </summary>
-        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string emotionName = null, double activationBoost = 1.0)
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string reason, string source, string emotionName = null, double activationBoost = 1.0)
         {
             // Get the collections
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
@@ -154,6 +156,8 @@ namespace Aislinn.Core.Services
                     ? chunk.ActivationHistory[0].SequenceNumber + 1
                     : 1,
                 EmotionName = emotionName,
+                ActivationSource = source,
+                ActivationReason = reason,
                 ActivationDate = _timeManager.GetCognitiveSteps()
             };
 
@@ -171,6 +175,8 @@ namespace Aislinn.Core.Services
             await SpreadActivationAsync(
                 chunk,
                 null,
+                reason,
+                source,
                 maxSpreadingDepth,
                 activationBoost,
                 new HashSet<Guid> { chunkId },
@@ -332,6 +338,8 @@ namespace Aislinn.Core.Services
         private async Task SpreadActivationAsync(
             Chunk sourceChunk,
             ChunkAssociation incomingAssociation,
+            string reason,
+            string source,
             int remainingDepth,
             double currentSpreadingFactor,
             HashSet<Guid> visitedChunks,
@@ -409,6 +417,8 @@ namespace Aislinn.Core.Services
                         ? targetChunk.ActivationHistory[0].SequenceNumber + 1
                         : 1,
                     EmotionName = originalActivation.EmotionName,
+                    ActivationReason = reason,
+                    ActivationSource = source,
                     ActivationDate = _timeManager.GetCognitiveSteps(),
                     ActivatedByChunk = sourceChunk.ID
                 };
@@ -444,7 +454,9 @@ namespace Aislinn.Core.Services
                     NewValue = isSourceA ? association.WeightAtoB : association.WeightBtoA,
                     Change = parameters.AssociationStrengthIncrement,
                     ActivationDate = _timeManager.GetCognitiveSteps(),
-                    ActivatedByChunk = sourceChunk.ID
+                    ActivatedByChunk = sourceChunk.ID,
+                    ActivationReason = reason,
+                    ActivationSource = source
                 };
                 association.ActivationHistory.Add(associationHistoryItem);
 
@@ -456,6 +468,8 @@ namespace Aislinn.Core.Services
                 await SpreadActivationAsync(
                     targetChunk,
                     association,
+                    reason,
+                    source,
                     remainingDepth - 1,
                     currentSpreadingFactor * parameters.SpreadingFactor,
                     visitedChunks,

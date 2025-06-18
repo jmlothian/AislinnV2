@@ -99,12 +99,12 @@ namespace RAINA.Services
             }
             if (entityInstance != null)
             {
-                await _activationService.ActivateChunkAsync(entityInstance.ID, "entity_extraction", 0.1);
+                await _activationService.ActivateChunkAsync(entityInstance.ID, "entity_extraction", "EntityInstanceManager.FindOrCreateEntityInstanceAsync", null, 0.1);
 
                 // Also activate the ontology concept
                 if (ontologyConcept != null)
                 {
-                    await _activationService.ActivateChunkAsync(ontologyConcept.ID, "entity_extraction", 0.1);
+                    await _activationService.ActivateChunkAsync(ontologyConcept.ID, "entity_extraction", "EntityInstanceManager.FindOrCreateEntityInstanceAsync.ontology", null, 0.1);
                 }
             }
             return entityInstance;
@@ -525,7 +525,7 @@ namespace RAINA.Services
                         }
 
                         // Activate the new entity
-                        await _activationService.ActivateChunkAsync(entityChunk.ID, "entity_extraction", 0.1);
+                        await _activationService.ActivateChunkAsync(entityChunk.ID, "entity_extraction", "EntityInstanceManager.ProcessEntitiesForUtteranceAsync.new", null, 0.1);
                     }
                 }
 
@@ -562,7 +562,7 @@ namespace RAINA.Services
             var existingCount = entityChunks.Count - newEntityData.Count;
             for (int i = 0; i < existingCount; i++)
             {
-                await _activationService.ActivateChunkAsync(entityChunks[i].ID, "entity_extraction", 0.05);
+                await _activationService.ActivateChunkAsync(entityChunks[i].ID, "entity_extraction", "EntityInstanceManager.ProcessEntitiesForUtteranceAsync.existing", null, 0.05);
             }
 
             // Add all entities to utterance slots

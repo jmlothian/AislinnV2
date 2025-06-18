@@ -161,7 +161,7 @@ namespace RAINA.Web.Hubs
                     return;
                 }
 
-                var chunk = await _coreServices.MemorySystem.ActivateChunkAsync(id, "manual_web", 1.0);
+                var chunk = await _coreServices.MemorySystem.ActivateChunkAsync(id, "manual web", "RainaHub.ActivateChunk", null, 1.0);
                 if (chunk != null)
                 {
                     await Clients.Caller.SendAsync("ChunkActivated", new

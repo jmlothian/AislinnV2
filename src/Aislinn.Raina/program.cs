@@ -355,7 +355,7 @@ public class WorkingMemoryController
         if (chunk == null) return false;
 
         // Activate the chunk and update working memory
-        chunk = await _memorySystem.ActivateChunkAsync(chunkId);
+        chunk = await _memorySystem.ActivateChunkAsync(chunkId, "", "");
         return chunk != null;
     }
 }
@@ -447,7 +447,7 @@ public class TaskManager
         await _memorySystem.AddChunkAsync(taskChunk);
 
         // Activate the task to make it prominent in memory
-        await _memorySystem.ActivateChunkAsync(taskChunk.ID, null, 0.05);
+        await _memorySystem.ActivateChunkAsync(taskChunk.ID, "", "", null, 0.05);
 
         //handle Trello Update
 

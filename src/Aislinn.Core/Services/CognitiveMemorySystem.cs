@@ -153,10 +153,10 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Activate a chunk and optionally bring it into working memory
         /// </summary>
-        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, string emotionName = null, double activationBoost = 1.0)
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, string reason, string source, string emotionName = null, double activationBoost = 1.0)
         {
             // Activate the chunk using the activation service
-            var chunk = await _activationService.ActivateChunkAsync(chunkId, emotionName, activationBoost);
+            var chunk = await _activationService.ActivateChunkAsync(chunkId, reason, source, emotionName, activationBoost);
 
             // Update working memory with the activated chunk
             if (chunk != null)
@@ -169,10 +169,10 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Activate a chunk with context-filtered spreading activation
         /// </summary>
-        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string emotionName = null, double activationBoost = 1.0)
+        public async Task<Chunk> ActivateChunkAsync(Guid chunkId, SpreadingContext context, string reason, string source, string emotionName = null, double activationBoost = 1.0)
         {
             // Activate the chunk using the activation service with context
-            var chunk = await _activationService.ActivateChunkAsync(chunkId, context, emotionName, activationBoost);
+            var chunk = await _activationService.ActivateChunkAsync(chunkId, context, reason, source, emotionName, activationBoost);
 
             // Update working memory with the activated chunk
             if (chunk != null)
@@ -312,11 +312,11 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Activate multiple chunks with different boost levels
         /// </summary>
-        public async Task ActivateChunksAsync(Dictionary<Guid, double> chunkBoosts, string emotionName = null)
+        public async Task ActivateChunksAsync(Dictionary<Guid, double> chunkBoosts, string reason, string source, string emotionName = null)
         {
             foreach (var kvp in chunkBoosts)
             {
-                await ActivateChunkAsync(kvp.Key, emotionName, kvp.Value);
+                await ActivateChunkAsync(kvp.Key, emotionName, reason, source, kvp.Value);
             }
         }
 

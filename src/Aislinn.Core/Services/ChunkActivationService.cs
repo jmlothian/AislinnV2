@@ -85,8 +85,12 @@ namespace Aislinn.Core.Services
                     ? chunk.ActivationHistory[0].SequenceNumber + 1
                     : 1,
                 EmotionName = emotionName,
-                ActivationDate = _timeManager.GetCognitiveSteps()
+                ActivationDate = _timeManager.GetCognitiveSteps(),
+                ActivationSource = source,
+                ActivationReason = reason
             };
+            // Initialize ActivatedBy for the root activation
+            activationItem.ActivatedBy = new List<Guid> { chunk.ID };
 
             // Add to history (most recent first)
             chunk.ActivationHistory.Insert(0, activationItem);
@@ -414,7 +418,7 @@ namespace Aislinn.Core.Services
                     NewValue = targetChunk.ActivationLevel,
                     Change = spreadAmount, // Use the final spread amount including any context reduction
                     SequenceNumber = targetChunk.ActivationHistory.Count > 0
-                        ? targetChunk.ActivationHistory[0].SequenceNumber + 1
+                        ? targetChunk.ActivationHistory[0].SequenceNumber + 1 //first item is most recent
                         : 1,
                     EmotionName = originalActivation.EmotionName,
                     ActivationReason = reason,
@@ -464,7 +468,6 @@ namespace Aislinn.Core.Services
                 await associationCollection.UpdateAssociationAsync(association);
 
                 // Continue spreading (recursive call with reduced factor)
-                // Continue spreading (recursive call with reduced factor)
                 await SpreadActivationAsync(
                     targetChunk,
                     association,
@@ -473,7 +476,7 @@ namespace Aislinn.Core.Services
                     remainingDepth - 1,
                     currentSpreadingFactor * parameters.SpreadingFactor,
                     visitedChunks,
-                    originalActivation,
+                    activationItem, // Pass the current activationItem to accumulate the path
                     parameters,
                     context);
             }

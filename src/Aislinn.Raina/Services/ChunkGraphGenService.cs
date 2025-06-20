@@ -464,7 +464,7 @@ public class ChunkGraphGenService
 
             // Only include associations where both chunks are in our set
             var filteredAssociations = chunkAssociations.Where(a =>
-                chunkIds.Contains(a.ChunkAId) && chunkIds.Contains(a.ChunkBId));
+                allChunkIds.Contains(a.ChunkAId) && allChunkIds.Contains(a.ChunkBId));
 
             allAssociations.AddRange(filteredAssociations);
         }

@@ -104,8 +104,20 @@ namespace Aislinn.Core.Activation
             // Get parameters for the source chunk type
             var parameters = _parametersRegistry.GetParameters(sourceChunk);
 
+            // Use the most recent activation increment (change) for spreading
+            double activationIncrement = 0.0;
+            if (sourceChunk.ActivationHistory != null && sourceChunk.ActivationHistory.Count > 0)
+            {
+                activationIncrement = sourceChunk.ActivationHistory[0].Change;
+            }
+            else
+            {
+                activationIncrement = sourceChunk.ActivationLevel;
+            }
+
             // ACT-R spreading activation calculation with type-specific factor
-            return sourceChunk.ActivationLevel * associationWeight * spreadingFactor * parameters.SpreadingFactor;
+            return activationIncrement * associationWeight * spreadingFactor * parameters.SpreadingFactor;
+            //return sourceChunk.ActivationLevel * associationWeight * spreadingFactor * parameters.SpreadingFactor;
         }
     }
 }

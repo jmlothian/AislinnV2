@@ -982,5 +982,51 @@ namespace Aislinn.Core.Memory
             Console.WriteLine($"[WM-DEBUG] Current primed chunks count: {count}");
             return count;
         }
+
+        /// <summary>
+        /// Creates very weak associations between all pairs of chunks in working memory and primed memory
+        /// if no association already exists. Links from primed elements are weaker.
+        /// </summary>
+        public async Task CreateWeakAssociationsForWMAndPrimedAsync()
+        {
+            var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+            var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
+            if (chunkCollection == null || associationCollection == null)
+                return;
+
+            // Gather all chunk IDs from working memory and primed memory
+            var wmIds = _workingMemorySlots.Values.SelectMany(slots => slots).Select(slot => slot.ChunkId).ToHashSet();
+            var primedIds = _primedChunks.Keys.ToHashSet();
+            var allIds = wmIds.Union(primedIds).ToList();
+
+            for (int i = 0; i < allIds.Count; i++)
+            {
+                for (int j = i + 1; j < allIds.Count; j++)
+                {
+                    var idA = allIds[i];
+                    var idB = allIds[j];
+                    // Check if association already exists (in either direction)
+                    var existing = await associationCollection.GetAssociationAsync(idA, idB, "$workingmemory", "$workingmemory");
+                    if (existing == null)
+                    {
+                        // Determine weight based on membership
+                        bool aWM = wmIds.Contains(idA);
+                        bool bWM = wmIds.Contains(idB);
+                        //working memory  / working and primed mix / primed only
+                        double weight = (aWM && bWM) ? 0.01 : (aWM || bWM) ? 0.005 : 0.001;
+                        await associationCollection.AddAssociationAsync(new ChunkAssociation
+                        {
+                            ChunkAId = idA,
+                            ChunkBId = idB,
+                            RelationAtoB = "$workingmemory",
+                            RelationBtoA = "$workingmemory",
+                            WeightAtoB = weight,
+                            WeightBtoA = weight,
+                            LastActivated = _cognitiveTimeManager.GetCognitiveSteps()
+                        });
+                    }
+                }
+            }
+        }
     }
 }

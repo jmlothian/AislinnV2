@@ -374,7 +374,7 @@ public class QueryEngine
         // In a real implementation, this would use vector search and activation to find relevant chunks
         // For now, we'll simulate finding chunks with high activation
 
-        var activeChunks = await _memorySystem.GetActiveChunksAsync(0.1);
+        var activeChunks = await _memorySystem.GetActiveChunksAsync();
 
         // Filter by keywords if provided
         if (parameters.Keywords != null && parameters.Keywords.Count > 0)

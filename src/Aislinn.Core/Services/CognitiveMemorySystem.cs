@@ -193,7 +193,7 @@ namespace Aislinn.Core.Cognitive
         /// <summary>
         /// Get all chunks above an activation threshold
         /// </summary>
-        public async Task<List<Chunk>> GetActiveChunksAsync(double threshold = 0.1)
+        public async Task<List<Chunk>> GetActiveChunksAsync(double? threshold = null)
         {
             return await _activationService.GetActiveChunksAsync(threshold);
         }

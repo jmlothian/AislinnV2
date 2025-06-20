@@ -50,6 +50,16 @@ namespace Aislinn.Models.Activation
         public double AssociationStrengthIncrement { get; set; } = 0.1;
 
         /// <summary>
+        /// If true, allow multiple activations per chunk in a single spreading event (ACT-R style)
+        /// </summary>
+        public bool AllowMultipleActivationsPerSpread { get; set; } = false;
+
+        /// <summary>
+        /// Activation threshold for triggering spreading from a chunk (ACT-R style)
+        /// </summary>
+        public double ActivationThreshold { get; set; } = 1.4; //this reflects the math we're currently getting
+
+        /// <summary>
         /// Creates default activation parameters
         /// </summary>
         public TypeActivationParameters() { }

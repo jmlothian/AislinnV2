@@ -349,13 +349,19 @@ namespace Aislinn.Core.Services
             HashSet<Guid> visitedChunks,
             ActivationHistoryItem originalActivation,
             TypeActivationParameters parameters,
-            SpreadingContext context = null)
+            SpreadingContext context = null,
+            HashSet<Guid> alreadySpreadChunks = null)
         {
             if (remainingDepth <= 0) return;
 
             // Get collections
             var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
+
+            bool allowMultipleActivationsPerSpread = parameters.AllowMultipleActivationsPerSpread;
+            double activationThreshold = parameters.ActivationThreshold;
+            if (alreadySpreadChunks == null && allowMultipleActivationsPerSpread)
+                alreadySpreadChunks = new HashSet<Guid>();
 
             // Get associations for this chunk
             var associations = await associationCollection.GetAssociationsForChunkAsync(sourceChunk.ID);
@@ -366,11 +372,13 @@ namespace Aislinn.Core.Services
                 bool isSourceA = association.ChunkAId == sourceChunk.ID;
                 Guid targetChunkId = isSourceA ? association.ChunkBId : association.ChunkAId;
 
-                // Skip if already visited
-                if (visitedChunks.Contains(targetChunkId)) continue;
-
-                // Add to visited set
-                visitedChunks.Add(targetChunkId);
+                if (!allowMultipleActivationsPerSpread)
+                {
+                    // Skip if already visited (classic behavior)
+                    if (visitedChunks.Contains(targetChunkId)) continue;
+                    visitedChunks.Add(targetChunkId);
+                }
+                // If allowing multiple activations, do not skip, but track spreading
 
                 // Get weight in the correct direction
                 double weight = isSourceA ? association.WeightAtoB : association.WeightBtoA;
@@ -467,36 +475,64 @@ namespace Aislinn.Core.Services
                 // Update the association
                 await associationCollection.UpdateAssociationAsync(association);
 
-                // Continue spreading (recursive call with reduced factor)
-                await SpreadActivationAsync(
-                    targetChunk,
-                    association,
-                    reason,
-                    source,
-                    remainingDepth - 1,
-                    currentSpreadingFactor * parameters.SpreadingFactor,
-                    visitedChunks,
-                    activationItem, // Pass the current activationItem to accumulate the path
-                    parameters,
-                    context);
+                // ACT-R-like: If activation crosses threshold and hasn't already spread, trigger spreading
+                if (allowMultipleActivationsPerSpread && activationThreshold > 0.0 && targetChunk.ActivationLevel >= activationThreshold)
+                {
+                    if (!alreadySpreadChunks.Contains(targetChunkId))
+                    {
+                        alreadySpreadChunks.Add(targetChunkId);
+                        await SpreadActivationAsync(
+                            targetChunk,
+                            association,
+                            reason,
+                            source,
+                            remainingDepth - 1,
+                            currentSpreadingFactor * parameters.SpreadingFactor,
+                            visitedChunks, // still pass for compatibility, but not used if allowMultipleActivationsPerSpread
+                            activationItem,
+                            parameters,
+                            context,
+                            alreadySpreadChunks);
+                    }
+                }
+                else if (!allowMultipleActivationsPerSpread)
+                {
+                    // Continue spreading (classic behavior)
+                    await SpreadActivationAsync(
+                        targetChunk,
+                        association,
+                        reason,
+                        source,
+                        remainingDepth - 1,
+                        currentSpreadingFactor * parameters.SpreadingFactor,
+                        visitedChunks,
+                        activationItem,
+                        parameters,
+                        context);
+                }
             }
         }
 
         /// <summary>
         /// Get chunks above a certain activation threshold
         /// </summary>
-        public async Task<List<Chunk>> GetActiveChunksAsync(double threshold = 0.1)
+        public async Task<List<Chunk>> GetActiveChunksAsync(double? threshold)
         {
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
             if (chunkCollection == null)
                 return new List<Chunk>();
 
             var allChunks = await chunkCollection.GetAllChunksAsync();
+            if (threshold == null)
+            {
+                threshold = this._parametersRegistry.GetDefaultParameters().ActivationThreshold;
+            }
+
 
             return allChunks
-                .Where(c => c.ActivationLevel >= threshold)
-                .OrderByDescending(c => c.ActivationLevel)
-                .ToList();
+                    .Where(c => c.ActivationLevel >= threshold)
+                    .OrderByDescending(c => c.ActivationLevel)
+                    .ToList();
         }
     }
 }

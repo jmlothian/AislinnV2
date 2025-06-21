@@ -30,10 +30,12 @@ import type {
   AuthState,
   LoadingState,
   EntityInfo,
+  GraphData,
 } from "./models/models";
 import { ChatTab } from "./ChatTab";
 import { LoginScreen } from "./LoginScreen";
 import { LoadingSpinner } from "./LoadingSpinner"; // or wherever you put it
+import CognitiveGraphViewer from "./CognitiveGraphViewer";
 
 const RainaUI = () => {
   const generateId = (): string => {
@@ -103,7 +105,6 @@ const RainaUI = () => {
   const [expandedDepths, setExpandedDepths] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false, 3: false });
   // Inside your RainaUI component, add these state variables and useEffect:
   const [signalRService] = useState(() => new SignalRService());
-  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [messageCount, setMessageCount] = useState<number>(1);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [currentIntent, setCurrentIntent] = useState<Intent>(mockCurrentIntent);
@@ -112,6 +113,7 @@ const RainaUI = () => {
   const [workingMemory, setWorkingMemory] = useState<WorkingMemoryChunk[]>([]);
   const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
   const [maxDebugLogs] = useState<number>(1000); // Limit to prevent memory issues
+  const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
 
   const [context, setContext] = useState<ContextData>({
     environment: {},
@@ -156,12 +158,12 @@ const RainaUI = () => {
             // Check if the username (before 3rd colon) contains "Raina"
             const usernameSection = parts.slice(0, 3).join(":");
             const isAssistant = usernameSection.includes("Raina");
-            if (item.chunkId == "00000000-0000-0000-0000-000000000000") {
-              item.chunkId = generateId();
+            if (item.id == "00000000-0000-0000-0000-000000000000") {
+              item.id = generateId();
             }
 
             messages.push({
-              id: item.chunkId,
+              id: item.id,
               type: isAssistant ? "assistant" : "user",
               text: cleanText,
               timestamp: item.timestamp,
@@ -194,211 +196,236 @@ const RainaUI = () => {
   }, [authState?.authenticated]);
   useEffect(() => {
     const connectSignalR = async () => {
+      console.log("🎬 Starting SignalR setup...");
+
       const savedMessages = loadChatHistory();
       if (savedMessages.length > 0) {
         setMessages(savedMessages);
-        console.log(`Loaded ${savedMessages.length} messages from local storage`);
+        console.log(`📚 Loaded ${savedMessages.length} messages from local storage`);
       }
+      try {
+        await signalRService.start();
+        console.log("🎯 SignalR setup complete, registering event listeners...");
+        // Set up event listeners
+        signalRService.onWorkingMemoryChanged((data) => {
+          console.log("🧠 Working Memory Updated callback triggered:", data);
+          const newWorkingMemory: WorkingMemoryChunk[] = data.workingMemoryItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            type: item.chunkType,
+            activation: item.activationLevel,
+            subsystem: item.subsystem,
+          }));
+          setWorkingMemory(newWorkingMemory);
+          console.log("🧠 Working memory state updated");
+        });
 
-      await signalRService.start();
-      setIsConnected(true);
-      console.log(isConnected);
-      // Set up event listeners
-      signalRService.onWorkingMemoryChanged((data) => {
-        console.log("Working Memory Updated:", data);
-        const newWorkingMemory: WorkingMemoryChunk[] = data.workingMemoryItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          type: item.chunkType,
-          activation: item.activationLevel,
-          subsystem: item.subsystem,
-        }));
-        setWorkingMemory(newWorkingMemory);
-      });
+        // Context Updates
+        signalRService.onContextUpdated((data) => {
+          console.log("🎯 Context Updated callback triggered:", data);
+          // Convert the context snapshot to your ContextData format
+          // This is a simplified conversion - you may need to adjust based on your actual data structure
 
-      // Context Updates
-      signalRService.onContextUpdated((data) => {
-        console.log("Context Updated:", data);
-        // Convert the context snapshot to your ContextData format
-        // This is a simplified conversion - you may need to adjust based on your actual data structure
+          const newContext: ContextData = {};
 
-        const newContext: ContextData = {};
+          // Iterate through each category in the context snapshot
+          Object.entries(data.contextSnapshot).forEach(([categoryName, categoryData]) => {
+            newContext[categoryName] = {};
 
-        // Iterate through each category in the context snapshot
-        Object.entries(data.contextSnapshot).forEach(([categoryName, categoryData]) => {
-          newContext[categoryName] = {};
+            // Extract properties with .Value suffix and convert to string
+            Object.entries(categoryData as Record<string, unknown>).forEach(([key, value]) => {
+              if (key.endsWith(".Value")) {
+                const propertyName = key.replace(".Value", "");
+                newContext[categoryName][propertyName] = String(value);
+              }
+            });
+          });
+          setContext(newContext);
+          console.log("🎯 Context state updated");
+        });
 
-          // Extract properties with .Value suffix and convert to string
-          Object.entries(categoryData as Record<string, unknown>).forEach(([key, value]) => {
-            if (key.endsWith(".Value")) {
-              const propertyName = key.replace(".Value", "");
-              newContext[categoryName][propertyName] = String(value);
-            }
+        // Message Received
+        //we can use this to update the processing status of a message to mark it as "seen" essentially
+        // signalRService.onMessageReceived((data) => {
+        //   console.log("Message Received:", data);
+        //   const newMessage: Message = {
+        //     id: Date.now(), // Simple ID generation
+        //     type: "user",
+        //     text: data.userInput,
+        //     timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        //   };
+        //   setMessages((prev) => [...prev, newMessage]);
+        // });
+
+        // Intent Classification
+        signalRService.onIntentClassified((data) => {
+          console.log("🎯 Intent Classified callback triggered:", data);
+          console.log(`Intent: ${data.intentType} (${(data.confidence * 100).toFixed(1)}%)`);
+
+          setCurrentIntent({
+            type: data.intentType,
+            confidence: data.confidence,
+          });
+
+          const newIntentEntities: EntityInfo[] = data.entities.map((entity) => ({
+            name: entity.name,
+            type: entity.type,
+            formal: entity.formal,
+          }));
+          setIntentEntities(newIntentEntities);
+          console.log("🏷️ Entities state updated");
+        });
+
+        // Entities Extracted
+        signalRService.onEntitiesExtracted((data) => {
+          console.log("Entities Extracted:", data);
+          console.log(`Intent entities: ${data.intentEntities.length}, Extracted: ${data.extractedEntities.length}`);
+
+          const newExtractedEntities: EntityInfo[] = data.extractedEntities.map((entity) => ({
+            name: entity.name,
+            type: entity.type,
+            formal: entity.formal,
+          }));
+          setExtractedEntities(newExtractedEntities);
+        });
+
+        // Response Generated
+        signalRService.onResponseGenerated((data) => {
+          console.log("💬 Response Generated callback triggered:", data);
+          console.log("💬 Response text:", data.responseText);
+          setMessageCount((prev) => {
+            console.log("💬 Updating message count from", prev, "to", prev + 1);
+            return prev + 1;
+          });
+          const newMessage: Message = {
+            id: data.chunkId, // Simple ID generation, +1 to avoid collision
+            type: "assistant",
+            text: data.responseText,
+            timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          };
+          setMessages((prev) => {
+            console.log("💬 Adding message to state. Previous count:", prev.length);
+            const updated = [...prev, newMessage];
+            console.log("💬 New message count:", updated.length);
+            return updated;
+          });
+          console.log("💬 Response message state updated");
+        });
+        signalRService.onSystemStatus((data) => {
+          console.log("SYSTEMSTATUS");
+          console.log(data);
+        });
+        signalRService.onTest((data) => {
+          console.log("Test");
+          console.log(data);
+        });
+        // Summary Created
+        signalRService.onSummaryCreated((data) => {
+          console.log("Summary Created:", data);
+          console.log(`Created ${data.newSummaries.length} new summaries`);
+
+          // Update summary data with new summaries
+          setSummaryData((prev) => {
+            const newSummaryData = { ...prev };
+
+            data.newSummaries.forEach((summary) => {
+              const depth = summary.depth;
+
+              if (!newSummaryData[depth]) {
+                newSummaryData[depth] = {
+                  currentTokens: 0,
+                  maxTokens: 8000,
+                  items: [],
+                };
+              }
+
+              const newSummaryItem: SummaryItem = {
+                id: summary.id,
+                text: summary.text,
+                tokens: summary.tokenCount,
+                timestamp: new Date(summary.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                chunkId: summary.id,
+              };
+
+              newSummaryData[depth].items.push(newSummaryItem);
+              newSummaryData[depth].currentTokens += summary.tokenCount;
+            });
+
+            return newSummaryData;
           });
         });
+        signalRService.onSummariesLoaded((data) => {
+          console.log("Summaries Loaded:", data);
+          setSummariesLoading({ isLoading: false });
 
-        setContext(newContext);
-      });
+          const convertedSummaryData: Record<number, SummaryDepthData> = {};
+          Object.entries(data.summaryData).forEach(([depth, depthData]) => {
+            convertedSummaryData[Number(depth)] = {
+              currentTokens: depthData.currentTokens,
+              maxTokens: depthData.maxTokens,
+              items: depthData.items.map((item) => ({
+                id: item.id,
+                text: item.text,
+                tokens: item.tokenCount,
+                timestamp: new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                chunkId: item.id,
+              })),
+            };
+          });
+          setSummaryData(convertedSummaryData);
 
-      // Message Received
-      //we can use this to update the processing status of a message to mark it as "seen" essentially
-      // signalRService.onMessageReceived((data) => {
-      //   console.log("Message Received:", data);
-      //   const newMessage: Message = {
-      //     id: Date.now(), // Simple ID generation
-      //     type: "user",
-      //     text: data.userInput,
-      //     timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      //   };
-      //   setMessages((prev) => [...prev, newMessage]);
-      // });
-
-      // Intent Classification
-      signalRService.onIntentClassified((data) => {
-        console.log("Intent Classified:", data);
-        console.log(`Intent: ${data.intentType} (${(data.confidence * 100).toFixed(1)}%)`);
-
-        setCurrentIntent({
-          type: data.intentType,
-          confidence: data.confidence,
+          if (messages.length === 0) {
+            const messagesFromSummary = parseSummaryToMessages(convertedSummaryData);
+            setMessages(messagesFromSummary);
+            console.log(`Built ${messagesFromSummary.length} messages from summaries`);
+          }
         });
-
-        const newIntentEntities: EntityInfo[] = data.entities.map((entity) => ({
-          name: entity.name,
-          type: entity.type,
-          formal: entity.formal,
-        }));
-        setIntentEntities(newIntentEntities);
-      });
-
-      // Entities Extracted
-      signalRService.onEntitiesExtracted((data) => {
-        console.log("Entities Extracted:", data);
-        console.log(`Intent entities: ${data.intentEntities.length}, Extracted: ${data.extractedEntities.length}`);
-
-        const newExtractedEntities: EntityInfo[] = data.extractedEntities.map((entity) => ({
-          name: entity.name,
-          type: entity.type,
-          formal: entity.formal,
-        }));
-        setExtractedEntities(newExtractedEntities);
-      });
-
-      // Response Generated
-      signalRService.onResponseGenerated((data) => {
-        console.log("Response Generated:", data);
-        console.log(`Response: ${data.responseText}`);
-        setMessageCount(messageCount + 1);
-        const newMessage: Message = {
-          id: data.chunkId, // Simple ID generation, +1 to avoid collision
-          type: "assistant",
-          text: data.responseText,
-          timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-        setMessages((prev) => [...prev, newMessage]);
-      });
-      signalRService.onSystemStatus((data) => {
-        console.log("SYSTEMSTATUS");
-        console.log(data);
-      });
-      signalRService.onTest((data) => {
-        console.log("Test");
-        console.log(data);
-      });
-      // Summary Created
-      signalRService.onSummaryCreated((data) => {
-        console.log("Summary Created:", data);
-        console.log(`Created ${data.newSummaries.length} new summaries`);
-
-        // Update summary data with new summaries
-        setSummaryData((prev) => {
-          const newSummaryData = { ...prev };
-
-          data.newSummaries.forEach((summary) => {
-            const depth = summary.depth;
-
-            if (!newSummaryData[depth]) {
-              newSummaryData[depth] = {
-                currentTokens: 0,
-                maxTokens: 8000,
-                items: [],
-              };
-            }
-
-            const newSummaryItem: SummaryItem = {
-              id: summary.id,
-              text: summary.text,
-              tokens: summary.tokenCount,
-              timestamp: new Date(summary.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              chunkId: summary.id,
+        signalRService.onLogMessage((data) => {
+          if (!isDebugPaused) {
+            // Only add if not paused
+            const newLog: DebugLog = {
+              id: generateId(),
+              timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              }),
+              level: data.level as "DEBUG" | "INFO" | "WARNING" | "ERROR",
+              category: data.category,
+              message: data.message,
             };
 
-            newSummaryData[depth].items.push(newSummaryItem);
-            newSummaryData[depth].currentTokens += summary.tokenCount;
-          });
-
-          return newSummaryData;
+            setDebugLogs((prev) => {
+              const newLogs = [...prev, newLog];
+              // Keep only the most recent logs to prevent memory issues
+              return newLogs.slice(-maxDebugLogs);
+            });
+          }
         });
-      });
-      signalRService.onSummariesLoaded((data) => {
-        console.log("Summaries Loaded:", data);
-        setSummariesLoading({ isLoading: false });
-
-        const convertedSummaryData: Record<number, SummaryDepthData> = {};
-        Object.entries(data.summaryData).forEach(([depth, depthData]) => {
-          convertedSummaryData[Number(depth)] = {
-            currentTokens: depthData.currentTokens,
-            maxTokens: depthData.maxTokens,
-            items: depthData.items.map((item) => ({
-              id: item.id,
-              text: item.text,
-              tokens: item.tokenCount,
-              timestamp: new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              chunkId: item.id,
-            })),
-          };
+        // Listen for GraphUpdated event and print graph JSON to console
+        signalRService.onGraphUpdated((graphJson: string) => {
+          //console.log("Sigma Graph JSON:", graphJson);
+          try {
+            const parsedGraphData = JSON.parse(graphJson);
+            setGraphData(parsedGraphData);
+            //console.log(graphData);
+          } catch (error) {
+            console.error("Error parsing graph JSON:", error);
+          }
         });
-        setSummaryData(convertedSummaryData);
-
-        if (messages.length === 0) {
-          const messagesFromSummary = parseSummaryToMessages(convertedSummaryData);
-          setMessages(messagesFromSummary);
-          console.log(`Built ${messagesFromSummary.length} messages from summaries`);
-        }
-      });
-      signalRService.onLogMessage((data) => {
-        if (!isDebugPaused) {
-          // Only add if not paused
-          const newLog: DebugLog = {
-            id: generateId(),
-            timestamp: new Date(data.timestamp).toLocaleTimeString([], {
-              hour12: false,
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            }),
-            level: data.level as "DEBUG" | "INFO" | "WARNING" | "ERROR",
-            category: data.category,
-            message: data.message,
-          };
-
-          setDebugLogs((prev) => {
-            const newLogs = [...prev, newLog];
-            // Keep only the most recent logs to prevent memory issues
-            return newLogs.slice(-maxDebugLogs);
-          });
-        }
-      });
-      // Listen for GraphUpdated event and print graph JSON to console
-      signalRService.onGraphUpdated((graphJson: string) => {
-        console.log("Sigma Graph JSON:", graphJson);
-      });
+        console.log("✅ All event listeners registered and ready");
+      } catch (error) {
+        console.error("❌ Failed to setup SignalR:", error);
+      }
     };
 
     connectSignalR();
 
     // Cleanup on unmount
     return () => {
+      console.log("🧹 Cleaning up SignalR connection");
+
       signalRService.stop();
     };
   }, []);
@@ -716,59 +743,55 @@ const RainaUI = () => {
   );
 
   const renderVizTab = () => (
-    <div className="h-full flex items-center justify-center p-4">
-      <div className="text-center">
-        <Eye className="mx-auto mb-4 text-gray-400" size={48} />
-        <div className="text-lg font-medium text-gray-600 mb-2">Activation Visualization</div>
-        <div className="text-sm text-gray-400">To be implemented</div>
-      </div>
+    <div className="h-full">
+      <CognitiveGraphViewer graphData={graphData} isActive={activeTab === "viz"} />
     </div>
   );
 
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case "chat":
-        return (
-          <ChatTab
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            messages={messages}
-            setMessages={setMessages}
-            messageCount={messageCount}
-            setMessageCount={setMessageCount}
-            currentIntent={currentIntent}
-            authState={authState}
-          />
-        );
-      case "memory":
-        return renderMemoryTab();
-      case "context":
-        return renderContextTab();
-      case "entities":
-        return renderEntitiesTab();
-      case "summaries":
-        return renderSummariesTab();
-      case "query":
-        return renderQueryTab();
-      case "debug":
-        return renderDebugTab();
-      case "viz":
-        return renderVizTab();
-      default:
-        return (
-          <ChatTab
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            messages={messages}
-            setMessages={setMessages}
-            messageCount={messageCount}
-            setMessageCount={setMessageCount}
-            currentIntent={currentIntent}
-            authState={authState}
-          />
-        );
-    }
-  };
+  // const renderActiveTab = () => {
+  //   switch (activeTab) {
+  //     case "chat":
+  //       return (
+  //         <ChatTab
+  //           chatInput={chatInput}
+  //           setChatInput={setChatInput}
+  //           messages={messages}
+  //           setMessages={setMessages}
+  //           messageCount={messageCount}
+  //           setMessageCount={setMessageCount}
+  //           currentIntent={currentIntent}
+  //           authState={authState}
+  //         />
+  //       );
+  //     case "memory":
+  //       return renderMemoryTab();
+  //     case "context":
+  //       return renderContextTab();
+  //     case "entities":
+  //       return renderEntitiesTab();
+  //     case "summaries":
+  //       return renderSummariesTab();
+  //     case "query":
+  //       return renderQueryTab();
+  //     case "debug":
+  //       return renderDebugTab();
+  //     case "viz":
+  //       return renderVizTab();
+  //     default:
+  //       return (
+  //         <ChatTab
+  //           chatInput={chatInput}
+  //           setChatInput={setChatInput}
+  //           messages={messages}
+  //           setMessages={setMessages}
+  //           messageCount={messageCount}
+  //           setMessageCount={setMessageCount}
+  //           currentIntent={currentIntent}
+  //           authState={authState}
+  //         />
+  //       );
+  //   }
+  // };
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col max-w-full">
@@ -795,7 +818,6 @@ const RainaUI = () => {
           </div>
         </div>
       </div>
-
       {/* Tab Navigation */}
       <div className="bg-white border-b border-gray-200 px-2 py-2 flex-shrink-0">
         <div className="flex space-x-1 overflow-x-auto">
@@ -818,9 +840,38 @@ const RainaUI = () => {
           })}
         </div>
       </div>
-
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">{renderActiveTab()}</div>
+      <div className="flex-1 overflow-hidden">
+        {/* Chat Tab - always rendered */}
+        <div className={`h-full ${activeTab === "chat" ? "block" : "hidden"}`}>
+          <ChatTab
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            messages={messages}
+            setMessages={setMessages}
+            messageCount={messageCount}
+            setMessageCount={setMessageCount}
+            currentIntent={currentIntent}
+            authState={authState}
+          />
+        </div>
+
+        {/* Other tabs */}
+        <div className={`h-full ${activeTab === "memory" ? "block" : "hidden"}`}>{renderMemoryTab()}</div>
+
+        <div className={`h-full ${activeTab === "context" ? "block" : "hidden"}`}>{renderContextTab()}</div>
+
+        <div className={`h-full ${activeTab === "entities" ? "block" : "hidden"}`}>{renderEntitiesTab()}</div>
+
+        <div className={`h-full ${activeTab === "summaries" ? "block" : "hidden"}`}>{renderSummariesTab()}</div>
+
+        <div className={`h-full ${activeTab === "query" ? "block" : "hidden"}`}>{renderQueryTab()}</div>
+
+        <div className={`h-full ${activeTab === "debug" ? "block" : "hidden"}`}>{renderDebugTab()}</div>
+
+        <div className={`h-full ${activeTab === "viz" ? "block" : "hidden"}`}>{renderVizTab()}</div>
+      </div>
+      ;
     </div>
   );
 };

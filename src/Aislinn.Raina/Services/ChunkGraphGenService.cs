@@ -472,6 +472,7 @@ public class ChunkGraphGenService
         allAssociations = allAssociations
             .GroupBy(a => new { a.ChunkAId, a.ChunkBId, a.RelationAtoB, a.RelationBtoA })
             .Select(g => g.First())
+            .Where(a => !(a.RelationAtoB != null && a.RelationAtoB.StartsWith("$"))) // Exclude $ associations
             .ToList();
 
         // Count associations per chunk
@@ -539,6 +540,10 @@ public class ChunkGraphGenService
         // Create edges from associations
         foreach (var association in associations)
         {
+            // Exclude associations where RelationAtoB starts with $
+            if (association.RelationAtoB != null && association.RelationAtoB.StartsWith("$"))
+                continue;
+
             var edge = new SigmaGraphEdge
             {
                 Id = $"{association.ChunkAId}-{association.ChunkBId}",

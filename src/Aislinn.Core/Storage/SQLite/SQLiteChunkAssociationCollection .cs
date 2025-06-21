@@ -428,5 +428,53 @@ namespace Aislinn.Core.Storage.SQLite
         {
             _cache.Clear();
         }
+        /// <summary>
+        /// Returns true if any association exists between two chunk IDs (any relation type)
+        /// </summary>
+        public async Task<bool> HasAssociationAsync(Guid chunkAId, Guid chunkBId)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var query = $@"
+        SELECT COUNT(*) FROM {_tableName}
+        WHERE (ChunkAId = @idA AND ChunkBId = @idB)
+           OR (ChunkAId = @idB AND ChunkBId = @idA)";
+
+            using var cmd = new SqliteCommand(query, connection);
+            cmd.Parameters.AddWithValue("@idA", chunkAId.ToString());
+            cmd.Parameters.AddWithValue("@idB", chunkBId.ToString());
+
+            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            return count > 0;
+        }
+
+        /// <summary>
+        /// Returns all associations (all relation types) between two chunk IDs
+        /// </summary>
+        public async Task<List<ChunkAssociation>> GetAllAssociationsBetweenChunksAsync(Guid chunkAId, Guid chunkBId)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var query = $@"
+        SELECT AssociationKey, ChunkAId, ChunkBId, RelationAtoB, RelationBtoA, WeightAtoB, WeightBtoA, LastActivated, ActivationHistoryJson
+        FROM {_tableName}
+        WHERE (ChunkAId = @idA AND ChunkBId = @idB)
+           OR (ChunkAId = @idB AND ChunkBId = @idA)";
+
+            using var cmd = new SqliteCommand(query, connection);
+            cmd.Parameters.AddWithValue("@idA", chunkAId.ToString());
+            cmd.Parameters.AddWithValue("@idB", chunkBId.ToString());
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            var associations = new List<ChunkAssociation>();
+            while (await reader.ReadAsync())
+            {
+                var association = DeserializeAssociation(reader);
+                associations.Add(DeepCopyAssociation(association));
+            }
+            return associations;
+        }
     }
 }

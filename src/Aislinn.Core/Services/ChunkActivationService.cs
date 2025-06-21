@@ -244,7 +244,7 @@ namespace Aislinn.Core.Services
             var associationsToRemove = new List<ChunkAssociation>();
 
             const double associationDecayRate = 0.02; // 2% decay per time unit
-            const double removalThreshold = 0.05; // Remove when weight drops below 5%
+            const double removalThreshold = 0.0005; // Remove when weight drops below 5%
 
             foreach (var association in allAssociations)
             {

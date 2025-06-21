@@ -165,6 +165,16 @@ namespace Aislinn.Storage.AssociationStore
         {
             throw new NotImplementedException();
         }
+
+        public Task<List<ChunkAssociation>> GetAllAssociationsBetweenChunksAsync(Guid chunkAId, Guid chunkBId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> HasAssociationAsync(Guid chunkAId, Guid chunkBId)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

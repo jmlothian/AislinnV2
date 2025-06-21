@@ -1006,8 +1006,8 @@ namespace Aislinn.Core.Memory
                     var idA = allIds[i];
                     var idB = allIds[j];
                     // Check if association already exists (in either direction)
-                    var existing = await associationCollection.GetAssociationAsync(idA, idB, "$workingmemory", "$workingmemory");
-                    if (existing == null)
+                    var existing = await associationCollection.HasAssociationAsync(idA, idB);
+                    if (existing == false)
                     {
                         // Determine weight based on membership
                         bool aWM = wmIds.Contains(idA);

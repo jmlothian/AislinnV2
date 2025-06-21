@@ -235,8 +235,10 @@ If a factor pertains to a specific entity (user, task, etc.) the factor.name sho
 - Prioritize recent conversation over summaries
 - Confidence: explicit, implied, inferred
 - Importance: primary, significant, background
-- Max 3-5 factors per category
+- Maximum 5 factors per category
 - Only include categories with relevant factors
+- The Entity Name for the Entity 'I' is {userName}
+- The Entity Name for the Entity 'you' is {agentName}
 
 ---
 

@@ -640,7 +640,7 @@ public class ConversationManager
         _logger.LogInformation($"Extracting Context");
 
         var summaryJson = JsonSerializer.Serialize(input, new JsonSerializerOptions { WriteIndented = true });
-        var prompt = promptLibrary.HydratePrompt("context.extract", new Dictionary<string, object>() { ["summaryData"] = summaryJson, ["agentName"] = "Raina" });
+        var prompt = promptLibrary.HydratePrompt("context.extract", new Dictionary<string, object>() { ["summaryData"] = summaryJson, ["agentName"] = "Raina", ["userName"] = context.UserName });
         var resp = await CallOpenAIAsync("You are part of Raina (she/her), an intelligent conversational AI. You are a helpful assistant specialized in conversational context extraction for her. Please respond in first person as her.", prompt, true);
         //Console.WriteLine(prompt);
         _logger.LogInformation("Context Extracton...");

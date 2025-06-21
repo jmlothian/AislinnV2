@@ -59,12 +59,23 @@ namespace RAINA.Web.Services
                 ConversationManager.SummaryCreated += OnSummaryCreated;
                 Console.WriteLine("✓ ConversationManager.SummaryCreated subscribed");
 
+                ConversationManager.GraphUpdated += OnGraphUpdated;
+
                 Console.WriteLine("WebEventSubscriber initialized - listening for RAINA events");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in WebEventSubscriber.Subscribe(): {ex}");
                 throw;
+            }
+        }
+
+        private async void OnGraphUpdated(object? sender, GraphUpdatedEventArgs e)
+        {
+
+            if (e?.GraphJson != null)
+            {
+                await _hubContext.Clients.All.SendAsync("GraphUpdated", e.GraphJson);
             }
         }
 

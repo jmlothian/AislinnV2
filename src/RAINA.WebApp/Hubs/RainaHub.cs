@@ -28,6 +28,15 @@ namespace RAINA.Web.Hubs
             _rainaServices = rainaServices;
             _userContextManager = userContextManager;
             _logger = logger;
+
+            // Subscribe to GraphUpdated event
+            // GraphUpdated += async (sender, args) =>
+            // {
+            //     if (args?.GraphJson != null)
+            //     {
+            //         await Clients.All.SendAsync("GraphUpdated", args.GraphJson);
+            //     }
+            // };
         }
 
         /// <summary>

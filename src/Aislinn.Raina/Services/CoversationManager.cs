@@ -82,6 +82,8 @@ public class ConversationManager
     public static event EventHandler<WorkingMemoryChangedEventArgs> WorkingMemoryChanged;
     public static event EventHandler<SummaryCreatedEventArgs> SummaryCreated;
     public static event EventHandler<EntitiesExtractedEventArgs> EntitiesExtracted;
+    public static event EventHandler<GraphUpdatedEventArgs> GraphUpdated;
+
     private readonly ChunkGraphGenService _chunkGraphGenService;
 
     private readonly ILogger<ConversationManager> _logger;
@@ -717,7 +719,14 @@ public class ConversationManager
         //resp = await CallOpenAIAsync("You are Raina (she/her), an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input.",
         //prompt,
         //false);
-
+        try
+        {
+            GraphUpdated?.Invoke(this, new GraphUpdatedEventArgs { GraphJson = json });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating Sigma graph JSON for SignalR");
+        }
         string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, contextMarkdown);
         // Generate response using LLM
         // This would call OpenAI or other LLM to generate a natural language response
@@ -1103,6 +1112,7 @@ public class ConversationManager
             WorkingMemoryContents = workingMemory,
             PrimedChunks = primedChunks
         });
+
     }
 
     private void OnSummaryCreated(List<Utterance> summaries, string userInput)
@@ -1115,7 +1125,6 @@ public class ConversationManager
     }
 
 }
-
 
 // New supporting classes
 public class ConversationSummary

@@ -162,6 +162,9 @@ export class SignalRService {
   onSummaryCreated(callback: (data: SummaryCreatedEvent) => void): void {
     this.connection.on("SummaryCreated", callback);
   }
+  onGraphUpdated(callback: (graphJson: string) => void): void {
+    this.connection.on("GraphUpdated", callback);
+  }
   onSystemStatus(callback: (data: string) => void): void {
     this.connection.on("SystemStatus", callback);
   }
@@ -175,6 +178,7 @@ export class SignalRService {
     this.connection.off("EntitiesExtracted");
     this.connection.off("ResponseGenerated");
     this.connection.off("SummaryCreated");
+    this.connection.off("GraphUpdated");
     this.connection.off("SystemStatus");
     this.connection.off("Test");
     this.connection.off("SummariesLoaded");

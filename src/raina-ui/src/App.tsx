@@ -389,6 +389,10 @@ const RainaUI = () => {
           });
         }
       });
+      // Listen for GraphUpdated event and print graph JSON to console
+      signalRService.onGraphUpdated((graphJson: string) => {
+        console.log("Sigma Graph JSON:", graphJson);
+      });
     };
 
     connectSignalR();

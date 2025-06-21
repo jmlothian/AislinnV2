@@ -55,4 +55,10 @@ namespace RAINA.Events
         public List<Utterance> NewSummaries { get; set; }
         public string UserInput { get; set; }
     }
+
+    // Add GraphUpdated event and args in the same convention
+    public class GraphUpdatedEventArgs : EventArgs
+    {
+        public string GraphJson { get; set; }
+    }
 }

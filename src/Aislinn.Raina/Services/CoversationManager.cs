@@ -331,6 +331,7 @@ public class ConversationManager
         catch (Exception ex)
         {
             Console.WriteLine($"Error updating context: {ex.Message}");
+            Console.WriteLine(ex);
         }
     }
 
@@ -340,55 +341,64 @@ public class ConversationManager
 
         foreach (var factor in categoryFactors.Factors)
         {
-            // Convert category to chunk type using reverse of CategorizeChunk logic
-            string semanticType = "Context." + GetChunkTypeFromCategory(category) + "." + factor.Name;
-
-            // Search for existing chunk
-            var existingChunk = await this._memorySystem.FindChunkBySemanticTypeAndName(semanticType, factor.Name);
-
-            if (existingChunk != null)
+            try
             {
-                // Update existing chunk with new value
-                existingChunk.Slots["Value"] = new ModelSlot { Name = "Value", Value = factor.Value };
-                existingChunk.Slots["Confidence"] = new ModelSlot { Name = "Confidence", Value = factor.Confidence };
-                existingChunk.Slots["LastUpdated"] = new ModelSlot { Name = "LastUpdated", Value = DateTime.Now };
+                // Convert category to chunk type using reverse of CategorizeChunk logic
+                string semanticType = "Context." + GetChunkTypeFromCategory(category) + "." + factor.Name;
 
-                await _memorySystem.UpdateChunkAsync(existingChunk);
+                // Search for existing chunk
+                var existingChunk = await this._memorySystem.FindChunkBySemanticTypeAndName(semanticType, factor.Name);
 
-                // Activate it to bring into working memory
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, "categories exist", "ConversationManager.ProcessCategoryFactors", null, 0.2);
-                //manually import into context...
-                _contextContainer.AddContextChunk(category, existingChunk.ID);
-                _contextContainer.ExtractContextFactorsFromChunk(category, existingChunk);
-            }
-            else
-            {
-                // Create new context chunk
-                var newChunk = new Chunk
+                if (existingChunk != null)
                 {
-                    ChunkType = semanticType,
-                    Name = factor.Name,
-                    Slots = new Dictionary<string, ModelSlot>
-                {
-                    { "Value", new ModelSlot { Name = "Value", Value = factor.Value } },
-                    { "Confidence", new ModelSlot { Name = "Confidence", Value = factor.Confidence } },
-                    { "Importance", new ModelSlot { Name = "Importance", Value = factor.Importance } },
-                    { "Category", new ModelSlot { Name = "Category", Value = category.ToString() } },
-                    { "ExtractedFromLLM", new ModelSlot { Name = "ExtractedFromLLM", Value = true } },
-                    { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } },
-                    { "LastUpdated",  new ModelSlot { Name = "LastUpdated", Value = DateTime.Now } }
+                    // Update existing chunk with new value
+                    existingChunk.Slots["Value"] = new ModelSlot { Name = "Value", Value = factor.Value };
+                    existingChunk.Slots["Confidence"] = new ModelSlot { Name = "Confidence", Value = factor.Confidence };
+                    existingChunk.Slots["LastUpdated"] = new ModelSlot { Name = "LastUpdated", Value = DateTime.Now };
+
+                    await _memorySystem.UpdateChunkAsync(existingChunk);
+
+                    // Activate it to bring into working memory
+                    await _memorySystem.ActivateChunkAsync(existingChunk.ID, "categories exist", "ConversationManager.ProcessCategoryFactors", null, 0.2);
+                    //manually import into context...
+                    _contextContainer.AddContextChunk(category, existingChunk.ID);
+                    _contextContainer.ExtractContextFactorsFromChunk(category, existingChunk);
                 }
-                };
+                else
+                {
+                    // Create new context chunk
+                    var newChunk = new Chunk
+                    {
+                        ChunkType = semanticType,
+                        Name = factor.Name,
+                        Slots = new Dictionary<string, ModelSlot>
+                        {
+                            { "Value", new ModelSlot { Name = "Value", Value = factor.Value } },
+                            { "Confidence", new ModelSlot { Name = "Confidence", Value = factor.Confidence } },
+                            { "Importance", new ModelSlot { Name = "Importance", Value = factor.Importance } },
+                            { "Category", new ModelSlot { Name = "Category", Value = category.ToString() } },
+                            { "ExtractedFromLLM", new ModelSlot { Name = "ExtractedFromLLM", Value = true } },
+                            { "CreatedTimestamp", new ModelSlot { Name = "CreatedTimestamp", Value = DateTime.Now } },
+                            { "LastUpdated",  new ModelSlot { Name = "LastUpdated", Value = DateTime.Now } }
+                        }
+                    };
 
-                // Add to memory system
-                var savedChunk = await _memorySystem.AddChunkAsync(newChunk);
+                    // Add to memory system
+                    var savedChunk = await _memorySystem.AddChunkAsync(newChunk);
 
-                // Activate it to bring into working memory
-                var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
-                await _memorySystem.ActivateChunkAsync(existingChunk.ID, contextSpreadingContext, "categories created", "ConversationManager.ProcessCategoryFactors", null, 0.05);
-                //manually import into context...
-                _contextContainer.AddContextChunk(category, savedChunk.ID);
-                _contextContainer.ExtractContextFactorsFromChunk(category, savedChunk);
+                    // Activate it to bring into working memory
+                    var contextSpreadingContext = await CreateConversationSpreadingContextAsync(context);
+                    await _memorySystem.ActivateChunkAsync(newChunk.ID, contextSpreadingContext, "categories created", "ConversationManager.ProcessCategoryFactors", null, 0.05);
+                    //manually import into context...
+                    _contextContainer.AddContextChunk(category, savedChunk.ID);
+                    _contextContainer.ExtractContextFactorsFromChunk(category, savedChunk);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ProcessCategoryFactors: {ex.Message}");
+                Console.WriteLine(factor.Name + " - " + factor.Value);
+                Console.WriteLine(ex);
             }
         }
     }
@@ -633,7 +643,8 @@ public class ConversationManager
         var prompt = promptLibrary.HydratePrompt("context.extract", new Dictionary<string, object>() { ["summaryData"] = summaryJson, ["agentName"] = "Raina" });
         var resp = await CallOpenAIAsync("You are part of Raina (she/her), an intelligent conversational AI. You are a helpful assistant specialized in conversational context extraction for her. Please respond in first person as her.", prompt, true);
         //Console.WriteLine(prompt);
-        Console.WriteLine(resp.Choices[0].Message.Content);
+        _logger.LogInformation("Context Extracton...");
+        _logger.LogInformation(resp.Choices[0].Message.Content);
         await this.UpdateContextFromLLMResponse(resp.Choices[0].Message.Content, context);
 
         //convert context snapshot back into text
@@ -713,7 +724,7 @@ public class ConversationManager
         var contextMarkdown = _contextContainer.ToMarkdown();
         _logger.LogInformation(contextMarkdown);
         var json = await _chunkGraphGenService.GenerateSigmaGraphAsync(workingMemoryChunks.ToArray());
-        _logger.LogInformation(json);
+        //_logger.LogInformation(json);
         // Use context for response generation
         //You are Raina, an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input.
         //resp = await CallOpenAIAsync("You are Raina (she/her), an intelligent conversational AI. Generate a natural, contextually appropriate response based on the conversation history, current context, and user input.",

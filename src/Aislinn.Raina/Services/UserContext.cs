@@ -12,6 +12,7 @@ public class UserContext
     public Chunk CurrentUtterance { get; set; }
     public Chunk LastSystemUtterance { get; set; }
     public Chunk CurrentConversationChunk { get; set; }
+    public string CurrentIntentActivityMessage { get; set; }
     public List<Chunk> ActiveMemoryChunks { get; set; } = new List<Chunk>();
     public Dictionary<string, object> ContextVariables { get; set; } = new Dictionary<string, object>();
     public DateTime? LoginTime { get; set; }

@@ -484,7 +484,7 @@ public class ConversationManager
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<OpenAIResponse>(responseString);
     }
-    private async Task<string> GenerateContextualResponse(string userName, string userInput, string conversationSummaries, List<Utterance> history, string contextSummary, Intent intent, string workingMemoryContextMarkdown)
+    private async Task<string> GenerateContextualResponse(UserContext context, string userInput, string conversationSummaries, List<Utterance> history, string contextSummary, Intent intent, string workingMemoryContextMarkdown)
     {
         _logger.LogInformation($"Generating Response...");
 
@@ -501,23 +501,30 @@ public class ConversationManager
         // var userProfile = context.UserChunk != null ?
         //     $"Name: {context.UserName}" :
         //     "No user profile available.";
+        var userActivity = "";
+        if (context.CurrentIntentActivityMessage != "")
+        {
+            userActivity = "## User Request\n Based on the last message, you have just completed this task for " + context.UserName + ".  Please consider mentioning that you did this in your response: " + context.CurrentIntentActivityMessage;
+        }
+
         var systemPrompt = promptLibrary.HydratePrompt("raina.system", new Dictionary<string, object>
         {
             ["contextSummary"] = contextSummary,
             ["intentType"] = intentType,
             ["intentConfidence"] = intentConfidence,
             ["workingMemoryItems"] = workingMemoryContextMarkdown,
-            ["userName"] = userName,
+            ["userName"] = context.UserName,
             ["recentConversation"] = conversationSummaries,
+            ["userActivity"] = userActivity,
             ["dateTime"] = DateTime.Now.ToString("F")
         });
-
+        context.CurrentIntentActivityMessage = "";
         // Build the full prompt
         var prompt = promptLibrary.HydratePrompt("response.contextual", new Dictionary<string, object>
         {
             //["userProfile"] = userProfile,
             ["userInput"] = userInput,
-            ["userName"] = userName
+            ["userName"] = context.UserName
         });
         _logger.LogInformation("System Prompt: " + systemPrompt);
         _logger.LogInformation("Prompt: " + prompt);
@@ -738,7 +745,7 @@ public class ConversationManager
         {
             _logger.LogError(ex, "Error generating Sigma graph JSON for SignalR");
         }
-        string responseText = await GenerateContextualResponse(context.UserName, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, contextMarkdown);
+        string responseText = await GenerateContextualResponse(context, userInput, conversationHistoryText, recentConversation.ToList<Utterance>(), contextSummary, intent, contextMarkdown);
         // Generate response using LLM
         // This would call OpenAI or other LLM to generate a natural language response
         // For now, just create a simple response

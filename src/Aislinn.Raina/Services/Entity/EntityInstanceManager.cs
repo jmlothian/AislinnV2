@@ -907,7 +907,25 @@ namespace RAINA.Services
                 { "UsedFor", "UseOf" },
                 { "UsesTools", "ToolUsedBy" },
                 { "VerifiedBy", "Verifies" },
-                { "ViolatedBy", "Violates" }
+                { "ViolatedBy", "Violates" },
+                { "Prefers", "PreferredBy" },
+                { "Enjoys", "EnjoyedBy" },
+                { "Avoids", "AvoidedBy" },
+                { "Dislikes", "DislikedBy" },
+                { "HasFact", "FactAbout" },
+                { "HasCharacteristic", "CharacteristicOf" },
+                { "ExhibitsBehavior", "BehaviorOf" },
+                { "DemonstratesPattern", "PatternOf" },
+                { "InferredAbout", "BasisForInference" },
+                { "SuggestsAbout", "SuggestedBy" },
+                { "ImpliesAbout", "ImpliedBy" },
+                { "InteractsWith", "InteractsWith" },
+                { "RelatedToPerson", "RelatedToPerson" },
+                { "ParticipatesIn", "HasParticipant" },
+                { "EngagesIn", "EngagedInBy" },
+                { "BondedWith", "BondedWith" },
+                { "ServedBy", "Serves" },
+                { "RepresentedBy", "Represents" }
             };
 
 

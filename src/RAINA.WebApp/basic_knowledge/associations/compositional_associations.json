@@ -1,0 +1,162 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000004",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "MadeOf",
+    "RelationBtoA": "ComponentOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000005",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "MadeOf",
+    "RelationBtoA": "ComponentOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000006",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "ComposedOf",
+    "RelationBtoA": "ComponentOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000026",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "HasBody",
+    "RelationBtoA": "BodyOf",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.9,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "InvolvesMaterials",
+    "RelationBtoA": "UsedIn",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000022",
+    "RelationAtoB": "HasStages",
+    "RelationBtoA": "StageOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000007",
+    "ChunkBId": "00000000-0000-0000-0000-000000000108",
+    "RelationAtoB": "ContainedIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000108",
+    "RelationAtoB": "ContainsBuildings",
+    "RelationBtoA": "BuildingIn",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000005",
+    "RelationAtoB": "ContainsComponents",
+    "RelationBtoA": "ComponentOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000108",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "ContainsEquipment",
+    "RelationBtoA": "EquipmentIn",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000118",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "ContainsNutrients",
+    "RelationBtoA": "NutrientIn",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000113",
+    "ChunkBId": "00000000-0000-0000-0000-000000000005",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000114",
+    "ChunkBId": "00000000-0000-0000-0000-000000000005",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000005",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000117",
+    "ChunkBId": "00000000-0000-0000-0000-000000000005",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000118",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

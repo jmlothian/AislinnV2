@@ -1,0 +1,192 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000114",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "UsedFor",
+    "RelationBtoA": "Uses",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000113",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "UsedFor",
+    "RelationBtoA": "Uses",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "UsedFor",
+    "RelationBtoA": "Uses",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000108",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "UsedFor",
+    "RelationBtoA": "Uses",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000005",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "DesignedFor",
+    "RelationBtoA": "DesignTarget",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000114",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "OperatedBy",
+    "RelationBtoA": "Operates",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "OperatedBy",
+    "RelationBtoA": "Operates",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000117",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "OperatedBy",
+    "RelationBtoA": "Operates",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ControlledBy",
+    "RelationBtoA": "Controls",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000101",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ManagedBy",
+    "RelationBtoA": "Manages",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000108",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ManagedBy",
+    "RelationBtoA": "Manages",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000014",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "PerformedBy",
+    "RelationBtoA": "Performs",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000014",
+    "ChunkBId": "00000000-0000-0000-0000-000000000124",
+    "RelationAtoB": "AimedAt",
+    "RelationBtoA": "TargetOf",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000014",
+    "ChunkBId": "00000000-0000-0000-0000-000000000114",
+    "RelationAtoB": "UsesTools",
+    "RelationBtoA": "ToolFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000127",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "AppliedTo",
+    "RelationBtoA": "RequiresSkill",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000128",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "AppliedIn",
+    "RelationBtoA": "ApplicationOf",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000131",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "GuidesAction",
+    "RelationBtoA": "GuidedBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000126",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "SolvedBy",
+    "RelationBtoA": "Solves",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000127",
+    "ChunkBId": "00000000-0000-0000-0000-000000000114",
+    "RelationAtoB": "RequiredFor",
+    "RelationBtoA": "Requires",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

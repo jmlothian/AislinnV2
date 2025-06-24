@@ -1,0 +1,132 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000009",
+    "ChunkBId": "00000000-0000-0000-0000-000000000129",
+    "RelationAtoB": "RelatedTo",
+    "RelationBtoA": "RelatedTo",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000010",
+    "ChunkBId": "00000000-0000-0000-0000-000000000128",
+    "RelationAtoB": "RelatedTo",
+    "RelationBtoA": "RelatedTo",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000113",
+    "ChunkBId": "00000000-0000-0000-0000-000000000114",
+    "RelationAtoB": "SimilarTo",
+    "RelationBtoA": "SimilarTo",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000114",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "SimilarTo",
+    "RelationBtoA": "SimilarTo",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000119",
+    "ChunkBId": "00000000-0000-0000-0000-000000000120",
+    "RelationAtoB": "SimilarTo",
+    "RelationBtoA": "SimilarTo",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000102",
+    "ChunkBId": "00000000-0000-0000-0000-000000000104",
+    "RelationAtoB": "SimilarTo",
+    "RelationBtoA": "SimilarTo",
+    "WeightAtoB": 0.5,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000109",
+    "ChunkBId": "00000000-0000-0000-0000-000000000110",
+    "RelationAtoB": "RelatedTo",
+    "RelationBtoA": "RelatedTo",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000122",
+    "ChunkBId": "00000000-0000-0000-0000-000000000123",
+    "RelationAtoB": "ConflictsWith",
+    "RelationBtoA": "ConflictsWith",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000122",
+    "ChunkBId": "00000000-0000-0000-0000-000000000130",
+    "RelationAtoB": "SupportedBy",
+    "RelationBtoA": "Supports",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000121",
+    "ChunkBId": "00000000-0000-0000-0000-000000000124",
+    "RelationAtoB": "OppositeOf",
+    "RelationBtoA": "OppositeOf",
+    "WeightAtoB": 0.5,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000021",
+    "ChunkBId": "00000000-0000-0000-0000-000000000009",
+    "RelationAtoB": "Connects",
+    "RelationBtoA": "ConnectedTo",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "ConnectedBy",
+    "RelationBtoA": "Connects",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000008",
+    "ChunkBId": "00000000-0000-0000-0000-000000000003",
+    "RelationAtoB": "Association",
+    "RelationBtoA": "Association",
+    "WeightAtoB": 0.4,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

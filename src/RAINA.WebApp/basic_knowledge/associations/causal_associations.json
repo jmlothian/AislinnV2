@@ -1,0 +1,142 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000014",
+    "ChunkBId": "00000000-0000-0000-0000-000000000016",
+    "RelationAtoB": "Causes",
+    "RelationBtoA": "CausedBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000022",
+    "RelationAtoB": "Causes",
+    "RelationBtoA": "CausedBy",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000016",
+    "ChunkBId": "00000000-0000-0000-0000-000000000004",
+    "RelationAtoB": "AffectsEnvironment",
+    "RelationBtoA": "AffectedBy",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000121",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "TriggeredBy",
+    "RelationBtoA": "Triggers",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000121",
+    "ChunkBId": "00000000-0000-0000-0000-000000000016",
+    "RelationAtoB": "TriggeredBy",
+    "RelationBtoA": "Triggers",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000009",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "LeadsTo",
+    "RelationBtoA": "ResultsFrom",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000009",
+    "ChunkBId": "00000000-0000-0000-0000-000000000121",
+    "RelationAtoB": "InspiredBy",
+    "RelationBtoA": "Inspires",
+    "WeightAtoB": 0.5,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000114",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "Enables",
+    "RelationBtoA": "EnabledBy",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "Enables",
+    "RelationBtoA": "EnabledBy",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000126",
+    "ChunkBId": "00000000-0000-0000-0000-000000000014",
+    "RelationAtoB": "Impedes",
+    "RelationBtoA": "ImpededBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000113",
+    "RelationAtoB": "ProducesResult",
+    "RelationBtoA": "ResultOf",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000017",
+    "ChunkBId": "00000000-0000-0000-0000-000000000022",
+    "RelationAtoB": "Results",
+    "RelationBtoA": "CausedBy",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000123",
+    "ChunkBId": "00000000-0000-0000-0000-000000000121",
+    "RelationAtoB": "InfluencedBy",
+    "RelationBtoA": "Influences",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000126",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "AffectsEntity",
+    "RelationBtoA": "AffectedBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000109",
+    "ChunkBId": "00000000-0000-0000-0000-000000000110",
+    "RelationAtoB": "Before",
+    "RelationBtoA": "After",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000110",
+    "ChunkBId": "00000000-0000-0000-0000-000000000109",
+    "RelationAtoB": "During",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000111",
+    "ChunkBId": "00000000-0000-0000-0000-000000000112",
+    "RelationAtoB": "ShorterThan",
+    "RelationBtoA": "LongerThan",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000112",
+    "ChunkBId": "00000000-0000-0000-0000-000000000111",
+    "RelationAtoB": "FollowedBy",
+    "RelationBtoA": "Precedes",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000013",
+    "ChunkBId": "00000000-0000-0000-0000-000000000023",
+    "RelationAtoB": "OccursAt",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000013",
+    "ChunkBId": "00000000-0000-0000-0000-000000000109",
+    "RelationAtoB": "OccursOn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000013",
+    "ChunkBId": "00000000-0000-0000-0000-000000000110",
+    "RelationAtoB": "ScheduledAt",
+    "RelationBtoA": "ScheduledFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000013",
+    "ChunkBId": "00000000-0000-0000-0000-000000000111",
+    "RelationAtoB": "RequiresTime",
+    "RelationBtoA": "RequiredFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000014",
+    "ChunkBId": "00000000-0000-0000-0000-000000000111",
+    "RelationAtoB": "RequiresTime",
+    "RelationBtoA": "RequiredFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000111",
+    "RelationAtoB": "RequiresTime",
+    "RelationBtoA": "RequiredFor",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000015",
+    "ChunkBId": "00000000-0000-0000-0000-000000000112",
+    "RelationAtoB": "During",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000018",
+    "ChunkBId": "00000000-0000-0000-0000-000000000023",
+    "RelationAtoB": "ChangesOver",
+    "RelationBtoA": "Affects",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000019",
+    "ChunkBId": "00000000-0000-0000-0000-000000000022",
+    "RelationAtoB": "ChangesUnder",
+    "RelationBtoA": "Affects",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000022",
+    "ChunkBId": "00000000-0000-0000-0000-000000000023",
+    "RelationAtoB": "TransitionsTo",
+    "RelationBtoA": "Enables",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000022",
+    "ChunkBId": "00000000-0000-0000-0000-000000000111",
+    "RelationAtoB": "Temporary",
+    "RelationBtoA": "Bounds",
+    "WeightAtoB": 0.5,
+    "WeightBtoA": 0.3,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000023",
+    "ChunkBId": "00000000-0000-0000-0000-000000000013",
+    "RelationAtoB": "Measures",
+    "RelationBtoA": "MeasuredBy",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000023",
+    "ChunkBId": "00000000-0000-0000-0000-000000000109",
+    "RelationAtoB": "Sequences",
+    "RelationBtoA": "OrderedBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000124",
+    "ChunkBId": "00000000-0000-0000-0000-000000000109",
+    "RelationAtoB": "HasDeadline",
+    "RelationBtoA": "DeadlineFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

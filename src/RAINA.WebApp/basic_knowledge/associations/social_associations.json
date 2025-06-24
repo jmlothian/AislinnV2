@@ -1,0 +1,102 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000027",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "KnowsPerson",
+    "RelationBtoA": "KnownBy",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000027",
+    "ChunkBId": "00000000-0000-0000-0000-000000000028",
+    "RelationAtoB": "HasRole",
+    "RelationBtoA": "RoleOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000027",
+    "ChunkBId": "00000000-0000-0000-0000-000000000026",
+    "RelationAtoB": "EmbodiedBy",
+    "RelationBtoA": "Embodies",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.9,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000101",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "GovernedBy",
+    "RelationBtoA": "Governs",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000102",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "GovernedBy",
+    "RelationBtoA": "Governs",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000105",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "GovernedBy",
+    "RelationBtoA": "Governs",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000101",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "LeadBy",
+    "RelationBtoA": "Leads",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000101",
+    "ChunkBId": "00000000-0000-0000-0000-000000000101",
+    "RelationAtoB": "PartnersWith",
+    "RelationBtoA": "PartnersWith",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000101",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "HasEmployees",
+    "RelationBtoA": "EmployeeOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "HasMayor",
+    "RelationBtoA": "MayorOf",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

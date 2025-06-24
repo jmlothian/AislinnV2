@@ -1,0 +1,1596 @@
+[
+  {
+    "ID": "00000000-0000-0000-0000-000000000001",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence",
+    "Name": "essence",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "The fundamental nature and categories of existence"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 0
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "entity",
+          "property",
+          "relation",
+          "action",
+          "state",
+          "time",
+          "space"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "nature",
+          "being",
+          "existence",
+          "foundation"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "IsA",
+          "HasProperty",
+          "RelatedTo",
+          "Contains"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "exists",
+          "can_be_categorized",
+          "has_identity"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000002",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity",
+    "Name": "entity",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Things that exist (physical or abstract)"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "chair",
+          "concept",
+          "event",
+          "person",
+          "idea"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "thing",
+          "object",
+          "being",
+          "item"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "IsA",
+          "HasProperty",
+          "PartOf",
+          "MadeOf",
+          "CreatedBy",
+          "RelatedTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_identity",
+          "can_be_named",
+          "can_be_referenced"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000003",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical",
+    "Name": "physical",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Physical objects that exist in space"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000002"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "chair",
+          "car",
+          "tree",
+          "person",
+          "building"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "material",
+          "tangible",
+          "concrete"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasSize",
+          "HasWeight",
+          "HasLocation",
+          "MadeOf",
+          "Contains"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_mass",
+          "occupies_space",
+          "has_physical_properties"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000004",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical.natural",
+    "Name": "natural",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Physical objects that occur naturally"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000003"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "rock",
+          "tree",
+          "mountain",
+          "river",
+          "cloud"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "organic",
+          "wild",
+          "unmodified"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "GrowsIn",
+          "FoundIn",
+          "ComposedOf",
+          "Evolved"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "naturally_occurring",
+          "not_manufactured",
+          "follows_natural_laws"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000005",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical.artificial",
+    "Name": "artificial",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Physical objects created by humans or other agents"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000003"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "car",
+          "building",
+          "tool",
+          "computer",
+          "book"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "manufactured",
+          "created",
+          "constructed",
+          "man-made"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "CreatedBy",
+          "MadeOf",
+          "UsedFor",
+          "DesignedFor"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "was_created",
+          "has_purpose",
+          "designed_function"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000006",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical.living",
+    "Name": "living",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Physical entities that are alive"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000003"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "human",
+          "dog",
+          "tree",
+          "bacteria",
+          "whale"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "alive",
+          "biological",
+          "organic"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "BornIn",
+          "LivesIn",
+          "EatsFood",
+          "HasOffspring",
+          "Dies"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "is_alive",
+          "can_grow",
+          "can_reproduce",
+          "responds_to_stimuli"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000007",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical.substance",
+    "Name": "substance",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Physical materials and substances"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000003"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "water",
+          "air",
+          "metal",
+          "wood",
+          "plastic"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "material",
+          "matter",
+          "element"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasState",
+          "MadeOf",
+          "ContainedIn",
+          "TransformsTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_chemical_properties",
+          "can_change_state",
+          "has_density"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000008",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract",
+    "Name": "abstract",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Non-physical concepts, ideas, and mental constructs"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000002"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "idea",
+          "concept",
+          "emotion",
+          "system",
+          "category"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "conceptual",
+          "mental",
+          "intangible",
+          "theoretical"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "DefinedBy",
+          "RelatedTo",
+          "InstanceOf",
+          "Contains"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "exists_mentally",
+          "can_be_understood",
+          "has_meaning"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000009",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.idea",
+    "Name": "idea",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Mental concepts and thoughts"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "freedom",
+          "justice",
+          "beauty",
+          "innovation",
+          "creativity"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "concept",
+          "notion",
+          "thought",
+          "principle"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "InspiredBy",
+          "LeadsTo",
+          "ConflictsWith",
+          "SupportedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "can_be_shared",
+          "can_inspire",
+          "has_value"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000010",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.information",
+    "Name": "information",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Data, facts, and knowledge"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "fact",
+          "data",
+          "knowledge",
+          "message",
+          "news"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "data",
+          "knowledge",
+          "facts",
+          "intelligence"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "StoredIn",
+          "TransmittedBy",
+          "ProcessedBy",
+          "VerifiedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "can_be_transmitted",
+          "has_accuracy",
+          "can_be_stored"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000011",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.system",
+    "Name": "system",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Organized structures and frameworks"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "government",
+          "economy",
+          "language",
+          "education",
+          "legal"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "framework",
+          "structure",
+          "organization",
+          "network"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Contains",
+          "ManagedBy",
+          "RegulatedBy",
+          "ConnectedTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_components",
+          "has_rules",
+          "serves_purpose"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000012",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.category",
+    "Name": "category",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Classifications and groupings"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "type",
+          "class",
+          "group",
+          "genre",
+          "species"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "classification",
+          "type",
+          "class",
+          "group"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Contains",
+          "DefinedBy",
+          "SubcategoryOf",
+          "ExcludesFrom"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "groups_similar_things",
+          "has_criteria",
+          "can_overlap"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000013",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.event",
+    "Name": "event",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Things that happen or occur"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000002"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "meeting",
+          "celebration",
+          "accident",
+          "conversation",
+          "performance"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "occurrence",
+          "happening",
+          "incident",
+          "occasion"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "OccursAt",
+          "Involves",
+          "CausedBy",
+          "LeadsTo",
+          "DuringTime"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_duration",
+          "has_participants",
+          "occurs_in_time"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000014",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.event.action",
+    "Name": "action",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Deliberate activities performed by agents"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000013"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "walking",
+          "speaking",
+          "creating",
+          "deciding",
+          "learning"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "activity",
+          "deed",
+          "behavior",
+          "conduct"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PerformedBy",
+          "AimedAt",
+          "UsesTools",
+          "RequiresSkill"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_agent",
+          "has_intention",
+          "can_be_controlled"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000015",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.event.process",
+    "Name": "process",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Natural or systematic sequences of changes"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000013"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "growing",
+          "decaying",
+          "transforming",
+          "learning",
+          "healing"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "progression",
+          "development",
+          "transformation",
+          "evolution"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasStages",
+          "RequiresTime",
+          "InvolvesMaterials",
+          "ProducesResult"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_stages",
+          "takes_time",
+          "involves_change"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000016",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.event.occurrence",
+    "Name": "occurrence",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Events that happen without deliberate planning"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000013"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "storm",
+          "earthquake",
+          "coincidence",
+          "discovery",
+          "breakthrough"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "incident",
+          "phenomenon",
+          "happening",
+          "manifestation"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "CausedBy",
+          "ObservedBy",
+          "AffectsEnvironment",
+          "Unpredictable"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "spontaneous",
+          "not_planned",
+          "observable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000017",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.event.interaction",
+    "Name": "interaction",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Events involving exchange or communication between entities"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000013"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "conversation",
+          "negotiation",
+          "collaboration",
+          "conflict",
+          "trade"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "exchange",
+          "communication",
+          "engagement",
+          "contact"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Between",
+          "Involves",
+          "Results",
+          "Mediated"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "involves_multiple_parties",
+          "involves_exchange",
+          "can_be_reciprocal"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000018",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.property",
+    "Name": "property",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Qualities or attributes that entities can have"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "color",
+          "size",
+          "weight",
+          "temperature",
+          "emotion"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "attribute",
+          "quality",
+          "characteristic",
+          "feature"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "AppliesTo",
+          "MeasuredBy",
+          "ObservedIn",
+          "ChangesOver"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "describes_entities",
+          "can_be_measured",
+          "can_change"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000019",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.property.physical",
+    "Name": "physical_property",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Observable or measurable physical characteristics"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000018"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "color",
+          "size",
+          "shape",
+          "weight",
+          "texture"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "physical_characteristic",
+          "material_property",
+          "tangible_quality"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "MeasuredWith",
+          "ObservedBy",
+          "ChangesUnder"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "physically_observable",
+          "measurable",
+          "objective"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000020",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.property.quality",
+    "Name": "quality",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Subjective or evaluative characteristics"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000018"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "beauty",
+          "intelligence",
+          "kindness",
+          "difficulty",
+          "importance"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "trait",
+          "characteristic",
+          "virtue",
+          "aspect"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "JudgedBy",
+          "EvaluatedAs",
+          "DependsOn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "subjective",
+          "evaluative",
+          "context_dependent"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000021",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.relation",
+    "Name": "relation",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "How entities connect to or interact with each other"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "IsA",
+          "PartOf",
+          "RelatedTo",
+          "Causes",
+          "Contains"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "relationship",
+          "connection",
+          "association",
+          "link"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Connects",
+          "HasDirection",
+          "HasStrength",
+          "IsTransitive"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "connects_entities",
+          "has_semantics",
+          "can_be_directional"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000022",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.state",
+    "Name": "state",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Conditions or situations entities can be in"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "active",
+          "dormant",
+          "broken",
+          "happy",
+          "solid"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "condition",
+          "situation",
+          "status",
+          "mode"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "ExperiencedBy",
+          "CausedBy",
+          "TransitionsTo",
+          "Temporary"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "describes_condition",
+          "can_change",
+          "temporary_or_persistent"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000023",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.time",
+    "Name": "time",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Temporal aspects of existence"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "moment",
+          "duration",
+          "sequence",
+          "past",
+          "future"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "temporal",
+          "chronological",
+          "timing"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Measures",
+          "Sequences",
+          "Contains",
+          "Before",
+          "After"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "flows_forward",
+          "measurable",
+          "universal"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000024",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space",
+    "Name": "space",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Locations and spatial arrangements"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000001"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 1
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "location",
+          "position",
+          "distance",
+          "direction",
+          "area"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "spatial",
+          "location",
+          "geography",
+          "place"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Contains",
+          "Adjacent",
+          "DistanceFrom",
+          "DirectionTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_dimensions",
+          "can_contain_objects",
+          "measurable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000025",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location",
+    "Name": "location",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Specific places or positions in space"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000024"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "place",
+          "spot",
+          "position",
+          "site",
+          "venue"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "place",
+          "position",
+          "spot",
+          "site"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Contains",
+          "NearTo",
+          "AccessibleBy",
+          "KnownFor"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_coordinates",
+          "can_be_visited",
+          "has_boundaries"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000026",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.physical.living.human",
+    "Name": "human",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Biological human beings as physical entities"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000006"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "homo sapiens",
+          "human body",
+          "biological entity",
+          "organism"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "homo_sapiens",
+          "human_being",
+          "person_body"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasIdentity",
+          "HasBody",
+          "BornAt",
+          "LivesIn",
+          "HasDNA"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "biological",
+          "conscious",
+          "social_species",
+          "bipedal"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000027",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.person",
+    "Name": "person",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Social and psychological identity of individuals"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "individual identity",
+          "personality",
+          "character",
+          "self"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "individual",
+          "identity",
+          "self",
+          "character"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "EmbodiedBy",
+          "HasRole",
+          "HasName",
+          "HasPersonality",
+          "KnowsPerson"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_consciousness",
+          "has_identity",
+          "social_being",
+          "unique"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000028",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.role",
+    "Name": "role",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Social functions or positions that can be performed"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "teacher",
+          "manager",
+          "parent",
+          "friend",
+          "leader"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "position",
+          "function",
+          "job",
+          "responsibility"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PerformedBy",
+          "RequiresSkills",
+          "HasResponsibilities",
+          "InContext"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "social_construct",
+          "can_be_performed",
+          "has_expectations"
+        ]
+      }
+    }
+  }
+]

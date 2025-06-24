@@ -1,0 +1,1762 @@
+[
+  {
+    "ID": "00000000-0000-0000-0000-000000000101",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.organization",
+    "Name": "organization",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Structured groups of people working together"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000011"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "company",
+          "corporation",
+          "nonprofit",
+          "government",
+          "team"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "company",
+          "institution",
+          "group",
+          "entity"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasEmployees",
+          "HasPurpose",
+          "LocatedIn",
+          "LeadBy",
+          "PartnersWith"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_structure",
+          "has_goals",
+          "employs_people",
+          "has_hierarchy"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000102",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.country",
+    "Name": "country",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Political territories with defined borders"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "United States",
+          "Canada",
+          "France",
+          "Japan",
+          "Brazil"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "nation",
+          "state",
+          "republic",
+          "kingdom"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HasCapital",
+          "HasCurrency",
+          "HasLanguage",
+          "BordersWith",
+          "GovernedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "has_government",
+          "has_borders",
+          "has_sovereignty",
+          "has_population"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000103",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.city",
+    "Name": "city",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Large populated urban areas"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "New York",
+          "London",
+          "Tokyo",
+          "Paris",
+          "Los Angeles"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "town",
+          "municipality",
+          "metropolis",
+          "urban_area"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "LocatedIn",
+          "HasPopulation",
+          "HasMayor",
+          "ContainsBuildings",
+          "ConnectedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "densely_populated",
+          "has_infrastructure",
+          "economic_center"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000104",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.region",
+    "Name": "region",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Geographic areas with common characteristics"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "Midwest",
+          "Southeast Asia",
+          "Mediterranean",
+          "Arctic",
+          "Sahara"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "area",
+          "zone",
+          "territory",
+          "district"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "CharacterizedBy",
+          "Contains",
+          "KnownFor",
+          "BordersWith"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "geographically_defined",
+          "has_common_features",
+          "cultural_identity"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000105",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.state",
+    "Name": "state",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Political subdivisions within countries"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "California",
+          "Texas",
+          "New York",
+          "Ontario",
+          "Bavaria"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "province",
+          "territory",
+          "commonwealth",
+          "jurisdiction"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PartOf",
+          "HasCapital",
+          "GovernedBy",
+          "Contains",
+          "BordersWith"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "political_subdivision",
+          "has_government",
+          "has_laws"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000106",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.address",
+    "Name": "address",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Specific location identifiers for places"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "123 Main Street",
+          "456 Oak Ave",
+          "postal address",
+          "street address"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "street_address",
+          "mailing_address",
+          "location_identifier"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "LocatesBuilding",
+          "HasPostalCode",
+          "InCity",
+          "OnStreet"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "uniquely_identifies",
+          "hierarchical",
+          "standardized_format"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000107",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.coordinate",
+    "Name": "coordinate",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Numerical position specifications"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "latitude/longitude",
+          "GPS coordinates",
+          "40.7128, -74.0060"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "coordinates",
+          "GPS_position",
+          "lat_long",
+          "location_data"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "SpecifiesLocation",
+          "MeasuredIn",
+          "UsedBy",
+          "ConvertedTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "numerical",
+          "precise",
+          "universal_system"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000108",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.space.location.facility",
+    "Name": "facility",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Buildings or structures designed for specific purposes"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000025"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "hospital",
+          "school",
+          "factory",
+          "stadium",
+          "office building"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "building",
+          "structure",
+          "establishment",
+          "institution"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "UsedFor",
+          "ContainsEquipment",
+          "ManagedBy",
+          "AccessedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "purpose_built",
+          "has_infrastructure",
+          "serves_function"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000109",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.time.date",
+    "Name": "date",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Specific points in calendar time"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000023"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "January 1, 2024",
+          "tomorrow",
+          "yesterday",
+          "December 25th"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "day",
+          "calendar_date",
+          "timestamp"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Before",
+          "After",
+          "During",
+          "ScheduledFor",
+          "OccursOn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "calendar_based",
+          "sequential",
+          "culturally_defined"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000110",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.time.clock",
+    "Name": "time",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Specific moments within a day"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000023"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "3:30 PM",
+          "noon",
+          "midnight",
+          "morning",
+          "evening"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "clock_time",
+          "hour",
+          "moment"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "Before",
+          "After",
+          "During",
+          "MeasuredBy",
+          "ScheduledAt"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "cyclical",
+          "measurable",
+          "precise"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000111",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.time.duration",
+    "Name": "duration",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Lengths of time between events"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000023"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "2 hours",
+          "30 minutes",
+          "a week",
+          "lifetime",
+          "brief moment"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "timespan",
+          "period",
+          "interval",
+          "length"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "MeasuredIn",
+          "LongerThan",
+          "ShorterThan",
+          "RequiredFor"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "measurable",
+          "comparative",
+          "bounded"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000112",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.time.period",
+    "Name": "time_period",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Named or significant time spans"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000023"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 2
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "Renaissance",
+          "summer",
+          "quarterly",
+          "childhood",
+          "morning"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "era",
+          "epoch",
+          "season",
+          "phase"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "CharacterizedBy",
+          "Contains",
+          "FollowedBy",
+          "KnownFor"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "culturally_defined",
+          "has_characteristics",
+          "recurring_or_unique"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000113",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.artificial.product",
+    "Name": "product",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Items manufactured or created for use or sale"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000005"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "smartphone",
+          "book",
+          "car",
+          "clothing",
+          "food item"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "item",
+          "goods",
+          "merchandise",
+          "commodity"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "ManufacturedBy",
+          "SoldBy",
+          "UsedFor",
+          "MadeOf",
+          "HasBrand"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "commercially_available",
+          "has_purpose",
+          "mass_produced"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000114",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.artificial.tool",
+    "Name": "tool",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Implements designed to perform specific functions"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000005"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "hammer",
+          "screwdriver",
+          "calculator",
+          "software",
+          "wrench"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "instrument",
+          "implement",
+          "device",
+          "utility"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "UsedFor",
+          "OperatedBy",
+          "RequiresSkill",
+          "MadeOf"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "functional",
+          "operated_by_user",
+          "extends_capability"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000115",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.artificial.device",
+    "Name": "device",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Complex mechanical or electronic apparatus"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000005"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "computer",
+          "smartphone",
+          "television",
+          "microwave",
+          "printer"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "apparatus",
+          "machine",
+          "gadget",
+          "equipment"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PoweredBy",
+          "ControlledBy",
+          "ConnectedTo",
+          "ContainsComponents"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "electronic_or_mechanical",
+          "complex_functionality",
+          "user_interface"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000116",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.software",
+    "Name": "software",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Computer programs and applications"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000008"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 3
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "app",
+          "program",
+          "operating system",
+          "game",
+          "browser"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "application",
+          "program",
+          "app",
+          "code"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "RunsOn",
+          "DevelopedBy",
+          "UpdatedBy",
+          "IntegratesWith"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "executable",
+          "digital",
+          "functional_purpose"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000117",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.artificial.vehicle",
+    "Name": "vehicle",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Devices designed for transportation"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000005"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "car",
+          "bicycle",
+          "airplane",
+          "boat",
+          "train"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "transport",
+          "conveyance",
+          "automobile"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "DrivenBy",
+          "PoweredBy",
+          "CarriesPassengers",
+          "TravelsOn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "mobile",
+          "carries_people_or_cargo",
+          "has_propulsion"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000118",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.substance.food",
+    "Name": "food",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Substances consumed for nutrition"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000007"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "apple",
+          "bread",
+          "meat",
+          "vegetables",
+          "pasta"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "nourishment",
+          "sustenance",
+          "meal",
+          "edibles"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "ConsumedBy",
+          "PreparedBy",
+          "ContainsNutrients",
+          "StoredIn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "edible",
+          "provides_nutrition",
+          "perishable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000119",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.information.document",
+    "Name": "document",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Recorded information in structured format"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000010"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "contract",
+          "report",
+          "letter",
+          "manual",
+          "certificate"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "paper",
+          "record",
+          "file",
+          "text"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "AuthoredBy",
+          "SignedBy",
+          "StoredIn",
+          "ReferencesOther"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "contains_information",
+          "structured",
+          "can_be_shared"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000120",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.information.file",
+    "Name": "file",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Digital containers for data and information"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000010"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "PDF",
+          "image",
+          "video",
+          "spreadsheet",
+          "text file"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "digital_file",
+          "computer_file",
+          "data_file"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "StoredOn",
+          "CreatedBy",
+          "OpenedWith",
+          "SharedVia"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "digital",
+          "has_format",
+          "can_be_copied"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000121",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.emotion",
+    "Name": "emotion",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Psychological and physiological states of feeling"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "happiness",
+          "sadness",
+          "anger",
+          "fear",
+          "love"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "feeling",
+          "mood",
+          "sentiment",
+          "affect"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "ExperiencedBy",
+          "TriggeredBy",
+          "ExpressedAs",
+          "LeadsTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "subjective",
+          "temporary",
+          "influences_behavior"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000122",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.belief",
+    "Name": "belief",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Convictions or acceptances that certain things are true"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "religious belief",
+          "political view",
+          "scientific theory",
+          "personal conviction"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "conviction",
+          "faith",
+          "opinion",
+          "creed"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HeldBy",
+          "BasedOn",
+          "ConflictsWith",
+          "SupportedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "held_as_true",
+          "influences_decisions",
+          "can_change"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000123",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.opinion",
+    "Name": "opinion",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Personal views or judgments about something"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "movie review",
+          "political stance",
+          "preference",
+          "judgment"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "view",
+          "perspective",
+          "judgment",
+          "stance"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "HeldBy",
+          "AboutTopic",
+          "InfluencedBy",
+          "ExpressedAs"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "subjective",
+          "can_be_shared",
+          "influences_choices"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000124",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.goal",
+    "Name": "goal",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Desired outcomes or objectives to achieve"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "career objective",
+          "personal target",
+          "project milestone",
+          "life ambition"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "objective",
+          "target",
+          "aim",
+          "purpose"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PursuitBy",
+          "AchievedThrough",
+          "RequiresActions",
+          "HasDeadline"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "future_oriented",
+          "motivates_action",
+          "measurable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000125",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.intent",
+    "Name": "intent",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Purpose or intention behind actions or communications"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "communication intent",
+          "action purpose",
+          "underlying motive",
+          "planned outcome"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "intention",
+          "purpose",
+          "motive",
+          "aim"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "BehindAction",
+          "CommunicatedBy",
+          "AchievedThrough",
+          "RecognizedBy"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "drives_behavior",
+          "can_be_inferred",
+          "contextual"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000126",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.issue",
+    "Name": "issue",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Problems or matters of concern requiring attention"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "technical problem",
+          "social concern",
+          "business challenge",
+          "personal difficulty"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "problem",
+          "concern",
+          "matter",
+          "challenge"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "AffectsEntity",
+          "CausedBy",
+          "SolvedBy",
+          "RequiresAttention"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "requires_resolution",
+          "has_impact",
+          "can_escalate"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000127",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.skill",
+    "Name": "skill",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Learned abilities to perform tasks effectively"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "programming",
+          "communication",
+          "leadership",
+          "cooking",
+          "analysis"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "ability",
+          "competency",
+          "expertise",
+          "talent"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "PossessedBy",
+          "DevelopedThrough",
+          "AppliedTo",
+          "RequiredFor"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "learnable",
+          "improvable",
+          "transferable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000128",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.knowledge",
+    "Name": "knowledge",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Information, understanding, and awareness gained through experience or study"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000010"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "expertise",
+          "facts",
+          "understanding",
+          "wisdom",
+          "know-how"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "understanding",
+          "awareness",
+          "expertise",
+          "learning"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "AcquiredBy",
+          "SharedWith",
+          "AppliedTo",
+          "BasedOn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "can_be_learned",
+          "can_be_shared",
+          "builds_over_time"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000129",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.concept",
+    "Name": "concept",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Abstract ideas or general notions"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "democracy",
+          "mathematics",
+          "love",
+          "justice",
+          "evolution"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "idea",
+          "notion",
+          "principle",
+          "abstraction"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "UnderstoodBy",
+          "RelatedTo",
+          "ExplainedBy",
+          "AppliedIn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "abstract",
+          "universal",
+          "can_be_complex"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000130",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.theory",
+    "Name": "theory",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Systematic explanations for phenomena based on evidence"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "relativity theory",
+          "evolution",
+          "economic theory",
+          "game theory"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "hypothesis",
+          "model",
+          "framework",
+          "explanation"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "ProposedBy",
+          "SupportedBy",
+          "TestedBy",
+          "AppliedTo"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "evidence_based",
+          "explanatory",
+          "testable"
+        ]
+      }
+    }
+  },
+  {
+    "ID": "00000000-0000-0000-0000-000000000131",
+    "ChunkType": "Declarative",
+    "CognitiveCategory": "Ontology",
+    "SemanticType": "essence.entity.abstract.principle",
+    "Name": "principle",
+    "Slots": {
+      "Description": {
+        "Name": "Description",
+        "Value": "Fundamental rules or beliefs that guide behavior or reasoning"
+      },
+      "Parent": {
+        "Name": "Parent",
+        "Value": "00000000-0000-0000-0000-000000000009"
+      },
+      "Level": {
+        "Name": "Level",
+        "Value": 4
+      },
+      "Examples": {
+        "Name": "Examples",
+        "Value": [
+          "moral principle",
+          "scientific law",
+          "design principle",
+          "ethical guideline"
+        ]
+      },
+      "Synonyms": {
+        "Name": "Synonyms",
+        "Value": [
+          "rule",
+          "law",
+          "guideline",
+          "standard"
+        ]
+      },
+      "CanHave": {
+        "Name": "CanHave",
+        "Value": [
+          "GuidesAction",
+          "FollowedBy",
+          "ViolatedBy",
+          "BasedOn"
+        ]
+      },
+      "CommonProperties": {
+        "Name": "CommonProperties",
+        "Value": [
+          "fundamental",
+          "guides_behavior",
+          "universal_or_contextual"
+        ]
+      }
+    }
+  }
+]

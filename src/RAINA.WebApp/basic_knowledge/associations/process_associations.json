@@ -1,0 +1,302 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000005",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "CreatedBy",
+    "RelationBtoA": "Creates",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000116",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "DevelopedBy",
+    "RelationBtoA": "Develops",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000113",
+    "ChunkBId": "00000000-0000-0000-0000-000000000101",
+    "RelationAtoB": "ManufacturedBy",
+    "RelationBtoA": "Manufactures",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000119",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "AuthoredBy",
+    "RelationBtoA": "Authors",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000118",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "PreparedBy",
+    "RelationBtoA": "Prepares",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000010",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "ProcessedBy",
+    "RelationBtoA": "Processes",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000116",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "UpdatedBy",
+    "RelationBtoA": "Updates",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000130",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ProposedBy",
+    "RelationBtoA": "Proposes",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000130",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "TestedBy",
+    "RelationBtoA": "Tests",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000119",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "SignedBy",
+    "RelationBtoA": "Signs",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000113",
+    "ChunkBId": "00000000-0000-0000-0000-000000000101",
+    "RelationAtoB": "SoldBy",
+    "RelationBtoA": "Sells",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000118",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ConsumedBy",
+    "RelationBtoA": "Consumes",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000115",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "PoweredBy",
+    "RelationBtoA": "Powers",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000117",
+    "ChunkBId": "00000000-0000-0000-0000-000000000007",
+    "RelationAtoB": "PoweredBy",
+    "RelationBtoA": "Powers",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000117",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "DrivenBy",
+    "RelationBtoA": "Drives",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000019",
+    "ChunkBId": "00000000-0000-0000-0000-000000000114",
+    "RelationAtoB": "MeasuredBy",
+    "RelationBtoA": "Measures",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000019",
+    "ChunkBId": "00000000-0000-0000-0000-000000000114",
+    "RelationAtoB": "MeasuredWith",
+    "RelationBtoA": "MeasurementToolFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000016",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "ObservedBy",
+    "RelationBtoA": "Observes",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000010",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "VerifiedBy",
+    "RelationBtoA": "Verifies",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000010",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "TransmittedBy",
+    "RelationBtoA": "Transmits",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000119",
+    "ChunkBId": "00000000-0000-0000-0000-000000000108",
+    "RelationAtoB": "StoredIn",
+    "RelationBtoA": "Stores",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000120",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "StoredOn",
+    "RelationBtoA": "Stores",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000120",
+    "ChunkBId": "00000000-0000-0000-0000-000000000116",
+    "RelationAtoB": "OpenedWith",
+    "RelationBtoA": "Opens",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000120",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "SharedVia",
+    "RelationBtoA": "Shares",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000116",
+    "ChunkBId": "00000000-0000-0000-0000-000000000115",
+    "RelationAtoB": "RunsOn",
+    "RelationBtoA": "Runs",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000116",
+    "ChunkBId": "00000000-0000-0000-0000-000000000116",
+    "RelationAtoB": "IntegratesWith",
+    "RelationBtoA": "IntegratedWith",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000122",
+    "ChunkBId": "00000000-0000-0000-0000-000000000009",
+    "RelationAtoB": "BasedOn",
+    "RelationBtoA": "BasisFor",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000012",
+    "ChunkBId": "00000000-0000-0000-0000-000000000018",
+    "RelationAtoB": "DefinedBy",
+    "RelationBtoA": "Defines",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000129",
+    "ChunkBId": "00000000-0000-0000-0000-000000000130",
+    "RelationAtoB": "ExplainedBy",
+    "RelationBtoA": "Explains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000129",
+    "ChunkBId": "00000000-0000-0000-0000-000000000027",
+    "RelationAtoB": "UnderstoodBy",
+    "RelationBtoA": "Understands",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

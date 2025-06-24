@@ -1,0 +1,212 @@
+[
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000003",
+    "ChunkBId": "00000000-0000-0000-0000-000000000024",
+    "RelationAtoB": "FoundIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000004",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "FoundIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000006",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "LivesIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000026",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "BornAt",
+    "RelationBtoA": "BirthplaceOf",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000102",
+    "ChunkBId": "00000000-0000-0000-0000-000000000103",
+    "RelationAtoB": "BordersWith",
+    "RelationBtoA": "BordersWith",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000102",
+    "ChunkBId": "00000000-0000-0000-0000-000000000104",
+    "RelationAtoB": "BordersWith",
+    "RelationBtoA": "BordersWith",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000102",
+    "ChunkBId": "00000000-0000-0000-0000-000000000105",
+    "RelationAtoB": "Contains",
+    "RelationBtoA": "LocatedIn",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000102",
+    "RelationAtoB": "LocatedIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000105",
+    "RelationAtoB": "LocatedIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000103",
+    "ChunkBId": "00000000-0000-0000-0000-000000000108",
+    "RelationAtoB": "Contains",
+    "RelationBtoA": "LocatedIn",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000104",
+    "ChunkBId": "00000000-0000-0000-0000-000000000102",
+    "RelationAtoB": "BordersWith",
+    "RelationBtoA": "BordersWith",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000104",
+    "ChunkBId": "00000000-0000-0000-0000-000000000103",
+    "RelationAtoB": "Contains",
+    "RelationBtoA": "LocatedIn",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000105",
+    "ChunkBId": "00000000-0000-0000-0000-000000000102",
+    "RelationAtoB": "PartOf",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000105",
+    "ChunkBId": "00000000-0000-0000-0000-000000000104",
+    "RelationAtoB": "BordersWith",
+    "RelationBtoA": "BordersWith",
+    "WeightAtoB": 0.6,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000106",
+    "ChunkBId": "00000000-0000-0000-0000-000000000103",
+    "RelationAtoB": "InCity",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000106",
+    "ChunkBId": "00000000-0000-0000-0000-000000000108",
+    "RelationAtoB": "LocatesBuilding",
+    "RelationBtoA": "LocatedAt",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.8,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000107",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "SpecifiesLocation",
+    "RelationBtoA": "IdentifiedBy",
+    "WeightAtoB": 0.9,
+    "WeightBtoA": 0.7,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000108",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "LocatedIn",
+    "RelationBtoA": "Contains",
+    "WeightAtoB": 0.8,
+    "WeightBtoA": 0.6,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000117",
+    "ChunkBId": "00000000-0000-0000-0000-000000000025",
+    "RelationAtoB": "TravelsOn",
+    "RelationBtoA": "AccessibleBy",
+    "WeightAtoB": 0.7,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000025",
+    "ChunkBId": "00000000-0000-0000-0000-000000000024",
+    "RelationAtoB": "NearTo",
+    "RelationBtoA": "NearTo",
+    "WeightAtoB": 0.5,
+    "WeightBtoA": 0.5,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  },
+  {
+    "ChunkAId": "00000000-0000-0000-0000-000000000024",
+    "ChunkBId": "00000000-0000-0000-0000-000000000023",
+    "RelationAtoB": "Adjacent",
+    "RelationBtoA": "Adjacent",
+    "WeightAtoB": 0.4,
+    "WeightBtoA": 0.4,
+    "LastActivated": 0,
+    "ActivationHistory": []
+  }
+]

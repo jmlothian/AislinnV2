@@ -38,6 +38,7 @@ class Program
             return;
         }
 
+        string anthropicKey = Environment.GetEnvironmentVariable("ANTHROPIC_RAINA");
         // Define the database path for chunk storage
         string appDataPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -59,6 +60,7 @@ class Program
             config.ChunkCollectionId = "raina_main";
             config.AssociationCollectionId = "raina_associations";
             config.OpenAIApiKey = openAIApiKey;
+            config.AnthropicKey = anthropicKey;
 
             var vectorConfig = new VoyageConfiguration();
             vectorConfig.VoyageApiKey = voyageAPIKey;

@@ -1,0 +1,1188 @@
+[
+    {
+        "ID": "00000000-0000-0000-0000-000000000201",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social",
+        "Name": "social",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Relationships between people and social entities"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000021"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 2
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "friendship",
+                    "family bond",
+                    "work relationship",
+                    "romantic partnership",
+                    "mentorship"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "interpersonal",
+                    "human_connection",
+                    "social_bond",
+                    "relationship"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "BondedWith",
+                    "RelatedToPerson",
+                    "KnowsPerson",
+                    "PartnersWith",
+                    "ManagedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "involves_people",
+                    "has_emotional_component",
+                    "can_change_over_time"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000202",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.intimate",
+        "Name": "intimate",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Close personal bonds with high emotional significance"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000201"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "romantic relationship",
+                    "family member",
+                    "best friend",
+                    "life partner",
+                    "close confidant"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "close",
+                    "personal",
+                    "deep",
+                    "bonded"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "BondedWith",
+                    "RelatedToPerson",
+                    "SharedWith",
+                    "TrustedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "high_emotional_investment",
+                    "deep_trust",
+                    "significant_influence"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000203",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.intimate.romantic",
+        "Name": "romantic",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Intimate relationships involving romantic love and attraction"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000202"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "boyfriend/girlfriend",
+                    "spouse",
+                    "partner",
+                    "fiancé",
+                    "romantic interest"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "romantic_partnership",
+                    "love_relationship",
+                    "intimate_partnership"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "BondedWith",
+                    "SharedWith",
+                    "Lives_with",
+                    "CommittedTo"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "involves_romantic_love",
+                    "exclusive_or_primary",
+                    "high_priority_relationship"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000204",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.intimate.familial",
+        "Name": "familial",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Relationships based on blood, marriage, or adoption"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000202"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "parent-child",
+                    "siblings",
+                    "grandparent",
+                    "spouse",
+                    "cousin"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "family",
+                    "kinship",
+                    "blood_relation",
+                    "family_bond"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "RelatedToPerson",
+                    "HasOffspring",
+                    "LivesIn",
+                    "CaredForBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "biological_or_legal_bond",
+                    "permanent_connection",
+                    "inherited_obligations"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000205",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.intimate.close_friendship",
+        "Name": "close_friendship",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Deep non-romantic personal bonds with chosen companions"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000202"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "best friend",
+                    "lifelong friend",
+                    "confidant",
+                    "chosen family",
+                    "close companion"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "best_friendship",
+                    "deep_friendship",
+                    "close_companionship"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "BondedWith",
+                    "SharedWith",
+                    "TrustedBy",
+                    "SupportedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "chosen_relationship",
+                    "mutual_support",
+                    "deep_understanding"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000206",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.professional",
+        "Name": "professional",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Work and career-based relationships"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000201"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "boss-employee",
+                    "colleague",
+                    "client-provider",
+                    "mentor-mentee",
+                    "business partner"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "work_relationship",
+                    "business_relationship",
+                    "career_connection"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ManagedBy",
+                    "PartnersWith",
+                    "ServedBy",
+                    "Collaborates",
+                    "Reports_to"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "work_context",
+                    "goal_oriented",
+                    "structured_interaction"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000207",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.professional.hierarchical",
+        "Name": "hierarchical",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Professional relationships with power or authority differences"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000206"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "boss-employee",
+                    "supervisor-subordinate",
+                    "mentor-mentee",
+                    "teacher-student",
+                    "manager-team member"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "authority_relationship",
+                    "power_relationship",
+                    "reporting_relationship"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ManagedBy",
+                    "LeadBy",
+                    "SupervisedBy",
+                    "Reports_to"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "power_differential",
+                    "formal_structure",
+                    "responsibility_flow"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000208",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.professional.collaborative",
+        "Name": "collaborative",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Professional relationships based on cooperation and teamwork"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000206"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "coworker",
+                    "team member",
+                    "business partner",
+                    "collaborator",
+                    "project partner"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "peer_relationship",
+                    "teamwork_relationship",
+                    "partnership"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "PartnersWith",
+                    "CollaboratesWith",
+                    "WorksWith",
+                    "SharedGoals"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "equal_status",
+                    "shared_objectives",
+                    "mutual_cooperation"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000209",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.professional.service",
+        "Name": "service",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Professional relationships where one party provides services to another"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000206"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "client-lawyer",
+                    "patient-doctor",
+                    "customer-vendor",
+                    "client-consultant",
+                    "customer-service provider"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "client_relationship",
+                    "service_relationship",
+                    "provider_relationship"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ServedBy",
+                    "ProvidesService",
+                    "PaymentFor",
+                    "ContractWith"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "service_exchange",
+                    "professional_boundaries",
+                    "compensation_based"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000210",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.casual",
+        "Name": "casual",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Lower-intensity social connections without deep emotional bonds"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000201"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "acquaintance",
+                    "neighbor",
+                    "classmate",
+                    "gym buddy",
+                    "social contact"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "informal",
+                    "light",
+                    "social",
+                    "surface_level"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "KnowsPerson",
+                    "InteractsWith",
+                    "MeetsOccasionally",
+                    "SocialContact"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "low_emotional_investment",
+                    "situational_interaction",
+                    "limited_commitment"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000211",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.casual.acquaintance",
+        "Name": "acquaintance",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "People known through brief or limited interactions"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000210"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "someone met at party",
+                    "person from class",
+                    "social media contact",
+                    "friend of friend",
+                    "casual contact"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "contact",
+                    "social_contact",
+                    "casual_friend"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "KnowsPerson",
+                    "MetThrough",
+                    "OccasionalContact",
+                    "RecognizedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "limited_knowledge",
+                    "superficial_interaction",
+                    "potential_for_growth"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000212",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.casual.neighbor",
+        "Name": "neighbor",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "People living in proximity with regular but limited interaction"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000210"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "next door neighbor",
+                    "building resident",
+                    "street neighbor",
+                    "community member",
+                    "local resident"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "resident",
+                    "local",
+                    "community_member"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "KnowsPerson",
+                    "LivesNear",
+                    "NeighborTo",
+                    "SharesSpace"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "geographic_proximity",
+                    "regular_encounters",
+                    "community_context"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000213",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.casual.community_member",
+        "Name": "community_member",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Relationships through shared community or group membership"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000210"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "church member",
+                    "club participant",
+                    "community volunteer",
+                    "group member",
+                    "association member"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "group_member",
+                    "participant",
+                    "fellow_member"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ParticipatesIn",
+                    "MemberOf",
+                    "SharedActivity",
+                    "CommonInterest"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "shared_membership",
+                    "common_interests",
+                    "group_context"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000214",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.group",
+        "Name": "group",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Relationships between individuals and organizations or groups"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000201"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "employee-company",
+                    "citizen-country",
+                    "member-organization",
+                    "student-school",
+                    "leader-group"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "organizational",
+                    "institutional",
+                    "collective"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ParticipatesIn",
+                    "LeadBy",
+                    "MemberOf",
+                    "RepresentedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "formal_structure",
+                    "collective_identity",
+                    "shared_purpose"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000215",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.group.membership",
+        "Name": "membership",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Formal or informal belonging to a group or organization"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000214"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "club member",
+                    "team participant",
+                    "organization member",
+                    "group participant",
+                    "community member"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "participation",
+                    "belonging",
+                    "enrollment"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ParticipatesIn",
+                    "MemberOf",
+                    "BelongsTo",
+                    "ActiveIn"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "formal_or_informal",
+                    "shared_identity",
+                    "group_benefits"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000216",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.social.group.leadership",
+        "Name": "leadership",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Directing or guiding a group or organization"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000214"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 4
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "team leader",
+                    "CEO",
+                    "group coordinator",
+                    "committee chair",
+                    "organization head"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "management",
+                    "direction",
+                    "guidance",
+                    "authority"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "LeadBy",
+                    "DirectedBy",
+                    "GuidedBy",
+                    "ManagedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "authority_position",
+                    "responsibility",
+                    "decision_making_power"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000217",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.functional",
+        "Name": "functional",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "Relationships based on operational roles and functions between entities"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000021"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 2
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "tool supports task",
+                    "lawyer represents client",
+                    "system controls process",
+                    "key enables access"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "operational",
+                    "utility",
+                    "service",
+                    "instrumental"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "SupportedBy",
+                    "ControlledBy",
+                    "EnabledBy",
+                    "RepresentedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "purpose_driven",
+                    "operational_nature",
+                    "cross_entity_types"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000218",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.functional.representation",
+        "Name": "representation",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "One entity acting or speaking on behalf of another entity"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000217"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "lawyer represents client",
+                    "spokesperson represents company",
+                    "model represents data",
+                    "agent represents principal",
+                    "map represents territory"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "agency",
+                    "proxy",
+                    "advocacy",
+                    "standing_for"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "RepresentedBy",
+                    "ActsFor",
+                    "SpeaksFor",
+                    "StandsFor"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "authorized_action",
+                    "behalf_relationship",
+                    "delegated_authority"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000219",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.functional.support",
+        "Name": "support",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "One entity helping or assisting another's function or operation"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000217"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "foundation supports building",
+                    "evidence supports theory",
+                    "team supports project",
+                    "infrastructure supports economy",
+                    "battery supports device"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "assistance",
+                    "backing",
+                    "reinforcement",
+                    "underpinning"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "SupportedBy",
+                    "AssistedBy",
+                    "ReinforcedBy",
+                    "BackedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "enabling_function",
+                    "strengthening_role",
+                    "dependency_relationship"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000220",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.functional.control",
+        "Name": "control",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "One entity directing or governing another's operations or behavior"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000217"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "software controls hardware",
+                    "thermostat controls temperature",
+                    "government controls policy",
+                    "rules control behavior",
+                    "remote controls device"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "direction",
+                    "governance",
+                    "regulation",
+                    "command"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "ControlledBy",
+                    "DirectedBy",
+                    "GovernedBy",
+                    "RegulatedBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "authority_relationship",
+                    "directive_power",
+                    "operational_influence"
+                ]
+            }
+        }
+    },
+    {
+        "ID": "00000000-0000-0000-0000-000000000221",
+        "ChunkType": "Declarative",
+        "CognitiveCategory": "Ontology",
+        "SemanticType": "essence.relation.functional.enablement",
+        "Name": "enablement",
+        "Slots": {
+            "Description": {
+                "Name": "Description",
+                "Value": "One entity making another's function or capability possible"
+            },
+            "Parent": {
+                "Name": "Parent",
+                "Value": "00000000-0000-0000-0000-000000000217"
+            },
+            "Level": {
+                "Name": "Level",
+                "Value": 3
+            },
+            "Examples": {
+                "Name": "Examples",
+                "Value": [
+                    "key enables access",
+                    "tool enables task completion",
+                    "education enables opportunity",
+                    "infrastructure enables commerce",
+                    "catalyst enables reaction"
+                ]
+            },
+            "Synonyms": {
+                "Name": "Synonyms",
+                "Value": [
+                    "facilitation",
+                    "empowerment",
+                    "capability_provision"
+                ]
+            },
+            "CanHave": {
+                "Name": "CanHave",
+                "Value": [
+                    "EnabledBy",
+                    "FacilitatedBy",
+                    "MadePossibleBy",
+                    "EmpoweredBy"
+                ]
+            },
+            "CommonProperties": {
+                "Name": "CommonProperties",
+                "Value": [
+                    "capability_granting",
+                    "possibility_creation",
+                    "functional_unlocking"
+                ]
+            }
+        }
+    }
+]

@@ -18,7 +18,7 @@ namespace Aislinn.Configuration
 
         // API Configuration
         public string OpenAIApiKey { get; set; } = "";
-
+        public string AnthropicKey { get; set; } = "";
 
 
 

@@ -258,8 +258,8 @@ public class SummaryService
             CreatedAt = DateTime.UtcNow;
             LastModified = DateTime.UtcNow;
         }
-        Console.WriteLine(filePath);
-        Console.WriteLine(jsonString);
+        Console.WriteLine("Summary Service Loaded: " + filePath);
+        //Console.WriteLine(jsonString);
     }
 
     // Factory method to create and load from JSON in one step

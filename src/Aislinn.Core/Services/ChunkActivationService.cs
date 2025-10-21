@@ -279,7 +279,9 @@ namespace Aislinn.Core.Services
             string relationAtoB,
             string relationBtoA,
             double initialWeightAtoB = 0.5,
-            double initialWeightBtoA = 0.5)
+            double initialWeightBtoA = 0.5,
+            string SubTypeRelationshipAtoB = "",
+            string SubTypeRelationshipBtoA = "")
         {
             var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
             if (associationCollection == null)
@@ -303,6 +305,8 @@ namespace Aislinn.Core.Services
                 RelationBtoA = relationBtoA,
                 WeightAtoB = initialWeightAtoB,
                 WeightBtoA = initialWeightBtoA,
+                SubTypeRelationshipAtoB = SubTypeRelationshipAtoB,
+                SubTypeRelationshipBtoA = SubTypeRelationshipBtoA,
                 LastActivated = _timeManager.GetCognitiveSteps()
             };
 

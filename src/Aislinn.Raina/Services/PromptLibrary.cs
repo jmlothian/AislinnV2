@@ -292,6 +292,8 @@ events, say that you're not sure. If you don't know something, explicitly say yo
 ## Conversation History Summaries
 {recentConversation}
 
+{userActivity}
+
 ## Current DateTime: {dateTime}
 
 ## Example
@@ -309,7 +311,72 @@ Generate natural response that:
 - Builds on the conversation history appropriately 
 - Takes into account the current context 
 - Maintains conversational flow 
-- Is short and sounds like dialog from a book or tv show"
+- Is short and sounds like dialog from a book or tv show",
+        ["memory.extract"] = @"
+# Memory Extraction for Important Information
+
+Extract only information the user explicitly asks you to remember OR that seems personally important to them (health, family, relationships, significant events, preferences that affect daily life).
+
+## Output Format
+```json
+{
+  ""people"": {""Name"": [""important facts about person""]},
+  ""places"": {""Location"": [""important facts about place""]},
+  ""activities"": {""Activity"": [""important facts about activity""]},
+  ""objects"": {""Item"": [""important facts about object""]},
+  ""events"": {""Event"": [""important occurrences""]},
+  ""relationships"": {""Person-Person"": [""relationship facts""]},
+  ""likes"": {""Name"": [""things person likes""]},
+  ""dislikes"": {""Name"": [""things person dislikes""]},
+  ""loves"": {""Name"": [""things person loves""]},
+  ""hates"": {""Name"": [""things person hates""]},
+  ""constraints"": {""Condition"": [""important limitations""]},
+  ""inferences"": [""conclusions about important patterns""]
+}
+```
+
+## What to Extract
+**Always extract:**
+- Explicit requests (""Remember that..."")
+- Health information (allergies, medical conditions, dietary restrictions, injuries)
+- Important dates (birthdays, anniversaries, appointments)
+- Important information about other people (preferences, health conditions, etc.)
+- Family or personal relationships and major life events
+- Work or hobby milestones or significant professional information
+
+**Don't extract:**
+- Casual conversation details
+- Minor preferences without lasting impact
+- Temporary situations or fleeting emotions
+- General observations about people
+
+## Example
+Input: ""My dentist appointment is Thursday at 2pm. The receptionist Sara likes flowers but doesn't like roses. Oh, and I grabbed coffee with Tom earlier - he seemed tired but said the new project is going well.""
+
+Output:
+```json
+{
+  ""events"": {
+    ""dentist_appointment"": [""Thursday at 2pm""]
+  },
+  ""dislikes"": {
+    ""Sara"":[""roses""]
+  },
+  ""likes"": { 
+    ""Sara"": [""flowers""]
+  },
+  ""inferences"": [""[userName] may be planning to bring flowers to Sara at their next dentist appointment""]  
+}
+```
+(Tom's tiredness and project update are not extracted - not personally important enough)
+
+",
+        ["memory.extract.userprompt"] = @"
+        - Your name: {agentName}
+        - Current DateTime: {dateTime}
+        - User's name: {userName}
+        
+        {userName}: {userInput}"
       };
     }
 

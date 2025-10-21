@@ -50,4 +50,30 @@ Raina - developer advocate bot
     --scan and store API docs, user projects, useful sites
     --allow folks to submit things, but block them if they abuse it
 
-Create API and web interface (bluesky login?  Some kind of auth)
+
+Need to get connection string out of git (sob)
+
+Streaming logs
+
+Need to cleanup activation / decay
+    -global decay needs to run on _everything_ including in working memory
+    -activation needs to even out - boosts shouldn't exceed a threshold.
+    -comparison for reduntant items needs to be looked at.  Using same type isn't gonna work
+        -example - two users (a,b) knows a third user (c),  if working memory has a,c but subject changes, we need b, not a.
+
+Get ALL data files into data directory
+
+hmmm...
+
+https://zettelkasten.de/introduction/
+
+consoliate prompt library and individual API call methods into single class
+
+
+We need VERY weak associations between entities and everything in working memory, and also the user (or weakly activate existing ones).
+    this way, concepts someone talks about a lot get attached to them, and concepts will grow larger associations with things that are 
+    talked about with them a lot.
+    --we need to hide these from the graph... it would be crazy big.
+    --we also need spreading activation and decay to work on associations...
+
+need to make sure for the memory thing that we're taking the appropriate $memory type during merge

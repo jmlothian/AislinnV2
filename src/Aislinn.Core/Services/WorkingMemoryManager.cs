@@ -59,6 +59,7 @@ namespace Aislinn.Core.Memory
         private System.Timers.Timer _refreshTimer;
         private bool _autoRefreshEnabled = false;
         private long _refreshIntervalMs = 200; // Default 200ms
+        private bool debugLogging = false;
 
         // Add these properties
         public bool AutoRefreshEnabled
@@ -71,7 +72,7 @@ namespace Aislinn.Core.Memory
                 {
                     _refreshTimer.Enabled = value;
                 }
-                Console.WriteLine($"[WM-DEBUG] AutoRefresh set to: {value}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] AutoRefresh set to: {value}");
             }
         }
 
@@ -85,21 +86,21 @@ namespace Aislinn.Core.Memory
                 {
                     _refreshTimer.Interval = value;
                 }
-                Console.WriteLine($"[WM-DEBUG] RefreshInterval set to: {value}ms");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] RefreshInterval set to: {value}ms");
             }
         }
 
         // Add these methods for timer management
         public void StartAutoRefresh(long intervalMs = 200)
         {
-            Console.WriteLine($"[WM-DEBUG] Starting auto refresh with interval: {intervalMs}ms");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Starting auto refresh with interval: {intervalMs}ms");
 
             if (_refreshTimer == null)
             {
                 _refreshTimer = new System.Timers.Timer(intervalMs);
                 _refreshTimer.Elapsed += async (sender, e) =>
                 {
-                    Console.WriteLine($"[WM-DEBUG] Auto refresh timer triggered");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Auto refresh timer triggered");
                     await RefreshCycleAsync();
                 };
                 _refreshTimer.AutoReset = true;
@@ -110,12 +111,12 @@ namespace Aislinn.Core.Memory
             _refreshTimer.Enabled = true;
             _autoRefreshEnabled = true;
 
-            Console.WriteLine($"[WM-DEBUG] Auto refresh started successfully");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Auto refresh started successfully");
         }
 
         public void StopAutoRefresh()
         {
-            Console.WriteLine($"[WM-DEBUG] Stopping auto refresh");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Stopping auto refresh");
             if (_refreshTimer != null)
             {
                 _refreshTimer.Enabled = false;
@@ -144,7 +145,7 @@ namespace Aislinn.Core.Memory
         // Add a disposal method to clean up timer resources
         public void Dispose()
         {
-            Console.WriteLine($"[WM-DEBUG] Disposing WorkingMemoryManager");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Disposing WorkingMemoryManager");
             SaveState();
             if (_refreshTimer != null)
             {
@@ -207,12 +208,12 @@ namespace Aislinn.Core.Memory
             CognitiveTimeManager timeManager,
             AislinnConfiguration config)
         {
-            Console.WriteLine($"[WM-DEBUG] Initializing WorkingMemoryManager:");
-            Console.WriteLine($"[WM-DEBUG]   - Total Capacity: {config.WorkingMemoryCapacity}");
-            Console.WriteLine($"[WM-DEBUG]   - Activation Threshold: {config.ActivationThreshold}");
-            Console.WriteLine($"[WM-DEBUG]   - Associative Threshold: {config.AssociativeThreshold}");
-            Console.WriteLine($"[WM-DEBUG]   - Chunk Collection: {config.ChunkCollectionId}");
-            Console.WriteLine($"[WM-DEBUG]   - Association Collection: {config.AssociationCollectionId}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Initializing WorkingMemoryManager:");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Total Capacity: {config.WorkingMemoryCapacity}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Activation Threshold: {config.ActivationThreshold}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Associative Threshold: {config.AssociativeThreshold}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Chunk Collection: {config.ChunkCollectionId}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Association Collection: {config.AssociationCollectionId}");
 
             _chunkStore = chunkStore;
             _associationStore = associationStore;
@@ -232,13 +233,13 @@ namespace Aislinn.Core.Memory
             foreach (MemorySubsystem subsystem in Enum.GetValues(typeof(MemorySubsystem)))
             {
                 _workingMemorySlots[subsystem] = new List<WorkingMemorySlot>();
-                Console.WriteLine($"[WM-DEBUG] Initialized subsystem: {subsystem}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Initialized subsystem: {subsystem}");
             }
 
             _primedChunks = new Dictionary<Guid, double>();
             _lastRefreshTime = _cognitiveTimeManager.GetCognitiveSteps();
 
-            Console.WriteLine($"[WM-DEBUG] WorkingMemoryManager initialization complete");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] WorkingMemoryManager initialization complete");
         }
 
         /// <summary>
@@ -248,48 +249,48 @@ namespace Aislinn.Core.Memory
         {
             if (chunk == null)
             {
-                Console.WriteLine($"[WM-DEBUG] UpdateWorkingMemoryAsync called with null chunk");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] UpdateWorkingMemoryAsync called with null chunk");
                 throw new ArgumentNullException(nameof(chunk));
             }
 
-            Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync START ===");
-            Console.WriteLine($"[WM-DEBUG] Chunk: {chunk.Name} (ID: {chunk.ID})");
-            Console.WriteLine($"[WM-DEBUG] Activation Level: {chunk.ActivationLevel:F3}");
-            Console.WriteLine($"[WM-DEBUG] Force Entry: {forceEntry}");
-            Console.WriteLine($"[WM-DEBUG] Current WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
-            Console.WriteLine($"[WM-DEBUG] Current primed count: {_primedChunks.Count}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync START ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk: {chunk.Name} (ID: {chunk.ID})");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Activation Level: {chunk.ActivationLevel:F3}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Force Entry: {forceEntry}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Current WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Current primed count: {_primedChunks.Count}");
 
             // Check if activation exceeds threshold for working memory
             if (chunk.ActivationLevel < _activationThreshold && !forceEntry)
             {
-                Console.WriteLine($"[WM-DEBUG] Chunk activation ({chunk.ActivationLevel:F3}) below WM threshold ({_activationThreshold})");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk activation ({chunk.ActivationLevel:F3}) below WM threshold ({_activationThreshold})");
 
                 // If below WM threshold but above associative threshold, add to primed list
                 if (chunk.ActivationLevel >= _associativeThreshold)
                 {
                     _primedChunks[chunk.ID] = chunk.ActivationLevel;
-                    Console.WriteLine($"[WM-DEBUG] Added chunk to primed list (activation: {chunk.ActivationLevel:F3})");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Added chunk to primed list (activation: {chunk.ActivationLevel:F3})");
                 }
                 else
                 {
-                    Console.WriteLine($"[WM-DEBUG] Chunk activation too low for priming (threshold: {_associativeThreshold})");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk activation too low for priming (threshold: {_associativeThreshold})");
                 }
 
-                Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (NOT ADDED) ===");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (NOT ADDED) ===");
                 return false;
             }
 
             // Determine which subsystem this chunk belongs to
             MemorySubsystem subsystem = DetermineSubsystem(chunk);
-            Console.WriteLine($"[WM-DEBUG] Determined subsystem: {subsystem}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Determined subsystem: {subsystem}");
 
             // Check if chunk is already in working memory
             var existingSlot = FindChunkInWorkingMemory(chunk.ID);
             if (existingSlot != null)
             {
-                Console.WriteLine($"[WM-DEBUG] Chunk already in WM (subsystem: {existingSlot.Subsystem})");
-                Console.WriteLine($"[WM-DEBUG] Previous activation: {existingSlot.CurrentActivation:F3}");
-                Console.WriteLine($"[WM-DEBUG] Previous refresh count: {existingSlot.RefreshCount}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk already in WM (subsystem: {existingSlot.Subsystem})");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Previous activation: {existingSlot.CurrentActivation:F3}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Previous refresh count: {existingSlot.RefreshCount}");
 
                 // Update existing slot
                 existingSlot.CurrentActivation = chunk.ActivationLevel;
@@ -297,14 +298,14 @@ namespace Aislinn.Core.Memory
                 existingSlot.RefreshCount++;
                 existingSlot.FocusValue = 1.0; // Full focus on refreshed item
 
-                Console.WriteLine($"[WM-DEBUG] Updated existing slot - new activation: {existingSlot.CurrentActivation:F3}, refresh count: {existingSlot.RefreshCount}");
-                Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (UPDATED) ===");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Updated existing slot - new activation: {existingSlot.CurrentActivation:F3}, refresh count: {existingSlot.RefreshCount}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (UPDATED) ===");
                 return true;
             }
 
             // Check for similar chunks already in working memory (to avoid redundancy)
             bool isRedundant = await IsRedundantToWorkingMemoryAsync(chunk);
-            Console.WriteLine($"[WM-DEBUG] Redundancy check result: {isRedundant}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Redundancy check result: {isRedundant}");
 
             if (isRedundant)
             {
@@ -312,66 +313,66 @@ namespace Aislinn.Core.Memory
                 if (!forceEntry)
                 {
                     _primedChunks[chunk.ID] = chunk.ActivationLevel;
-                    Console.WriteLine($"[WM-DEBUG] Chunk is redundant, added to primed list instead");
-                    Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (REDUNDANT) ===");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk is redundant, added to primed list instead");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (REDUNDANT) ===");
                     return false;
                 }
                 else
                 {
-                    Console.WriteLine($"[WM-DEBUG] Chunk is redundant but force entry is enabled");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk is redundant but force entry is enabled");
                 }
             }
 
             // Check if working memory is at capacity
             int totalUsed = GetTotalSlotsUsed();
-            Console.WriteLine($"[WM-DEBUG] Current capacity usage: {totalUsed}/{_totalCapacity}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Current capacity usage: {totalUsed}/{_totalCapacity}");
 
             if (totalUsed >= _totalCapacity)
             {
-                Console.WriteLine($"[WM-DEBUG] Working memory at capacity!");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Working memory at capacity!");
 
                 if (!forceEntry)
                 {
                     // If not forced entry, don't add to working memory
                     _primedChunks[chunk.ID] = chunk.ActivationLevel;
-                    Console.WriteLine($"[WM-DEBUG] No force entry - added to primed list instead");
-                    Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (CAPACITY FULL) ===");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] No force entry - added to primed list instead");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (CAPACITY FULL) ===");
                     return false;
                 }
 
                 // Forced entry - need to remove something
-                Console.WriteLine($"[WM-DEBUG] Force entry enabled - finding chunk to evict");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Force entry enabled - finding chunk to evict");
                 var lowestSlot = FindLowestActivationSlot();
 
                 if (lowestSlot != null)
                 {
-                    Console.WriteLine($"[WM-DEBUG] Found lowest activation slot:");
-                    Console.WriteLine($"[WM-DEBUG]   - Chunk ID: {lowestSlot.ChunkId}");
-                    Console.WriteLine($"[WM-DEBUG]   - Activation: {lowestSlot.CurrentActivation:F3}");
-                    Console.WriteLine($"[WM-DEBUG]   - Subsystem: {lowestSlot.Subsystem}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found lowest activation slot:");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Chunk ID: {lowestSlot.ChunkId}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Activation: {lowestSlot.CurrentActivation:F3}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Subsystem: {lowestSlot.Subsystem}");
 
                     if (lowestSlot.CurrentActivation < chunk.ActivationLevel)
                     {
                         // Remove the lowest activation item
                         _workingMemorySlots[lowestSlot.Subsystem].Remove(lowestSlot);
-                        Console.WriteLine($"[WM-DEBUG] EVICTED chunk from {lowestSlot.Subsystem} subsystem");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] EVICTED chunk from {lowestSlot.Subsystem} subsystem");
 
                         // Move it to primed list
                         _primedChunks[lowestSlot.ChunkId] = lowestSlot.CurrentActivation;
-                        Console.WriteLine($"[WM-DEBUG] Evicted chunk moved to primed list");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] Evicted chunk moved to primed list");
                     }
                     else
                     {
                         // New chunk has lower activation than all existing ones
                         _primedChunks[chunk.ID] = chunk.ActivationLevel;
-                        Console.WriteLine($"[WM-DEBUG] New chunk has lower activation than all existing - added to primed list");
-                        Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (LOWER ACTIVATION) ===");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] New chunk has lower activation than all existing - added to primed list");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (LOWER ACTIVATION) ===");
                         return false;
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"[WM-DEBUG] ERROR: Could not find lowest activation slot despite capacity being full!");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] ERROR: Could not find lowest activation slot despite capacity being full!");
                 }
             }
 
@@ -388,25 +389,25 @@ namespace Aislinn.Core.Memory
             };
 
             _workingMemorySlots[subsystem].Add(newSlot);
-            Console.WriteLine($"[WM-DEBUG] ADDED chunk to working memory in {subsystem} subsystem");
-            Console.WriteLine($"[WM-DEBUG] New slot details:");
-            Console.WriteLine($"[WM-DEBUG]   - Activation: {newSlot.CurrentActivation:F3}");
-            Console.WriteLine($"[WM-DEBUG]   - Focus Value: {newSlot.FocusValue}");
-            Console.WriteLine($"[WM-DEBUG]   - Entry Time: {newSlot.EntryTime}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] ADDED chunk to working memory in {subsystem} subsystem");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] New slot details:");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Activation: {newSlot.CurrentActivation:F3}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Focus Value: {newSlot.FocusValue}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Entry Time: {newSlot.EntryTime}");
 
             // Remove from primed if it was there
             if (_primedChunks.Remove(chunk.ID))
             {
-                Console.WriteLine($"[WM-DEBUG] Removed chunk from primed list (was previously primed)");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Removed chunk from primed list (was previously primed)");
             }
 
             // Process new associations to update primed chunks
-            Console.WriteLine($"[WM-DEBUG] Processing associations to update primed chunks...");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Processing associations to update primed chunks...");
             await UpdatePrimedChunksAsync(chunk);
 
-            Console.WriteLine($"[WM-DEBUG] Final WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
-            Console.WriteLine($"[WM-DEBUG] Final primed count: {_primedChunks.Count}");
-            Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (ADDED) ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Final WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Final primed count: {_primedChunks.Count}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === UpdateWorkingMemoryAsync END (ADDED) ===");
             return true;
         }
 
@@ -415,14 +416,14 @@ namespace Aislinn.Core.Memory
         /// </summary>
         public async Task<List<Chunk>> GetWorkingMemoryContentsAsync()
         {
-            Console.WriteLine($"[WM-DEBUG] GetWorkingMemoryContentsAsync called");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] GetWorkingMemoryContentsAsync called");
 
             var results = new List<Chunk>();
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
 
             if (chunkCollection == null)
             {
-                Console.WriteLine($"[WM-DEBUG] ERROR: Could not get chunk collection '{_chunkCollectionId}'");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] ERROR: Could not get chunk collection '{_chunkCollectionId}'");
                 return results;
             }
 
@@ -431,7 +432,7 @@ namespace Aislinn.Core.Memory
                 .SelectMany(slots => slots)
                 .OrderByDescending(slot => slot.CurrentActivation);
 
-            Console.WriteLine($"[WM-DEBUG] Found {allSlots.Count()} slots in working memory");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found {allSlots.Count()} slots in working memory");
 
             int count = 0;
             foreach (var slot in allSlots)
@@ -440,15 +441,15 @@ namespace Aislinn.Core.Memory
                 if (chunk != null)
                 {
                     results.Add(chunk);
-                    Console.WriteLine($"[WM-DEBUG] #{++count}: {chunk.Name} (activation: {slot.CurrentActivation:F3}, subsystem: {slot.Subsystem})");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] #{++count}: {chunk.Name} (activation: {slot.CurrentActivation:F3}, subsystem: {slot.Subsystem})");
                 }
                 else
                 {
-                    Console.WriteLine($"[WM-DEBUG] WARNING: Could not retrieve chunk {slot.ChunkId} from store");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] WARNING: Could not retrieve chunk {slot.ChunkId} from store");
                 }
             }
 
-            Console.WriteLine($"[WM-DEBUG] Returning {results.Count} chunks from working memory");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Returning {results.Count} chunks from working memory");
             return results;
         }
 
@@ -457,14 +458,14 @@ namespace Aislinn.Core.Memory
         /// </summary>
         public async Task<List<Chunk>> GetPrimedChunksAsync()
         {
-            Console.WriteLine($"[WM-DEBUG] GetPrimedChunksAsync called - {_primedChunks.Count} primed chunks");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] GetPrimedChunksAsync called - {_primedChunks.Count} primed chunks");
 
             var results = new List<Chunk>();
             var chunkCollection = await _chunkStore.GetCollectionAsync(_chunkCollectionId);
 
             if (chunkCollection == null)
             {
-                Console.WriteLine($"[WM-DEBUG] ERROR: Could not get chunk collection '{_chunkCollectionId}'");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] ERROR: Could not get chunk collection '{_chunkCollectionId}'");
                 return results;
             }
 
@@ -475,11 +476,11 @@ namespace Aislinn.Core.Memory
                 if (chunk != null)
                 {
                     results.Add(chunk);
-                    Console.WriteLine($"[WM-DEBUG] Primed #{++count}: {chunk.Name} (activation: {pair.Value:F3})");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Primed #{++count}: {chunk.Name} (activation: {pair.Value:F3})");
                 }
                 else
                 {
-                    Console.WriteLine($"[WM-DEBUG] WARNING: Could not retrieve primed chunk {pair.Key} from store");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] WARNING: Could not retrieve primed chunk {pair.Key} from store");
                 }
             }
 
@@ -491,25 +492,25 @@ namespace Aislinn.Core.Memory
         /// </summary>
         public async Task RefreshCycleAsync(List<Guid> focusedChunkIds = null)
         {
-            Console.WriteLine($"[WM-DEBUG] === RefreshCycleAsync START ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === RefreshCycleAsync START ===");
 
             // Calculate time since last refresh
             var now = _cognitiveTimeManager.GetCognitiveSteps();
             var timeSinceLastRefresh = (now - _lastRefreshTime);
             _lastRefreshTime = now;
 
-            Console.WriteLine($"[WM-DEBUG] Time since last refresh: {timeSinceLastRefresh:F2} seconds");
-            Console.WriteLine($"[WM-DEBUG] Decay rate: {_refreshDecayRate}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Time since last refresh: {timeSinceLastRefresh:F2} seconds");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Decay rate: {_refreshDecayRate}");
 
             // Default empty list if null
             focusedChunkIds ??= new List<Guid>();
-            Console.WriteLine($"[WM-DEBUG] Focused chunks count: {focusedChunkIds.Count}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Focused chunks count: {focusedChunkIds.Count}");
 
             if (focusedChunkIds.Any())
             {
                 foreach (var focusedId in focusedChunkIds)
                 {
-                    Console.WriteLine($"[WM-DEBUG] Focused chunk: {focusedId}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Focused chunk: {focusedId}");
                 }
             }
 
@@ -522,7 +523,7 @@ namespace Aislinn.Core.Memory
                 var slots = _workingMemorySlots[subsystem];
                 var slotsToRemove = new List<WorkingMemorySlot>();
 
-                Console.WriteLine($"[WM-DEBUG] Processing {subsystem} subsystem ({slots.Count} slots)");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Processing {subsystem} subsystem ({slots.Count} slots)");
 
                 foreach (var slot in slots)
                 {
@@ -535,22 +536,22 @@ namespace Aislinn.Core.Memory
                     slot.FocusValue *= 0.9; // Gradual focus decay
                     slot.CurrentActivation *= (1 - (_refreshDecayRate * timeSinceLastRefresh));
 
-                    Console.WriteLine($"[WM-DEBUG]   Chunk {slot.ChunkId}:");
-                    Console.WriteLine($"[WM-DEBUG]     Activation: {oldActivation:F3} -> {slot.CurrentActivation:F3}");
-                    Console.WriteLine($"[WM-DEBUG]     Focus: {oldFocus:F3} -> {slot.FocusValue:F3}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Chunk {slot.ChunkId}:");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]     Activation: {oldActivation:F3} -> {slot.CurrentActivation:F3}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]     Focus: {oldFocus:F3} -> {slot.FocusValue:F3}");
 
                     // If activation falls below threshold, mark for removal
                     if (slot.CurrentActivation < _associativeThreshold)
                     {
                         slotsToRemove.Add(slot);
-                        Console.WriteLine($"[WM-DEBUG]     MARKED FOR COMPLETE REMOVAL (below associative threshold {_associativeThreshold})");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG]     MARKED FOR COMPLETE REMOVAL (below associative threshold {_associativeThreshold})");
                     }
                     else if (slot.CurrentActivation < _activationThreshold)
                     {
                         // Move to primed list if below WM threshold but above associative threshold
                         slotsToRemove.Add(slot);
                         _primedChunks[slot.ChunkId] = slot.CurrentActivation;
-                        Console.WriteLine($"[WM-DEBUG]     MARKED FOR PRIMING (below WM threshold {_activationThreshold})");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG]     MARKED FOR PRIMING (below WM threshold {_activationThreshold})");
                     }
 
                 }
@@ -560,12 +561,12 @@ namespace Aislinn.Core.Memory
                 {
                     slots.Remove(slotToRemove);
                     totalSlotsRemoved++;
-                    Console.WriteLine($"[WM-DEBUG] REMOVED chunk {slotToRemove.ChunkId} from {subsystem}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] REMOVED chunk {slotToRemove.ChunkId} from {subsystem}");
                 }
 
                 if (slotsToRemove.Count > 0)
                 {
-                    Console.WriteLine($"[WM-DEBUG] {subsystem} subsystem: removed {slotsToRemove.Count} slots, {slots.Count} remaining");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] {subsystem} subsystem: removed {slotsToRemove.Count} slots, {slots.Count} remaining");
                 }
             }
 
@@ -573,7 +574,7 @@ namespace Aislinn.Core.Memory
             var primedToRemove = new List<Guid>();
             int primedProcessed = 0;
 
-            Console.WriteLine($"[WM-DEBUG] Processing {_primedChunks.Count} primed chunks");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Processing {_primedChunks.Count} primed chunks");
 
             foreach (var chunkId in _primedChunks.Keys.ToList())
             {
@@ -581,12 +582,12 @@ namespace Aislinn.Core.Memory
                 double oldPrimedActivation = _primedChunks[chunkId];
                 _primedChunks[chunkId] *= (1 - (_refreshDecayRate * 1.5 * timeSinceLastRefresh)); // Primed decay faster
 
-                Console.WriteLine($"[WM-DEBUG] Primed chunk {chunkId}: {oldPrimedActivation:F3} -> {_primedChunks[chunkId]:F3}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Primed chunk {chunkId}: {oldPrimedActivation:F3} -> {_primedChunks[chunkId]:F3}");
 
                 if (_primedChunks[chunkId] < _associativeThreshold)
                 {
                     primedToRemove.Add(chunkId);
-                    Console.WriteLine($"[WM-DEBUG] Primed chunk {chunkId} marked for removal (below threshold)");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Primed chunk {chunkId} marked for removal (below threshold)");
                 }
             }
 
@@ -594,17 +595,17 @@ namespace Aislinn.Core.Memory
             foreach (var chunkId in primedToRemove)
             {
                 _primedChunks.Remove(chunkId);
-                Console.WriteLine($"[WM-DEBUG] REMOVED primed chunk {chunkId}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] REMOVED primed chunk {chunkId}");
             }
 
-            Console.WriteLine($"[WM-DEBUG] Refresh cycle summary:");
-            Console.WriteLine($"[WM-DEBUG]   - Processed {totalSlotsProcessed} WM slots");
-            Console.WriteLine($"[WM-DEBUG]   - Removed {totalSlotsRemoved} WM slots");
-            Console.WriteLine($"[WM-DEBUG]   - Processed {primedProcessed} primed chunks");
-            Console.WriteLine($"[WM-DEBUG]   - Removed {primedToRemove.Count} primed chunks");
-            Console.WriteLine($"[WM-DEBUG]   - Final WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
-            Console.WriteLine($"[WM-DEBUG]   - Final primed count: {_primedChunks.Count}");
-            Console.WriteLine($"[WM-DEBUG] === RefreshCycleAsync END ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Refresh cycle summary:");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Processed {totalSlotsProcessed} WM slots");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Removed {totalSlotsRemoved} WM slots");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Processed {primedProcessed} primed chunks");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Removed {primedToRemove.Count} primed chunks");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Final WM usage: {GetTotalSlotsUsed()}/{_totalCapacity}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Final primed count: {_primedChunks.Count}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === RefreshCycleAsync END ===");
         }
 
         /// <summary>
@@ -612,7 +613,7 @@ namespace Aislinn.Core.Memory
         /// </summary>
         public void ClearWorkingMemory()
         {
-            Console.WriteLine($"[WM-DEBUG] === ClearWorkingMemory START ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === ClearWorkingMemory START ===");
 
             int totalCleared = 0;
             foreach (var subsystem in _workingMemorySlots.Keys)
@@ -620,14 +621,14 @@ namespace Aislinn.Core.Memory
                 int subsystemCount = _workingMemorySlots[subsystem].Count;
                 _workingMemorySlots[subsystem].Clear();
                 totalCleared += subsystemCount;
-                Console.WriteLine($"[WM-DEBUG] Cleared {subsystemCount} chunks from {subsystem}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Cleared {subsystemCount} chunks from {subsystem}");
             }
 
             int primedCleared = _primedChunks.Count;
             _primedChunks.Clear();
 
-            Console.WriteLine($"[WM-DEBUG] Cleared {totalCleared} WM chunks and {primedCleared} primed chunks");
-            Console.WriteLine($"[WM-DEBUG] === ClearWorkingMemory END ===");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Cleared {totalCleared} WM chunks and {primedCleared} primed chunks");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] === ClearWorkingMemory END ===");
         }
 
         /// <summary>
@@ -635,22 +636,22 @@ namespace Aislinn.Core.Memory
         /// </summary>
         public bool RemoveFromWorkingMemory(Guid chunkId)
         {
-            Console.WriteLine($"[WM-DEBUG] RemoveFromWorkingMemory called for chunk: {chunkId}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] RemoveFromWorkingMemory called for chunk: {chunkId}");
 
             var slot = FindChunkInWorkingMemory(chunkId);
             if (slot != null)
             {
-                Console.WriteLine($"[WM-DEBUG] Found chunk in {slot.Subsystem} subsystem, activation: {slot.CurrentActivation:F3}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found chunk in {slot.Subsystem} subsystem, activation: {slot.CurrentActivation:F3}");
 
                 _workingMemorySlots[slot.Subsystem].Remove(slot);
                 _primedChunks[chunkId] = slot.CurrentActivation; // Move to primed
 
-                Console.WriteLine($"[WM-DEBUG] REMOVED chunk from WM and moved to primed list");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] REMOVED chunk from WM and moved to primed list");
                 return true;
             }
             else
             {
-                Console.WriteLine($"[WM-DEBUG] Chunk not found in working memory");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Chunk not found in working memory");
                 return false;
             }
         }
@@ -663,39 +664,39 @@ namespace Aislinn.Core.Memory
             // Simple heuristic based on chunk type
             if (string.IsNullOrEmpty(chunk.ChunkType))
             {
-                Console.WriteLine($"[WM-DEBUG] No chunk type specified, defaulting to Semantic");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] No chunk type specified, defaulting to Semantic");
                 return MemorySubsystem.Semantic;
             }
 
             string type = chunk.ChunkType.ToLowerInvariant();
-            Console.WriteLine($"[WM-DEBUG] Determining subsystem for chunk type: '{type}'");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Determining subsystem for chunk type: '{type}'");
 
             if (type.Contains("visual") || type.Contains("spatial") || type.Contains("image"))
             {
-                Console.WriteLine($"[WM-DEBUG] Assigned to VisualSpatial subsystem");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Assigned to VisualSpatial subsystem");
                 return MemorySubsystem.VisualSpatial;
             }
 
             if (type.Contains("sound") || type.Contains("audio") || type.Contains("phonological") || type.Contains("verbal"))
             {
-                Console.WriteLine($"[WM-DEBUG] Assigned to Phonological subsystem");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Assigned to Phonological subsystem");
                 return MemorySubsystem.Phonological;
             }
 
             if (type.Contains("episode") || type.Contains("event") || type.Contains("memory"))
             {
-                Console.WriteLine($"[WM-DEBUG] Assigned to Episodic subsystem");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Assigned to Episodic subsystem");
                 return MemorySubsystem.Episodic;
             }
 
             if (type.Contains("procedure") || type.Contains("action") || type.Contains("skill"))
             {
-                Console.WriteLine($"[WM-DEBUG] Assigned to Procedural subsystem");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Assigned to Procedural subsystem");
                 return MemorySubsystem.Procedural;
             }
 
             // Default to semantic for anything else
-            Console.WriteLine($"[WM-DEBUG] No specific match, assigned to Semantic subsystem");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] No specific match, assigned to Semantic subsystem");
             return MemorySubsystem.Semantic;
         }
 
@@ -704,18 +705,18 @@ namespace Aislinn.Core.Memory
         /// </summary>
         private async Task UpdatePrimedChunksAsync(Chunk chunk)
         {
-            Console.WriteLine($"[WM-DEBUG] UpdatePrimedChunksAsync for chunk: {chunk.Name}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] UpdatePrimedChunksAsync for chunk: {chunk.Name}");
 
             var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
             if (associationCollection == null)
             {
-                Console.WriteLine($"[WM-DEBUG] ERROR: Could not get association collection '{_associationCollectionId}'");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] ERROR: Could not get association collection '{_associationCollectionId}'");
                 return;
             }
 
             // Get all associations for this chunk
             var associations = await associationCollection.GetAssociationsForChunkAsync(chunk.ID);
-            Console.WriteLine($"[WM-DEBUG] Found {associations.Count()} associations");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found {associations.Count()} associations");
 
             int primedCount = 0;
             int skippedInWM = 0;
@@ -727,23 +728,23 @@ namespace Aislinn.Core.Memory
                 bool isSourceA = association.ChunkAId == chunk.ID;
                 Guid targetChunkId = isSourceA ? association.ChunkBId : association.ChunkAId;
 
-                Console.WriteLine($"[WM-DEBUG] Processing association to chunk: {targetChunkId}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Processing association to chunk: {targetChunkId}");
 
                 // Skip if already in working memory
                 if (FindChunkInWorkingMemory(targetChunkId) != null)
                 {
                     skippedInWM++;
-                    Console.WriteLine($"[WM-DEBUG]   Skipped - already in working memory");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Skipped - already in working memory");
                     continue;
                 }
 
                 // Get weight in the correct direction
                 double weight = isSourceA ? association.WeightAtoB : association.WeightBtoA;
-                Console.WriteLine($"[WM-DEBUG]   Association weight: {weight:F3} (direction: {(isSourceA ? "A->B" : "B->A")})");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Association weight: {weight:F3} (direction: {(isSourceA ? "A->B" : "B->A")})");
 
                 // Calculate priming activation
                 double primingActivation = chunk.ActivationLevel * weight * 0.5;
-                Console.WriteLine($"[WM-DEBUG]   Calculated priming activation: {primingActivation:F3} (source: {chunk.ActivationLevel:F3} * {weight:F3} * 0.5)");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Calculated priming activation: {primingActivation:F3} (source: {chunk.ActivationLevel:F3} * {weight:F3} * 0.5)");
 
                 // If high enough to be primed, add to primed list
                 if (primingActivation >= _associativeThreshold)
@@ -753,26 +754,26 @@ namespace Aislinn.Core.Memory
                         double oldPriming = _primedChunks[targetChunkId];
                         // Take the higher of existing or new priming
                         _primedChunks[targetChunkId] = Math.Max(_primedChunks[targetChunkId], primingActivation);
-                        Console.WriteLine($"[WM-DEBUG]   Updated existing primed chunk: {oldPriming:F3} -> {_primedChunks[targetChunkId]:F3}");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Updated existing primed chunk: {oldPriming:F3} -> {_primedChunks[targetChunkId]:F3}");
                     }
                     else
                     {
                         _primedChunks[targetChunkId] = primingActivation;
-                        Console.WriteLine($"[WM-DEBUG]   ADDED to primed list with activation: {primingActivation:F3}");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG]   ADDED to primed list with activation: {primingActivation:F3}");
                         primedCount++;
                     }
                 }
                 else
                 {
                     skippedLowActivation++;
-                    Console.WriteLine($"[WM-DEBUG]   Skipped - priming activation ({primingActivation:F3}) below threshold ({_associativeThreshold})");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG]   Skipped - priming activation ({primingActivation:F3}) below threshold ({_associativeThreshold})");
                 }
             }
 
-            Console.WriteLine($"[WM-DEBUG] Priming summary:");
-            Console.WriteLine($"[WM-DEBUG]   - New primed chunks: {primedCount}");
-            Console.WriteLine($"[WM-DEBUG]   - Skipped (in WM): {skippedInWM}");
-            Console.WriteLine($"[WM-DEBUG]   - Skipped (low activation): {skippedLowActivation}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Priming summary:");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - New primed chunks: {primedCount}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Skipped (in WM): {skippedInWM}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG]   - Skipped (low activation): {skippedLowActivation}");
         }
 
         /// <summary>
@@ -780,7 +781,7 @@ namespace Aislinn.Core.Memory
         /// </summary>
         private async Task<bool> IsRedundantToWorkingMemoryAsync(Chunk candidateChunk)
         {
-            Console.WriteLine($"[WM-DEBUG] Checking redundancy for chunk: {candidateChunk.Name}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checking redundancy for chunk: {candidateChunk.Name}");
 
             // Get current working memory contents
             var workingMemoryChunks = await GetWorkingMemoryContentsAsync();
@@ -788,18 +789,18 @@ namespace Aislinn.Core.Memory
             // If empty, nothing to be redundant with
             if (workingMemoryChunks.Count == 0)
             {
-                Console.WriteLine($"[WM-DEBUG] No chunks in working memory - not redundant");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] No chunks in working memory - not redundant");
                 return false;
             }
 
-            Console.WriteLine($"[WM-DEBUG] Checking against {workingMemoryChunks.Count} chunks in working memory");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checking against {workingMemoryChunks.Count} chunks in working memory");
 
             // Check for direct associations first
             var associationCollection = await _associationStore.GetCollectionAsync(_associationCollectionId);
             if (associationCollection != null)
             {
                 var associations = await associationCollection.GetAssociationsForChunkAsync(candidateChunk.ID);
-                Console.WriteLine($"[WM-DEBUG] Found {associations.Count()} associations to check");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found {associations.Count()} associations to check");
 
                 // Check each association against working memory
                 foreach (var association in associations)
@@ -811,25 +812,25 @@ namespace Aislinn.Core.Memory
                     // Get strength
                     double strength = isSourceA ? association.WeightAtoB : association.WeightBtoA;
 
-                    Console.WriteLine($"[WM-DEBUG] Checking association with {otherChunkId}, strength: {strength:F3}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checking association with {otherChunkId}, strength: {strength:F3}");
 
                     // If strongly associated with something in working memory, it's redundant
                     if (strength > _interferenceThreshold && FindChunkInWorkingMemory(otherChunkId) != null)
                     {
-                        Console.WriteLine($"[WM-DEBUG] REDUNDANT - strong association ({strength:F3} > {_interferenceThreshold}) with chunk in WM");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] REDUNDANT - strong association ({strength:F3} > {_interferenceThreshold}) with chunk in WM");
                         return true;
                     }
                 }
             }
             else
             {
-                Console.WriteLine($"[WM-DEBUG] WARNING: Could not get association collection for redundancy check");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] WARNING: Could not get association collection for redundancy check");
             }
 
             // If we have vector representations, check similarities
             if (candidateChunk.Vector != null && candidateChunk.Vector.Length > 0)
             {
-                Console.WriteLine($"[WM-DEBUG] Checking vector similarity (candidate has {candidateChunk.Vector.Length} dimensions)");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checking vector similarity (candidate has {candidateChunk.Vector.Length} dimensions)");
 
                 int vectorChecked = 0;
                 foreach (var wmChunk in workingMemoryChunks)
@@ -838,24 +839,24 @@ namespace Aislinn.Core.Memory
                     {
                         vectorChecked++;
                         double similarity = CalculateCosineSimilarity(candidateChunk.Vector, wmChunk.Vector);
-                        Console.WriteLine($"[WM-DEBUG] Vector similarity with {wmChunk.Name}: {similarity:F3}");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] Vector similarity with {wmChunk.Name}: {similarity:F3}");
 
                         if (similarity > _similarityThreshold)
                         {
-                            Console.WriteLine($"[WM-DEBUG] REDUNDANT - high vector similarity ({similarity:F3} > {_similarityThreshold})");
+                            if (debugLogging) Console.WriteLine($"[WM-DEBUG] REDUNDANT - high vector similarity ({similarity:F3} > {_similarityThreshold})");
                             return true;
                         }
                     }
                 }
 
-                Console.WriteLine($"[WM-DEBUG] Checked vectors for {vectorChecked} chunks, no high similarity found");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checked vectors for {vectorChecked} chunks, no high similarity found");
             }
             else
             {
-                Console.WriteLine($"[WM-DEBUG] No vector data available for similarity check");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] No vector data available for similarity check");
             }
 
-            Console.WriteLine($"[WM-DEBUG] Not redundant to working memory");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Not redundant to working memory");
             return false;
         }
 
@@ -869,7 +870,7 @@ namespace Aislinn.Core.Memory
                 var slot = _workingMemorySlots[subsystem].FirstOrDefault(s => s.ChunkId == chunkId);
                 if (slot != null)
                 {
-                    Console.WriteLine($"[WM-DEBUG] Found chunk {chunkId} in {subsystem} subsystem");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Found chunk {chunkId} in {subsystem} subsystem");
                     return slot;
                 }
             }
@@ -881,7 +882,7 @@ namespace Aislinn.Core.Memory
         /// </summary>
         private WorkingMemorySlot FindLowestActivationSlot()
         {
-            Console.WriteLine($"[WM-DEBUG] Finding lowest activation slot across all subsystems");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Finding lowest activation slot across all subsystems");
 
             WorkingMemorySlot lowestSlot = null;
             double lowestActivation = double.MaxValue;
@@ -890,24 +891,24 @@ namespace Aislinn.Core.Memory
             {
                 foreach (var slot in _workingMemorySlots[subsystem])
                 {
-                    Console.WriteLine($"[WM-DEBUG] Checking {subsystem} slot {slot.ChunkId}: activation {slot.CurrentActivation:F3}");
+                    if (debugLogging) Console.WriteLine($"[WM-DEBUG] Checking {subsystem} slot {slot.ChunkId}: activation {slot.CurrentActivation:F3}");
 
                     if (slot.CurrentActivation < lowestActivation)
                     {
                         lowestActivation = slot.CurrentActivation;
                         lowestSlot = slot;
-                        Console.WriteLine($"[WM-DEBUG] New lowest found: {slot.CurrentActivation:F3}");
+                        if (debugLogging) Console.WriteLine($"[WM-DEBUG] New lowest found: {slot.CurrentActivation:F3}");
                     }
                 }
             }
 
             if (lowestSlot != null)
             {
-                Console.WriteLine($"[WM-DEBUG] Lowest activation slot: {lowestSlot.ChunkId} with {lowestActivation:F3}");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] Lowest activation slot: {lowestSlot.ChunkId} with {lowestActivation:F3}");
             }
             else
             {
-                Console.WriteLine($"[WM-DEBUG] No slots found!");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG] No slots found!");
             }
 
             return lowestSlot;
@@ -964,10 +965,10 @@ namespace Aislinn.Core.Memory
                 kvp => kvp.Value.Count
             );
 
-            Console.WriteLine($"[WM-DEBUG] Working memory usage by subsystem:");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Working memory usage by subsystem:");
             foreach (var kvp in usage)
             {
-                Console.WriteLine($"[WM-DEBUG]   {kvp.Key}: {kvp.Value} slots");
+                if (debugLogging) Console.WriteLine($"[WM-DEBUG]   {kvp.Key}: {kvp.Value} slots");
             }
 
             return usage;
@@ -979,7 +980,7 @@ namespace Aislinn.Core.Memory
         public int GetPrimedChunksCount()
         {
             int count = _primedChunks.Count;
-            Console.WriteLine($"[WM-DEBUG] Current primed chunks count: {count}");
+            if (debugLogging) Console.WriteLine($"[WM-DEBUG] Current primed chunks count: {count}");
             return count;
         }
 

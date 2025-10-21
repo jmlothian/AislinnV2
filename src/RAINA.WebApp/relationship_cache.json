@@ -1,6 +1,25 @@
 {
   "RelationshipMappings": {
-    "ShowingUpIn": "DisplayedIn"
+    "Likes": "HasPreference",
+    "Know": "UnderstoodBy",
+    "CalledBy": "TriggeredBy",
+    "Showing": "DisplayedBy",
+    "SetAs": "ConfiguredAs",
+    "ConsidersImportant": "HasImportanceTo",
+    "ConsidersSpecial": "HasSignificanceTo",
+    "Loves": "HasAffectionFor",
+    "Dislikes": "OppositeOf",
+    "ConsidersCool": "EvaluatedAs",
+    "HasEmotion": "ExpressedAs",
+    "NotAttached": "DetachedFrom",
+    "Change": "TransformsTo",
+    "Love": "AboutTopic",
+    "TellingAbout": "CommunicatedBy",
+    "Storing": "StoredIn",
+    "DirectedTowards": "AimedAt",
+    "To": "CommunicatedBy",
+    "DirectedTo": "CommunicatedBy",
+    "DescribedAs": "CharacterizedBy"
   },
   "ApprovedNovelRelations": []
 }

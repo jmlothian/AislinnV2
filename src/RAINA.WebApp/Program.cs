@@ -43,8 +43,8 @@ namespace RAINA.Web
             }
             builder.Logging.AddSignalRLogger(options =>
             {
-                options.MinimumLevel = LogLevel.Information;
-                options.AllowedCategories = new List<string> { "RAINA.*", "Aislinn.*" };
+                options.MinimumLevel = LogLevel.Debug;
+                //options.AllowedCategories = new List<string> { "RAINA.*", "Aislinn.*" };
                 options.ExcludeCategories = new List<string> { "Microsoft.*", "System.*", "AspNetCore.*" };
                 options.HubMethodName = "ReceiveLogMessage";
             });
@@ -59,9 +59,50 @@ namespace RAINA.Web
             //     });
             // });
             // Add services to the container
-            await ConfigureServicesAsync(builder.Services);
+            var bootstrapper = new RainaBootstrapper(builder.Services);
+
+            await ConfigureServicesAsync(builder.Services, bootstrapper);
 
             var app = builder.Build();
+            try
+            {
+                var testConfig = app.Services.GetRequiredService<RainaConfiguration>();
+                Console.WriteLine($"Config resolved from app.Services - OpenAI Key: {(!string.IsNullOrEmpty(testConfig.OpenAIApiKey) ? "SET" : "NULL/EMPTY")}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to resolve RainaConfiguration from app.Services: {ex.Message}");
+            }
+            var rainaServiceProvider = app.Services;
+
+            Console.WriteLine("Initializing RAINA services...");
+            bootstrapper.Build(rainaServiceProvider);
+            // Get services
+            var rainaServices = rainaServiceProvider.GetRequiredService<RainaServices>();
+            Console.WriteLine("... RAINA Core Services Loaded");
+            // Initialize conversation manager
+            rainaServices.ConversationManager.Init();
+            Console.WriteLine("... Conversation Manager Initialized");
+            // Subscribe to events
+            //var webEventSubscriber = rainaServiceProvider.GetRequiredService<WebEventSubscriber>();
+            //webEventSubscriber.Subscribe();
+
+            Console.WriteLine("RAINA Web API initialized successfully");
+
+            var defaultContext = new UserContext
+            {
+                UserName = "Web User",
+                UserId = "web_default",
+                CurrentTopic = "general"
+            };
+            var workingMemoryController = rainaServiceProvider.GetRequiredService<WorkingMemoryController>();
+            var chunkManager = rainaServiceProvider.GetRequiredService<ChunkManager>();
+            var chunkQueryService = rainaServiceProvider.GetRequiredService<ChunkQueryService>();
+            rainaServices.EntityExtractionService.LoadCacheAsync("relationship_cache.json").Wait();
+            // Load user context like console app does
+            await LoadUserContextAsync(defaultContext, workingMemoryController, chunkManager, chunkQueryService);
+            await rainaServices.ConversationManager.InitializeConversationAsync(defaultContext);
+            // Register RAINA services in the main DI container
 
             // Configure the HTTP request pipeline
             ConfigurePipeline(app);
@@ -71,7 +112,7 @@ namespace RAINA.Web
             await app.RunAsync();
         }
 
-        private static async Task ConfigureServicesAsync(IServiceCollection services)
+        private static async Task ConfigureServicesAsync(IServiceCollection services, RainaBootstrapper rainaBootstrapper)
         {
             // Add CORS for frontend
             services.AddCors(options =>
@@ -121,11 +162,12 @@ namespace RAINA.Web
 
             // Add web-specific services
             services.AddSingleton<UserContextManager>();
-            var bootstrapper = new RainaBootstrapper(services);
+
 
             // Load configuration
             string openAIApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             string voyageAPIKey = Environment.GetEnvironmentVariable("VOYAGE_API_KEY");
+            string anthropicKey = Environment.GetEnvironmentVariable("ANTHROPIC_RAINA");
 
             if (string.IsNullOrEmpty(openAIApiKey) || string.IsNullOrEmpty(voyageAPIKey))
             {
@@ -135,46 +177,22 @@ namespace RAINA.Web
             config.ChunkCollectionId = "raina_main";
             config.AssociationCollectionId = "raina_associations";
             config.OpenAIApiKey = openAIApiKey;
+            config.AnthropicKey = anthropicKey;
+            Console.WriteLine($"Setting OpenAI API Key: {(!string.IsNullOrEmpty(openAIApiKey) ? "SET" : "NULL/EMPTY")}");
+
             var voyageConfig = new VoyageConfiguration();
             voyageConfig.VoyageApiKey = voyageAPIKey;
             // Build RAINA services
-            var rainaServiceProvider = bootstrapper
+            var rainaServiceProvider = rainaBootstrapper
                 .ConfigureWithSettings(config, voyageConfig)
                 .ConfigureChunkMemorySystem()
                 .ConfigureCore()
 
                 .RegisterStandardModules()
                 .ConfigureIntegrations()
-                .Build();
+                ;//.Build();
 
-            Console.WriteLine("Initializing RAINA services...");
 
-            // Get services
-            var rainaServices = rainaServiceProvider.GetRequiredService<RainaServices>();
-            Console.WriteLine("... RAINA Core Services Loaded");
-            // Initialize conversation manager
-            rainaServices.ConversationManager.Init();
-            Console.WriteLine("... Conversation Manager Initialized");
-            // Subscribe to events
-            //var webEventSubscriber = rainaServiceProvider.GetRequiredService<WebEventSubscriber>();
-            //webEventSubscriber.Subscribe();
-
-            Console.WriteLine("RAINA Web API initialized successfully");
-
-            var defaultContext = new UserContext
-            {
-                UserName = "Web User",
-                UserId = "web_default",
-                CurrentTopic = "general"
-            };
-            var workingMemoryController = rainaServiceProvider.GetRequiredService<WorkingMemoryController>();
-            var chunkManager = rainaServiceProvider.GetRequiredService<ChunkManager>();
-            var chunkQueryService = rainaServiceProvider.GetRequiredService<ChunkQueryService>();
-            rainaServices.EntityExtractionService.LoadCacheAsync("relationship_cache.json").Wait();
-            // Load user context like console app does
-            await LoadUserContextAsync(defaultContext, workingMemoryController, chunkManager, chunkQueryService);
-            await rainaServices.ConversationManager.InitializeConversationAsync(defaultContext);
-            // Register RAINA services in the main DI container
 
         }
 

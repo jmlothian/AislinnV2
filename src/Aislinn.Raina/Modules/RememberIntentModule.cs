@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Aislinn.Core;
 using Aislinn.Core.Models;
-using RAINA.Modules;
+using RAINA.Models.Mcp;
 using RAINA.Services;
 
 namespace RAINA.Modules.Implementations
@@ -48,32 +49,36 @@ namespace RAINA.Modules.Implementations
         [JsonPropertyName("inferences")]
         public string[] Inferences { get; set; } = new string[0];
     }
+
     /// <summary>
-    /// module for handling information retrieval queries
+    /// Module for handling memory storage - storing personal information, facts, and experiences
     /// </summary>
     public class RememberIntentModule : IIntentModule
     {
         private readonly QueryEngine _queryEngine;
-        private readonly ConversationManager _conversationManager;
         private readonly PromptLibrary _promptLibrary;
-        private LLMApiService _llmApiService;
-        PromptLibrary promptLibrary = new PromptLibrary();
+        private readonly LLMApiService _llmApiService;
         private readonly AislinnCoreServices _coreServices;
         private readonly MemoryChunkConverter _memoryChunkConverter;
-        public RememberIntentModule(QueryEngine queryEngine, ConversationManager conversationManager, LLMApiService lLMApiService, AislinnCoreServices coreServices, MemoryChunkConverter memoryChunkConverter)
+
+        public RememberIntentModule(
+            QueryEngine queryEngine,
+            LLMApiService llmApiService,
+            AislinnCoreServices coreServices,
+            MemoryChunkConverter memoryChunkConverter)
         {
             _queryEngine = queryEngine ?? throw new ArgumentNullException(nameof(queryEngine));
-            _conversationManager = conversationManager ?? throw new ArgumentNullException(nameof(conversationManager));
-            _promptLibrary = new PromptLibrary();
-            _llmApiService = lLMApiService ?? throw new ArgumentNullException(nameof(lLMApiService));
+            _llmApiService = llmApiService ?? throw new ArgumentNullException(nameof(llmApiService));
             _coreServices = coreServices ?? throw new ArgumentNullException(nameof(coreServices));
             _memoryChunkConverter = memoryChunkConverter ?? throw new ArgumentNullException(nameof(memoryChunkConverter));
+            _promptLibrary = new PromptLibrary();
         }
 
-        public string GetIntentType()
-        {
-            return "Remember";
-        }
+        public string GetServerName() => "Remember";
+
+        public bool IsInProcess => true;
+
+        public McpServerConnection GetServerConnection() => null; // In-process, no external connection
 
         public string GetPromptDescription()
         {
@@ -92,57 +97,112 @@ namespace RAINA.Modules.Implementations
             };
         }
 
-        public string[] GetExpectedEntities()
+        public string GetToolsPromptSection()
         {
-            return new[]
+            var sb = new StringBuilder();
+            sb.AppendLine("Tools:");
+            sb.AppendLine("  - store_memory: Store important personal information, facts, or experiences in memory for future reference");
+            sb.AppendLine("    Parameters: content (string), importance (string)");
+            sb.AppendLine("Expected Entities: people, places, activities, objects, events, relationships, dates, times, likes, dislikes, loves, hates, constraints");
+            sb.AppendLine("Expected Parameters: context, specificity, importance");
+            return sb.ToString();
+        }
+
+        public Dictionary<string, string> ExtractArgumentsFromContext(UserContext context, Intent intent)
+        {
+            var args = new Dictionary<string, string>();
+
+            // Add user information for memory context
+            if (!string.IsNullOrEmpty(context.UserName))
             {
-                "people",
-                "places",
-                "activities",
-                "objects",
-                "events",
-                "relationships",
-                "constraints",
-                "dates",
-                "times",
-                "likes",
-                "dislikes",
-                "loves",
-                "hates"
+                args["userName"] = context.UserName;
+            }
+
+            // Add current timestamp
+            args["dateTime"] = DateTime.Now.ToString("F");
+
+            // Add agent name
+            args["agentName"] = "Raina";
+
+            return args;
+        }
+
+        public async Task<IList<McpTool>> ListToolsAsync()
+        {
+            return new List<McpTool>
+            {
+                new McpTool
+                {
+                    Name = "store_memory",
+                    Description = "Store important personal information, facts, or experiences in memory for future reference",
+                    InputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            content = new { type = "string", description = "The content to remember" },
+                            importance = new { type = "string", description = "Importance level (optional)" }
+                        },
+                        required = new[] { "content" }
+                    }
+                }
             };
         }
 
-        public string[] GetExpectedParameters()
+        public async Task<McpToolResult> CallToolAsync(string toolName, Dictionary<string, string> arguments)
         {
-            return new[]
+            try
             {
-                "context",
-                "specificity",
-                "importance"
-            };
+                switch (toolName)
+                {
+                    case "store_memory":
+                        return await HandleStoreMemoryAsync(arguments);
+
+                    default:
+                        return new McpToolResult
+                        {
+                            ToolName = toolName,
+                            Content = $"Unknown tool: {toolName}",
+                            IsError = true
+                        };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new McpToolResult
+                {
+                    ToolName = toolName,
+                    Content = $"Error executing {toolName}: {ex.Message}",
+                    IsError = true
+                };
+            }
         }
 
-        public async Task<Response> HandleAsync(string userInput, Intent intent, UserContext context)
+        private async Task<McpToolResult> HandleStoreMemoryAsync(Dictionary<string, string> arguments)
         {
-            //todo - scan memories for entity names - we need to know how important they are to determine
-            // what to store about them.
+            var userInput = arguments.GetValueOrDefault("content", "");
+            var userName = arguments.GetValueOrDefault("userName", "User");
+            var dateTime = arguments.GetValueOrDefault("dateTime", DateTime.Now.ToString("F"));
+            var agentName = arguments.GetValueOrDefault("agentName", "Raina");
 
-            //todo - use the previously extracted entities - possibly seed prompt and say "heres what we know so far, any others?"
-
-            //Run memory extraction prompt
-            var details = new Dictionary<string, object>()
+            // Run memory extraction prompt
+            var details = new Dictionary<string, object>
             {
-                ["dateTime"] = DateTime.Now.ToString("F"),
-                ["agentName"] = "Raina",
-                ["userName"] = context.UserName,
+                ["dateTime"] = dateTime,
+                ["agentName"] = agentName,
+                ["userName"] = userName,
                 ["userInput"] = userInput
             };
-            var systemprompt = _promptLibrary.HydratePrompt("memory.extract", details);
-            var userprompt = _promptLibrary.HydratePrompt("memory.extract.userprompt", details);
-            var extrated = await _llmApiService.CallLLM(systemprompt, userprompt, "Raina", true);
-            var data = JsonSerializer.Deserialize<MemoryExtractionResponse>(extrated);
-            //store memories
-            (List<Chunk> chunks, List<ChunkAssociation> associations) = await _memoryChunkConverter.ConvertMemoryExtractionToChunks(data);
+
+            var systemPrompt = _promptLibrary.HydratePrompt("memory.extract", details);
+            var userPrompt = _promptLibrary.HydratePrompt("memory.extract.userprompt", details);
+
+            var extracted = await _llmApiService.CallLLM(systemPrompt, userPrompt, "Raina", true);
+            var data = JsonSerializer.Deserialize<MemoryExtractionResponse>(extracted);
+
+            // Convert to chunks and associations
+            var (chunks, associations) = await _memoryChunkConverter.ConvertMemoryExtractionToChunks(data);
+
             // Add chunks to memory
             foreach (var chunk in chunks)
             {
@@ -165,7 +225,6 @@ namespace RAINA.Modules.Implementations
                 );
             }
 
-
             // Activate the newly stored chunks
             foreach (var chunk in chunks)
             {
@@ -173,26 +232,33 @@ namespace RAINA.Modules.Implementations
                     chunk.ID,
                     null,
                     "memory.intent",
-                    "RememberIntentModule.HandleAsync",
+                    "RememberIntentModule.HandleStoreMemoryAsync",
                     null,
                     0.005
                 );
             }
-            context.CurrentIntentActivityMessage = "The requested or important memories were stored.";
-            // Generate response using conversation manager
 
-            //return await _conversationManager.GenerateQueryResponseAsync(userInput, intent, queryResults, context);
-            return await _conversationManager.GenerateResponseAsync(userInput, intent, context);
+            return new McpToolResult
+            {
+                ToolName = "store_memory",
+                Content = "The requested or important memories were stored.",
+                IsError = false
+            };
         }
 
-        private List<string> ExtractKeywords(Intent intent)
+        public Task<IList<McpResource>> ListResourcesAsync()
         {
-            var keywords = new List<string>();
-            foreach (var entity in intent.Entities)
-            {
-                keywords.Add(entity.Name);
-            }
-            return keywords;
+            return Task.FromResult<IList<McpResource>>(new List<McpResource>());
+        }
+
+        public Task<IList<McpPrompt>> ListPromptsAsync()
+        {
+            return Task.FromResult<IList<McpPrompt>>(new List<McpPrompt>());
+        }
+
+        public Task<McpResourceContent> ReadResourceAsync(string uri)
+        {
+            throw new NotImplementedException("Remember module does not expose resources");
         }
     }
 }

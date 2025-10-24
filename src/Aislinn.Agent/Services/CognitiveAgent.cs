@@ -202,13 +202,14 @@ namespace Aislinn.Core.Agent
                     var storedChunk = await chunkCollection.AddChunkAsync(inputChunk);
 
                     // Activate the chunk to bring it into working memory
-                    await _memorySystem.ActivateChunkAsync(storedChunk.ID, "UserInput", 1.0);
+                    await _memorySystem.ActivateChunkAsync(storedChunk.ID, "UserInput", "Aislinn.Agent.ProcessInput.Async", null, 1.0);
 
                     // Update context with the new input
                     _contextContainer.UpdateContextFactor(
                         ContextCategory.Environment,
                         "LatestInput",
                         input,
+                        Guid.Empty,
                         importance: 0.8,
                         confidence: 1.0);
 
@@ -237,7 +238,7 @@ namespace Aislinn.Core.Agent
         public void UpdateContext(ContextCategory category, string factorName, object value,
             double importance = 0.5, double confidence = 1.0)
         {
-            _contextContainer.UpdateContextFactor(category, factorName, value, importance, confidence);
+            _contextContainer.UpdateContextFactor(category, factorName, value, Guid.Empty, importance, confidence);
         }
 
         /// <summary>

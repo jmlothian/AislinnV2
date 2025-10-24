@@ -1159,4 +1159,5 @@ public class Response
     public string Message { get; set; }
     public Chunk UtteranceChunk { get; set; }
     public List<Chunk> RelevantChunks { get; set; }
+    public bool Success { get; set; } = true;
 }

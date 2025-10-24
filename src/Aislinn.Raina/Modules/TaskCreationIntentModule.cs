@@ -1,27 +1,37 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
-using RAINA.Modules;
+using RAINA.Models.Mcp;
 using RAINA.Services;
 
 namespace RAINA.Modules.Implementations
 {
     /// <summary>
-    /// module for handling task creation and tracking
+    /// Module for handling task creation and tracking via external MCP server
     /// </summary>
     public class TaskManagementIntentModule : IIntentModule
     {
         private readonly TaskManager _taskManager;
-        private readonly ConversationManager _conversationManager;
 
-        public TaskManagementIntentModule(TaskManager taskManager, ConversationManager conversationManager)
+        public TaskManagementIntentModule(TaskManager taskManager)
         {
             _taskManager = taskManager ?? throw new ArgumentNullException(nameof(taskManager));
-            _conversationManager = conversationManager ?? throw new ArgumentNullException(nameof(conversationManager));
         }
 
-        public string GetIntentType()
+        public string GetServerName() => "TaskManagement";
+
+        public bool IsInProcess => false;
+
+        public McpServerConnection GetServerConnection()
         {
-            return "TaskManagement";
+            return new McpServerConnection
+            {
+                ServerName = "task",
+                IsInProcess = false,
+                Command = "dotnet",
+                Arguments = new[] { "run", "--project", "../RAINA.MCP/RAINA.MCP.Task" }
+            };
         }
 
         public string GetPromptDescription()
@@ -40,40 +50,109 @@ namespace RAINA.Modules.Implementations
             };
         }
 
-        public string[] GetExpectedEntities()
+        public string GetToolsPromptSection()
         {
-            return new[]
+            var sb = new StringBuilder();
+            sb.AppendLine("Tools:");
+            sb.AppendLine("  - add: Create a new task");
+            sb.AppendLine("    Parameters: title (string), description (string), dueDate (string), priority (string)");
+            sb.AppendLine("  - delete: Remove an existing task");
+            sb.AppendLine("    Parameters: taskId (string)");
+            sb.AppendLine("  - set_done: Mark a task as completed");
+            sb.AppendLine("    Parameters: taskId (string)");
+            sb.AppendLine("  - set_in_progress: Mark a task as currently being worked on");
+            sb.AppendLine("    Parameters: taskId (string)");
+            sb.AppendLine("  - set_backlog: Move a task to the backlog");
+            sb.AppendLine("    Parameters: taskId (string)");
+            sb.AppendLine("  - update_title: Change the title of a task");
+            sb.AppendLine("    Parameters: taskId (string), title (string)");
+            sb.AppendLine("  - update_description: Change the description of a task");
+            sb.AppendLine("    Parameters: taskId (string), description (string)");
+            sb.AppendLine("  - get_tasks: Retrieve a list of tasks");
+            sb.AppendLine("    Parameters: status (string), limit (string)");
+            sb.AppendLine("  - get_task_details: Retrieve detailed information about a specific task");
+            sb.AppendLine("    Parameters: taskId (string)");
+            sb.AppendLine("Expected Entities: task, deadline, person, project");
+            sb.AppendLine("Expected Parameters: priority, recurring, category");
+            return sb.ToString();
+        }
+
+        public Dictionary<string, string> ExtractArgumentsFromContext(UserContext context, Intent intent)
+        {
+            var args = new Dictionary<string, string>();
+
+            // Add user information for task ownership
+            if (!string.IsNullOrEmpty(context.UserId))
             {
-                "task",
-                "deadline",
-                "person",
-                "project"
-            };
-        }
+                args["userId"] = context.UserId;
+            }
 
-        public string[] GetExpectedParameters()
-        {
-            return new[]
+            if (!string.IsNullOrEmpty(context.UserName))
             {
-                "priority",
-                "recurring",
-                "category"
-            };
+                args["userName"] = context.UserName;
+            }
+
+            // Add current timestamp for task creation
+            args["timestamp"] = DateTime.Now.ToString("o"); // ISO 8601 format
+
+            // Extract task details from entities if available
+            var titleEntity = intent.Entities.Find(e => e.Type == "task");
+            if (titleEntity != null)
+            {
+                args["title"] = titleEntity.Name;
+            }
+
+            // // Extract due date if available
+            // var dateEntity = intent.Entities.Find(e => e.EntityType == "deadline");
+            // if (dateEntity != null)
+            // {
+            //     // Parse date - would need proper implementation
+            //     args["dueDate"] = DateTime.Now.AddDays(1).ToString("o"); // Placeholder
+            // }
+
+            // // Extract priority if available
+            // if (intent.Parameters.TryGetValue("priority", out var priority))
+            // {
+            //     args["priority"] = priority;
+            // }
+
+            return args;
         }
 
-        public async Task<Response> HandleAsync(string userInput, Intent intent, UserContext context)
+        public async Task<IList<McpTool>> ListToolsAsync()
         {
-            // Extract task details from intent entities and parameters
-            var task = ExtractTaskFromIntent(intent);
-
-            // Add task to the system
-            var result = await _taskManager.CreateTaskAsync(task, context);
-
-            // Generate confirmation response
-            // should also include info about the result...
-            return await _conversationManager.GenerateResponseAsync(userInput, intent, context);
+            // Since this is an external MCP server, the actual tools will be provided by the server
+            // This method would be called by McpServerManager which queries the external server
+            // For now, return empty list - the external server will provide the real tools
+            return new List<McpTool>();
         }
 
+        public async Task<McpToolResult> CallToolAsync(string toolName, Dictionary<string, string> arguments)
+        {
+            // This should not be called directly for external modules
+            // McpServerManager will call the external server instead
+            throw new InvalidOperationException(
+                "CallToolAsync should not be called directly on external modules. Use McpServerManager instead.");
+        }
+
+        public Task<IList<McpResource>> ListResourcesAsync()
+        {
+            // Resources will be provided by the external MCP server
+            return Task.FromResult<IList<McpResource>>(new List<McpResource>());
+        }
+
+        public Task<IList<McpPrompt>> ListPromptsAsync()
+        {
+            // Prompts will be provided by the external MCP server
+            return Task.FromResult<IList<McpPrompt>>(new List<McpPrompt>());
+        }
+
+        public Task<McpResourceContent> ReadResourceAsync(string uri)
+        {
+            throw new NotImplementedException("External MCP server handles resource reading");
+        }
+
+        // Keep these helper methods for future use if needed
         private RainaTask ExtractTaskFromIntent(Intent intent)
         {
             // Extract task details
@@ -101,11 +180,9 @@ namespace RAINA.Modules.Implementations
             //     task.Priority = priority;
             // }
 
-
             //get task type - addTask, deleteTask, setTaskToDone, setTaskToInProgress, setTaskToBacklog, updateTaskTitle, updateTaskDescription
 
             //get task details - title, description, dueDate, trelloLabels, priority
-
 
             return task;
         }

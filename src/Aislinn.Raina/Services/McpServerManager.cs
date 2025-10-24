@@ -156,11 +156,11 @@ namespace RAINA.Services
             {
                 Name = p.Name,
                 Description = p.Description,
-                Arguments = p.Arguments?.Select(a => new McpPromptArgument
+                Arguments = p.ProtocolPrompt.Arguments?.Select(a => new McpPromptArgument
                 {
                     Name = a.Name,
                     Description = a.Description,
-                    Required = a.Required
+                    Required = a.Required != null ? (bool)a.Required : false,
                 }).ToList() ?? new List<McpPromptArgument>()
             }).ToList();
         }

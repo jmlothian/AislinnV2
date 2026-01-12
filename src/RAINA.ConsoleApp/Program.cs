@@ -810,7 +810,7 @@ namespace RAINA.ConsoleApp
 
             try
             {
-                var chunk = await _coreServices.MemorySystem.ActivateChunkAsync(chunkId, "manual_console", 0.1);
+                var chunk = await _coreServices.MemorySystem.ActivateChunkAsync(chunkId, "manual_console", "Raina.ConsoleApp.ActivateChunkAsync", null, 0.1);
                 if (chunk != null)
                 {
                     Console.WriteLine($"Successfully activated: {chunk.Name}");

@@ -25,3 +25,8 @@ src/RAINA.WebApp/user_sessions.json
 src/RAINA.WebApp/Raina.json
 src/RAINA.WebApp/associations.db
 src/RAINA.WebApp/chunks.db
+src/RAINA.WebApp/basic_knowledge/backup/Raina.json
+src/RAINA.WebApp/chunks.db
+src/RAINA.WebApp/chunks.db
+src/RAINA.WebApp/data/working_memory.json
+src/Aislinn.Raina/ToDo.txt

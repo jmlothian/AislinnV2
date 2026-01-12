@@ -19,6 +19,7 @@ namespace RAINA.Web.Controllers
             _validPassword = Environment.GetEnvironmentVariable("RAINA_PASSWORD")
                 ?? configuration["Authentication:Password"]
                 ?? "raina123";
+            Console.WriteLine("Password: " + _validPassword);
         }
 
         /// <summary>

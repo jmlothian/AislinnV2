@@ -25,6 +25,7 @@ namespace RAINA
 
         private readonly Dictionary<string, IIntentModule> _modules = new Dictionary<string, IIntentModule>();
 
+        private readonly McpServerManager _mcpServerManager;
         public IntentProcessor(
             RainaServices rainaServices,
             ContextDetector contextDetector,
@@ -44,7 +45,7 @@ namespace RAINA
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
 
-            string intentType = module.GetIntentType();
+            string intentType = module.GetServerName();
             _modules[intentType] = module;
         }
 
@@ -63,6 +64,7 @@ namespace RAINA
         {
             // Classify intent using OpenAI
             var intent = await ClassifyIntentAsync(userInput, context);
+            //return new Response() { Message = "Processing intent: " + intent.IntentType };
             OnIntentClassified(userInput, intent, context);
 
 
@@ -96,13 +98,40 @@ namespace RAINA
 
             // Route to appropriate module
             Console.WriteLine("Intent: " + intent.IntentType);
-            if (_modules.TryGetValue(intent.IntentType, out var module))
-            {
-                //we should pass back the response data here, instead of trying to handle it in the module
-                // that way we can use a generic response method for GenerateResponseAsync that includes memory recording, etc. 
-                return await module.HandleAsync(userInput, intent, context);
-            }
+            // Get the server/module for this intent
+            string serverName = intent.IntentType;
 
+            // Call the appropriate tool if one was specified
+            if (!string.IsNullOrEmpty(intent.ToolName))
+            {
+                // Convert intent parameters and entities to arguments
+                var baseArguments = ConvertParametersToArguments(intent);
+
+                // Call MCP server with context extraction
+                var toolResult = await _mcpServerManager.CallToolAsync(
+                    serverName,
+                    intent.ToolName,
+                    baseArguments,
+                    context,
+                    intent
+                );
+
+                if (toolResult.IsError)
+                {
+                    return new Response
+                    {
+                        Message = $"Error: {toolResult.Content}",
+                        Success = false,
+                        //Error = toolResult.Content
+                    };
+                }
+
+                return new Response
+                {
+                    Message = toolResult.Content,
+                    Success = true
+                };
+            }
             // Default to conversation handler if no specific module is registered
             return await _conversationManager.GenerateResponseAsync(userInput, intent, context);
         }
@@ -124,13 +153,14 @@ Analyze the following user input and classify it into one of these intent types:
 
 {examplesSection}
 
-Current context: {context.CurrentTopic ?? "None"}, Time: {DateTime.Now}
+Where possible, try to include parameters and entities relevant to the intent.
 
-User input: ""{userInput}""
+Current context: {context.CurrentTopic ?? "None"}, Time: {DateTime.Now}
 
 Provide your response in JSON format:
 {{
   ""intentType"": ""[intent type]"",
+  ""toolName"": ""[specific tool if applicable]"",
   ""confidence"": 0.95,
   ""entities"": [
     {{ ""type"": ""person"", ""value"": ""John Smith"" }},
@@ -141,10 +171,12 @@ Provide your response in JSON format:
     ""action"": ""schedule"" 
   }}
 }}
+
+User input: ""{userInput}""
 ";
             Console.WriteLine(prompt);
             var response = await CallOpenAIAsync(prompt, 0.1);
-            //Console.WriteLine(response.Choices[0].Message.Content);
+            Console.WriteLine(response.Choices[0].Message.Content);
             try
             {
                 return JsonSerializer.Deserialize<Intent>(response.Choices[0].Message.Content);
@@ -158,7 +190,27 @@ Provide your response in JSON format:
                 return new Intent { IntentType = "Conversation", Confidence = 0.5 };
             }
         }
+        /// <summary>
+        /// Convert intent parameters and entities to tool arguments
+        /// </summary>
+        private Dictionary<string, string> ConvertParametersToArguments(Intent intent)
+        {
+            var args = new Dictionary<string, string>();
 
+            // Add explicit parameters from intent
+            foreach (var param in intent.Parameters)
+            {
+                args[param.Key] = param.Value;
+            }
+
+            // Add entities as parameters (entity type as key, entity value as value)
+            foreach (var entity in intent.Entities)
+            {
+                args[entity.Type] = entity.Name;
+            }
+
+            return args;
+        }
         /// <summary>
         /// Build the intent types section of the prompt based on registered modules
         /// </summary>
@@ -169,8 +221,11 @@ Provide your response in JSON format:
                 return "- Conversation: General conversation or chat";
             }
 
-            var intentDescriptions = _modules.Values.Select(p => $"- {p.GetPromptDescription()}");
-            return string.Join("\n", intentDescriptions) + "\n- Conversation: General conversation or chat";
+            var intentDescriptions = _modules.Values.Select(module =>
+                $"- {module.GetPromptDescription()}\n{module.GetToolsPromptSection()}"
+            );
+
+            return string.Join("\n\n", intentDescriptions) + "\n\n- Conversation: General conversation or chat";
         }
 
         /// <summary>
@@ -190,7 +245,7 @@ Provide your response in JSON format:
                 var examples = module.GetPromptExamples();
                 if (examples.Length > 0)
                 {
-                    examplesByType.AppendLine($"{module.GetIntentType()} examples:");
+                    examplesByType.AppendLine($"{module.GetServerName()} examples:");
                     foreach (var example in examples.Take(2)) // Limit to 2 examples per type
                     {
                         examplesByType.AppendLine($"- \"{example}\"");
@@ -247,21 +302,26 @@ Provide your response in JSON format:
 
     }
 
-    // Helper classes
+    /// <summary>
+    /// Intent classification result with MCP tool information
+    /// </summary>
     public class Intent
     {
         [JsonPropertyName("intentType")]
-        public string IntentType { get; set; }
+        public string IntentType { get; set; } // MCP server name
+
+        [JsonPropertyName("toolName")]
+        public string ToolName { get; set; } // Specific tool to call
+
         [JsonPropertyName("confidence")]
         public double Confidence { get; set; }
+
         [JsonPropertyName("entities")]
         public List<Entity> Entities { get; set; } = new List<Entity>();
+
         [JsonPropertyName("parameters")]
         public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
     }
-
-
-
 
     // public class Response
     // {

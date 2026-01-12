@@ -292,7 +292,7 @@ namespace RAINA
                 if (module != null)
                 {
                     intentProcessor.RegisterModule(module);
-                    Console.WriteLine($"Registered intent module: {moduleType.Name} for intent type: {module.GetIntentType()}");
+                    Console.WriteLine($"Registered intent module: {moduleType.Name} for intent type: {module.GetServerName()}");
                 }
             }
 
@@ -302,7 +302,7 @@ namespace RAINA
             Console.WriteLine("Available intent types:");
             foreach (var module in modules)
             {
-                Console.WriteLine($"- {module.GetIntentType()}: {module.GetPromptDescription()}");
+                Console.WriteLine($"- {module.GetServerName()}: {module.GetPromptDescription()}");
             }
 
             // Load ontology and associations using config paths

@@ -207,7 +207,10 @@ namespace Aislinn.Core.Cognitive
             string relationAtoB,
             string relationBtoA,
             double initialWeightAtoB = 0.5,
-            double initialWeightBtoA = 0.5)
+            double initialWeightBtoA = 0.5,
+            string SubTypeRelationshipAtoB = "",
+            string SubTypeRelationshipBtoA = ""
+            )
         {
             return await _activationService.CreateAssociationAsync(
                 chunkAId,
@@ -215,7 +218,9 @@ namespace Aislinn.Core.Cognitive
                 relationAtoB,
                 relationBtoA,
                 initialWeightAtoB,
-                initialWeightBtoA);
+                initialWeightBtoA,
+                SubTypeRelationshipAtoB,
+                SubTypeRelationshipBtoA);
         }
         public async Task<IChunkAssociationCollection> GetAssociationCollectionAsync()
         {

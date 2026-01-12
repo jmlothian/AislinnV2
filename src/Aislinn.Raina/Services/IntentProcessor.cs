@@ -30,9 +30,8 @@ namespace RAINA
             ContextDetector contextDetector,
             AislinnConfiguration config)
         {
-            _openAIApiKey = config.OpenAIApiKey;
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_openAIApiKey}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.OpenAIApiKey}");
 
             _conversationManager = rainaServices.ConversationManager;
             _contextDetector = contextDetector ?? throw new ArgumentNullException(nameof(contextDetector));
@@ -143,7 +142,7 @@ Provide your response in JSON format:
   }}
 }}
 ";
-            //Console.WriteLine(prompt);
+            Console.WriteLine(prompt);
             var response = await CallOpenAIAsync(prompt, 0.1);
             //Console.WriteLine(response.Choices[0].Message.Content);
             try

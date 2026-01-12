@@ -103,6 +103,8 @@ namespace RAINA
             _services.AddSingleton<AssociationLoader>();
             _services.AddSingleton<VectorStore>();
             _services.AddSingleton<ChunkGraphGenService>();
+            _services.AddSingleton<LLMApiService>();
+            _services.AddSingleton<MemoryChunkConverter>();
             _services.AddSingleton<SummaryService>((sp) =>
             {
                 var config = sp.GetRequiredService<RainaConfiguration>();
@@ -142,7 +144,8 @@ namespace RAINA
         public RainaBootstrapper RegisterStandardModules()
         {
             return RegisterIntentModule<QueryIntentModule>()
-                   .RegisterIntentModule<TaskManagementIntentModule>();
+                   .RegisterIntentModule<TaskManagementIntentModule>()
+                   .RegisterIntentModule<RememberIntentModule>();
             // Add more standard modules as they're implemented
         }
 
@@ -262,9 +265,10 @@ namespace RAINA
         /// <summary>
         /// Build the RAINA system
         /// </summary>
-        public ServiceProvider Build()
+        public IServiceProvider Build(IServiceProvider existingProvider = null)
         {
-            var provider = _services.BuildServiceProvider();
+            IServiceProvider provider = existingProvider;
+            if (provider == null) provider = _services.BuildServiceProvider();
 
             // Get configuration
             var config = provider.GetRequiredService<RainaConfiguration>();
@@ -284,7 +288,7 @@ namespace RAINA
             var intentProcessor = provider.GetRequiredService<IntentProcessor>();
             foreach (var moduleType in _moduleTypes)
             {
-                var module = provider.GetService(moduleType) as IIntentModule;
+                var module = provider.GetRequiredService(moduleType) as IIntentModule;
                 if (module != null)
                 {
                     intentProcessor.RegisterModule(module);
@@ -314,12 +318,21 @@ namespace RAINA
                     allLoadedChunks.AddRange(loadedChunks);
                 }
             }
+            else
+            {
+                Console.WriteLine("Ontology Chunks File Not Found: " + config.BasicKnowledgeChunksPath);
+            }
 
             if (Directory.Exists(config.BasicKnowledgeAssociationsPath))
             {
                 foreach (var file in Directory.GetFiles(config.BasicKnowledgeAssociationsPath, "*.json"))
                     associationLoader.LoadAssociationsAsync(File.ReadAllText(file), allLoadedChunks).Wait();
             }
+            else
+            {
+                Console.WriteLine("Ontology Associations File Not Found: " + config.BasicKnowledgeAssociationsPath);
+            }
+
 
             // Load entity relationship extraction cache
             var entityRelationshipExtractionService = provider.GetRequiredService<EntityRelationshipExtractionService>();
